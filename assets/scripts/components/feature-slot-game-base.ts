@@ -1,3 +1,6 @@
+/*
+
+
 import { _decorator, Director, director, Label, Prefab, Toggle } from "cc";
 import * as i18n from "i18n/runtime-scripts/LanguageData";
 import AnalyticsManager, { TrackingAction, TrackingEvent } from "../../analytics/AnalyticsManager";
@@ -21,7 +24,6 @@ import SlotGameSound from "./SlotGameSound";
 import TurboAutoSpinSettingDialog from "./TurboAutoSpinSettingDialog";
 
 const { ccclass, property } = _decorator;
-
 @ccclass
 export default abstract class FeatureSlotGameBase extends NewGameRoomBase {
     //#region override some properties to hide them
@@ -400,3 +402,5 @@ export default abstract class FeatureSlotGameBase extends NewGameRoomBase {
         uiManager.emitter.emit(InternalEvents.CLICK_OUTSIDE_REEL_AREA);
     }
 }
+
+*/

@@ -1,3 +1,4 @@
+/*
 import { _decorator, AudioSource, Button, director, instantiate, Label, Node, Prefab, sp, Toggle, ToggleContainer, Tween, tween } from "cc";
 import { FunctionUtils } from "db://shared-components/shared/utils";
 import * as _ from "lodash";
@@ -1142,3 +1143,5 @@ export default class SlotGameBase extends FeatureSlotGameBase {
         //empty
     }
 }
+
+*/

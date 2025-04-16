@@ -1,0 +1,234 @@
+{
+"skeleton": {
+	"hash": "T1HZGgTNQM9f8xdUCwUa7mjIs7M",
+	"spine": "3.8.99",
+	"x": -100,
+	"y": -29.57,
+	"width": 200,
+	"height": 150,
+	"images": "./images/",
+	"audio": ""
+},
+"bones": [
+	{ "name": "root" },
+	{ "name": "win-vfx", "parent": "root" },
+	{ "name": "vfx", "parent": "win-vfx", "y": 45.43 },
+	{ "name": "glowing", "parent": "win-vfx", "color": "ffbc00ff" },
+	{ "name": "glowing-continuous", "parent": "win-vfx", "color": "ffbc00ff" },
+	{ "name": "vfx2", "parent": "win-vfx", "y": 45.43 }
+],
+"slots": [
+	{ "name": "vfx", "bone": "vfx", "attachment": "gold-9", "blend": "screen" },
+	{ "name": "vfx2", "bone": "vfx2", "attachment": "gold-9", "blend": "screen" },
+	{ "name": "glowing", "bone": "glowing", "attachment": "glowing" },
+	{ "name": "glowing-continuous", "bone": "glowing-continuous", "attachment": "glowing" }
+],
+"skins": [
+	{
+		"name": "default",
+		"attachments": {
+			"glowing": {
+				"glowing": { "width": 154, "height": 54 }
+			},
+			"glowing-continuous": {
+				"glowing": { "width": 154, "height": 54 }
+			},
+			"vfx": {
+				"gold-0": { "width": 200, "height": 150 },
+				"gold-1": { "width": 200, "height": 150 },
+				"gold-2": { "width": 200, "height": 150 },
+				"gold-3": { "width": 200, "height": 150 },
+				"gold-4": { "width": 200, "height": 150 },
+				"gold-5": { "width": 200, "height": 150 },
+				"gold-6": { "width": 200, "height": 150 },
+				"gold-7": { "width": 200, "height": 150 },
+				"gold-8": { "width": 200, "height": 150 },
+				"gold-9": { "width": 200, "height": 150 },
+				"gold-10": { "width": 200, "height": 150 },
+				"gold-11": { "width": 200, "height": 150 },
+				"gold-12": { "width": 200, "height": 150 },
+				"gold-13": { "width": 200, "height": 150 },
+				"gold-14": { "width": 200, "height": 150 },
+				"gold-15": { "width": 200, "height": 150 },
+				"gold-16": { "width": 200, "height": 150 },
+				"gold-17": { "width": 200, "height": 150 },
+				"gold-18": { "width": 200, "height": 150 },
+				"gold-19": { "width": 200, "height": 150 },
+				"gold-20": { "width": 200, "height": 150 },
+				"gold-21": { "width": 200, "height": 150 },
+				"gold-22": { "width": 200, "height": 150 },
+				"gold-23": { "width": 200, "height": 150 },
+				"gold-24": { "width": 200, "height": 150 },
+				"gold-25": { "width": 200, "height": 150 },
+				"gold-26": { "width": 200, "height": 150 },
+				"gold-27": { "width": 200, "height": 150 },
+				"gold-28": { "width": 200, "height": 150 },
+				"gold-29": { "width": 200, "height": 150 },
+				"gold-30": { "width": 200, "height": 150 }
+			},
+			"vfx2": {
+				"gold-0": { "width": 200, "height": 150 },
+				"gold-1": { "width": 200, "height": 150 },
+				"gold-2": { "width": 200, "height": 150 },
+				"gold-3": { "width": 200, "height": 150 },
+				"gold-4": { "width": 200, "height": 150 },
+				"gold-5": { "width": 200, "height": 150 },
+				"gold-6": { "width": 200, "height": 150 },
+				"gold-7": { "width": 200, "height": 150 },
+				"gold-8": { "width": 200, "height": 150 },
+				"gold-9": { "width": 200, "height": 150 },
+				"gold-10": { "width": 200, "height": 150 },
+				"gold-11": { "width": 200, "height": 150 },
+				"gold-12": { "width": 200, "height": 150 },
+				"gold-13": { "width": 200, "height": 150 },
+				"gold-14": { "width": 200, "height": 150 },
+				"gold-15": { "width": 200, "height": 150 },
+				"gold-16": { "width": 200, "height": 150 },
+				"gold-17": { "width": 200, "height": 150 },
+				"gold-18": { "width": 200, "height": 150 },
+				"gold-19": { "width": 200, "height": 150 },
+				"gold-20": { "width": 200, "height": 150 },
+				"gold-21": { "width": 200, "height": 150 },
+				"gold-22": { "width": 200, "height": 150 },
+				"gold-23": { "width": 200, "height": 150 },
+				"gold-24": { "width": 200, "height": 150 },
+				"gold-25": { "width": 200, "height": 150 },
+				"gold-26": { "width": 200, "height": 150 },
+				"gold-27": { "width": 200, "height": 150 },
+				"gold-28": { "width": 200, "height": 150 },
+				"gold-29": { "width": 200, "height": 150 },
+				"gold-30": { "width": 200, "height": 150 }
+			}
+		}
+	}
+],
+"animations": {
+	"coin": {
+		"slots": {
+			"glowing": {
+				"color": [
+					{ "color": "ffffff00" },
+					{ "time": 0.3333, "color": "ffffffff" },
+					{ "time": 0.6667, "color": "ffffff00" }
+				],
+				"attachment": [
+					{ "time": 1, "name": null }
+				]
+			},
+			"glowing-continuous": {
+				"color": [
+					{ "color": "ffffff00", "curve": "stepped" },
+					{ "time": 0.3333, "color": "ffffff00" },
+					{ "time": 0.6667, "color": "ffffffff" },
+					{ "time": 1, "color": "ffffff00" }
+				],
+				"attachment": [
+					{ "time": 1, "name": null }
+				]
+			},
+			"vfx": {
+				"color": [
+					{ "time": 0.6667, "color": "ffffffff" },
+					{ "time": 1, "color": "ffffff00" }
+				],
+				"attachment": [
+					{ "name": "gold-0" },
+					{ "time": 0.0333, "name": "gold-1" },
+					{ "time": 0.0667, "name": "gold-2" },
+					{ "time": 0.1, "name": "gold-3" },
+					{ "time": 0.1333, "name": "gold-4" },
+					{ "time": 0.1667, "name": "gold-5" },
+					{ "time": 0.2, "name": "gold-6" },
+					{ "time": 0.2333, "name": "gold-7" },
+					{ "time": 0.2667, "name": "gold-8" },
+					{ "time": 0.3, "name": "gold-9" },
+					{ "time": 0.3333, "name": "gold-10" },
+					{ "time": 0.3667, "name": "gold-11" },
+					{ "time": 0.4, "name": "gold-12" },
+					{ "time": 0.4333, "name": "gold-13" },
+					{ "time": 0.4667, "name": "gold-14" },
+					{ "time": 0.5, "name": "gold-15" },
+					{ "time": 0.5333, "name": "gold-16" },
+					{ "time": 0.5667, "name": "gold-17" },
+					{ "time": 0.6, "name": "gold-18" },
+					{ "time": 0.6333, "name": "gold-19" },
+					{ "time": 0.6667, "name": "gold-20" },
+					{ "time": 0.7, "name": "gold-21" },
+					{ "time": 0.7333, "name": "gold-22" },
+					{ "time": 0.7667, "name": "gold-23" },
+					{ "time": 0.8, "name": "gold-24" },
+					{ "time": 0.8333, "name": "gold-25" },
+					{ "time": 0.8667, "name": "gold-26" },
+					{ "time": 0.9, "name": "gold-27" },
+					{ "time": 0.9333, "name": "gold-28" },
+					{ "time": 0.9667, "name": "gold-29" },
+					{ "time": 1, "name": "gold-30" }
+				]
+			},
+			"vfx2": {
+				"color": [
+					{ "time": 0.6667, "color": "ffffffff" },
+					{ "time": 1, "color": "ffffff00" }
+				],
+				"attachment": [
+					{ "name": "gold-0" },
+					{ "time": 0.0333, "name": "gold-1" },
+					{ "time": 0.0667, "name": "gold-2" },
+					{ "time": 0.1, "name": "gold-3" },
+					{ "time": 0.1333, "name": "gold-4" },
+					{ "time": 0.1667, "name": "gold-5" },
+					{ "time": 0.2, "name": "gold-6" },
+					{ "time": 0.2333, "name": "gold-7" },
+					{ "time": 0.2667, "name": "gold-8" },
+					{ "time": 0.3, "name": "gold-9" },
+					{ "time": 0.3333, "name": "gold-10" },
+					{ "time": 0.3667, "name": "gold-11" },
+					{ "time": 0.4, "name": "gold-12" },
+					{ "time": 0.4333, "name": "gold-13" },
+					{ "time": 0.4667, "name": "gold-14" },
+					{ "time": 0.5, "name": "gold-15" },
+					{ "time": 0.5333, "name": "gold-16" },
+					{ "time": 0.5667, "name": "gold-17" },
+					{ "time": 0.6, "name": "gold-18" },
+					{ "time": 0.6333, "name": "gold-19" },
+					{ "time": 0.6667, "name": "gold-20" },
+					{ "time": 0.7, "name": "gold-21" },
+					{ "time": 0.7333, "name": "gold-22" },
+					{ "time": 0.7667, "name": "gold-23" },
+					{ "time": 0.8, "name": "gold-24" },
+					{ "time": 0.8333, "name": "gold-25" },
+					{ "time": 0.8667, "name": "gold-26" },
+					{ "time": 0.9, "name": "gold-27" },
+					{ "time": 0.9333, "name": "gold-28" },
+					{ "time": 0.9667, "name": "gold-29" },
+					{ "time": 1, "name": "gold-30" }
+				]
+			}
+		},
+		"bones": {
+			"vfx": {
+				"translate": [
+					{ "y": 0.76 }
+				]
+			},
+			"glowing": {
+				"scale": [
+					{},
+					{ "time": 0.6667, "x": 1.2, "y": 1.4 }
+				]
+			},
+			"glowing-continuous": {
+				"scale": [
+					{ "time": 0.3333 },
+					{ "time": 1, "x": 1.2, "y": 1.4 }
+				]
+			},
+			"vfx2": {
+				"translate": [
+					{ "y": 0.76 }
+				]
+			}
+		}
+	}
+}
+}

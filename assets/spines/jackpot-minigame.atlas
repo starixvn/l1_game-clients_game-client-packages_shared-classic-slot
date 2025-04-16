@@ -1,0 +1,48 @@
+
+jackpot-minigame.png
+size: 570,243
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+bag
+  rotate: false
+  xy: 252, 88
+  size: 168, 153
+  orig: 168, 153
+  offset: 0, 0
+  index: -1
+bag-overlay
+  rotate: true
+  xy: 422, 73
+  size: 168, 146
+  orig: 168, 146
+  offset: 0, 0
+  index: -1
+coin
+  rotate: false
+  xy: 373, 23
+  size: 23, 19
+  orig: 23, 19
+  offset: 0, 0
+  index: -1
+frame
+  rotate: false
+  xy: 2, 3
+  size: 248, 238
+  orig: 253, 245
+  offset: 4, 4
+  index: -1
+gold-flare
+  rotate: false
+  xy: 252, 2
+  size: 119, 84
+  orig: 119, 84
+  offset: 0, 0
+  index: -1
+light
+  rotate: false
+  xy: 373, 44
+  size: 42, 42
+  orig: 51, 46
+  offset: 5, 3
+  index: -1

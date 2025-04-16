@@ -1,0 +1,182 @@
+import { _decorator, AudioSource, Component, Node, v3, Vec2, Vec3 } from "cc";
+
+import { AnimationUtils } from "db://shared-components/shared/utils";
+import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
+import { paylines } from "../config/slot-game-base-configs";
+import PreviewOddsPopup from "../others/preview-odds-popup";
+import SlotReel from "./slot-reel";
+import SlotReelItem from "./slot-reel-item";
+
+enum SlotGameSound {
+    SPINNING_NORMAL = 0,
+    SPINNING_TURBO = 1,
+}
+const { ccclass, property } = _decorator;
+
+@ccclass
+export default class SlotBoard extends Component {
+    @property(Node)
+    winningOverlayNode: Node = null;
+
+    @property(Node)
+    winningSymbolsNode: Node = null;
+
+    @property(Node)
+    itemLocationMap: Node = null;
+
+    @property({ type: AudioSource })
+    soundSources: AudioSource[] = [];
+
+    @property(PreviewOddsPopup)
+    previewPopup: PreviewOddsPopup = null;
+
+    public reels: SlotReel[] = [];
+
+    public get reelCount() {
+        return this.reels.length;
+    }
+
+    protected data: number[] = [];
+    public gameId: number;
+    public startReelDelayTime = 0.075;
+
+    turbo: boolean;
+    symbolCountPerReel = 24;
+    stepSymbolPerReel = 6;
+
+    onLoad() {
+        this.winningOverlayNode.active = false;
+    }
+
+    initReels() {
+        this.node.children.forEach((child, index) => {
+            const reel = child.getComponent(SlotReel);
+            if (reel) {
+                this.reels.push(reel);
+                reel.gameId = this.gameId;
+                reel.itemCount = this.getSymbolCountPerReel(index);
+                reel.createReel();
+            }
+            reel.winningContainer = this.winningSymbolsNode;
+        });
+
+        this.previewPopup.addPreviewPopup(this.reels);
+    }
+
+    getItemPositions(index: number): Vec2[] {
+        const payline = paylines[index];
+        const pos = [];
+        payline.forEach((position) => {
+            const item = this.itemLocationMap.children[position];
+            const transform = ComponentUtils.getTransform(item);
+            const worldPos = transform.convertToWorldSpaceAR(v3(0, 0));
+            pos.push(worldPos);
+        });
+
+        return pos;
+    }
+
+    setBoardData(data: number[]) {
+        this.data = data;
+    }
+
+    getLocation(index: number): { col: number; row: number } {
+        const RowCount = 3;
+        const col = Math.floor(index / RowCount);
+        const row = index % RowCount;
+        return { col, row };
+    }
+
+    convertDataToColumns(data: number[]) {
+        const columns = [
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+            [0, 0, 0],
+        ];
+        for (let i = 0; i < data.length; i++) {
+            const { col, row } = this.getLocation(i);
+            columns[col][row] = data[i];
+        }
+
+        return columns;
+    }
+
+    applyData(data: number[]) {
+        const columns = this.convertDataToColumns(data);
+        this.reels.forEach((reel, index) => reel.setReelData(columns[index]));
+    }
+
+    protected playSpinningAudio(turbo: boolean) {
+        if (this.soundSources.length > 0) {
+            const sound = turbo ? SlotGameSound.SPINNING_TURBO : SlotGameSound.SPINNING_NORMAL;
+            //TODO: play sfx
+            // AudioManager.getInstance().playSFX(this.soundSources[sound].clip);
+        }
+    }
+
+    showWinningEffect(positions: number[], symbol: number) {
+        positions.forEach((position) => {
+            const { col, row } = this.getLocation(position);
+            this.reels[col].showWinningEffect(row, symbol);
+        });
+        this.winningOverlayNode.active = true;
+    }
+
+    showHighlightSpecialSymbols(symbol: number) {
+        this.reels.forEach((reel) => reel.showHighlightSpecialSymbols(symbol));
+    }
+
+    hideWinningEffect() {
+        this.reels.forEach((reel) => reel.hideWinningEffect());
+        this.winningOverlayNode.active = false;
+    }
+
+    setItemWinningEffect() {
+        this.reels.forEach((reel) => {
+            reel.items.forEach((item: SlotReelItem) => {
+                item.addWinningEffect();
+            });
+        });
+    }
+
+    updateSymbolDuration(duration: number) {
+        this.reels.forEach((reel) => {
+            reel.items.forEach((item: SlotReelItem) => {
+                item.updateDuration(duration);
+            });
+        });
+    }
+
+    showPreview(previewNode: Node, worldPosition: Vec3) {
+        this.previewPopup.showPreview(previewNode, worldPosition);
+    }
+
+    async spin(duration: number, turbo: boolean) {
+        this.previewPopup.hideSymbolPreview();
+        this.playSpinningAudio(turbo);
+        const columns = this.convertDataToColumns(this.data);
+        for (let i = 0; i < this.reels.length; i++) {
+            const reel = this.reels[i];
+
+            if (i > 0 && !turbo) {
+                await AnimationUtils.delayTime(this.startReelDelayTime);
+            }
+
+            if (i < this.reels.length - 1) {
+                reel.spinWithData(duration, columns[i], turbo);
+            } else {
+                await reel.spinWithData(duration, columns[i], turbo);
+            }
+        }
+    }
+
+    getSymbolCountPerReel(index: number) {
+        if (this.turbo) {
+            return this.symbolCountPerReel;
+        } else {
+            return this.symbolCountPerReel + index * this.stepSymbolPerReel;
+        }
+    }
+}

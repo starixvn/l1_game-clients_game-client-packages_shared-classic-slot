@@ -1,0 +1,76 @@
+
+jackpot.png
+size: 238,256
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+anhsang
+  rotate: false
+  xy: 202, 193
+  size: 34, 34
+  orig: 34, 34
+  offset: 0, 0
+  index: -1
+anhsang2
+  rotate: false
+  xy: 31, 206
+  size: 28, 28
+  orig: 28, 28
+  offset: 0, 0
+  index: -1
+anhsang3
+  rotate: false
+  xy: 2, 207
+  size: 27, 27
+  orig: 27, 27
+  offset: 0, 0
+  index: -1
+board
+  rotate: false
+  xy: 2, 2
+  size: 224, 86
+  orig: 224, 86
+  offset: 0, 0
+  index: -1
+kimcuong1
+  rotate: false
+  xy: 61, 199
+  size: 139, 28
+  orig: 139, 28
+  offset: 0, 0
+  index: -1
+kimcuong2
+  rotate: false
+  xy: 77, 229
+  size: 157, 25
+  orig: 157, 25
+  offset: 0, 0
+  index: -1
+kimcuong3
+  rotate: false
+  xy: 2, 236
+  size: 73, 18
+  orig: 73, 18
+  offset: 0, 0
+  index: -1
+ruongvang
+  rotate: false
+  xy: 2, 169
+  size: 41, 35
+  orig: 41, 35
+  offset: 0, 0
+  index: -1
+vang1
+  rotate: false
+  xy: 45, 132
+  size: 182, 59
+  orig: 182, 59
+  offset: 0, 0
+  index: -1
+vang2
+  rotate: false
+  xy: 2, 90
+  size: 215, 40
+  orig: 215, 40
+  offset: 0, 0
+  index: -1

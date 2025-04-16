@@ -1,0 +1,134 @@
+{
+  "ver": "1.0.27",
+  "importer": "image",
+  "imported": true,
+  "uuid": "bac84b7b-7c8b-424a-9f37-3e53e1268679",
+  "files": [
+    ".json",
+    ".png"
+  ],
+  "subMetas": {
+    "6c48a": {
+      "importer": "texture",
+      "uuid": "bac84b7b-7c8b-424a-9f37-3e53e1268679@6c48a",
+      "displayName": "jackpot-minigame",
+      "id": "6c48a",
+      "name": "texture",
+      "userData": {
+        "wrapModeS": "clamp-to-edge",
+        "wrapModeT": "clamp-to-edge",
+        "imageUuidOrDatabaseUri": "bac84b7b-7c8b-424a-9f37-3e53e1268679",
+        "isUuid": true,
+        "visible": false,
+        "minfilter": "linear",
+        "magfilter": "linear",
+        "mipfilter": "none",
+        "anisotropy": 0
+      },
+      "ver": "1.0.22",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "f9941": {
+      "importer": "sprite-frame",
+      "uuid": "bac84b7b-7c8b-424a-9f37-3e53e1268679@f9941",
+      "displayName": "jackpot-minigame",
+      "id": "f9941",
+      "name": "spriteFrame",
+      "userData": {
+        "trimType": "auto",
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 2,
+        "trimY": 2,
+        "width": 566,
+        "height": 239,
+        "rawWidth": 570,
+        "rawHeight": 243,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [
+            -283,
+            -119.5,
+            0,
+            283,
+            -119.5,
+            0,
+            -283,
+            119.5,
+            0,
+            283,
+            119.5,
+            0
+          ],
+          "indexes": [
+            0,
+            1,
+            2,
+            2,
+            1,
+            3
+          ],
+          "uv": [
+            2,
+            241,
+            568,
+            241,
+            2,
+            2,
+            568,
+            2
+          ],
+          "nuv": [
+            0.0035087719298245615,
+            0.00823045267489712,
+            0.9964912280701754,
+            0.00823045267489712,
+            0.0035087719298245615,
+            0.9917695473251029,
+            0.9964912280701754,
+            0.9917695473251029
+          ],
+          "minPos": [
+            -283,
+            -119.5,
+            0
+          ],
+          "maxPos": [
+            283,
+            119.5,
+            0
+          ]
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "bac84b7b-7c8b-424a-9f37-3e53e1268679@6c48a",
+        "atlasUuid": ""
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "type": "sprite-frame",
+    "hasAlpha": true,
+    "fixAlphaTransparencyArtifacts": false,
+    "redirect": "bac84b7b-7c8b-424a-9f37-3e53e1268679@6c48a"
+  }
+}

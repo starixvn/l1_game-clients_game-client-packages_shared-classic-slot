@@ -1,6 +1,6 @@
 import { _decorator, Component, instantiate, Node, Prefab } from "cc";
 import { ComponentUtils } from "db://shared-components/shared/utils";
-import BetLevelItem from "./BetLevelItem";
+import BetLevelItem from "./bet-level-item";
 const { ccclass, property } = _decorator;
 
 @ccclass

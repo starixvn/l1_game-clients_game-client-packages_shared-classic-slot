@@ -1,0 +1,209 @@
+
+effect-jackpot-amount.png
+size: 1338,322
+format: RGBA8888
+filter: Linear,Linear
+repeat: none
+bg_coins_Lb
+  rotate: false
+  xy: 698, 4
+  size: 148, 58
+  orig: 150, 68
+  offset: 0, 9
+  index: -1
+bg_coins_Rb
+  rotate: true
+  xy: 1250, 21
+  size: 114, 58
+  orig: 114, 59
+  offset: 0, 1
+  index: -1
+bg_coins_f
+  rotate: true
+  xy: 310, 17
+  size: 303, 68
+  orig: 315, 77
+  offset: 3, 0
+  index: -1
+body
+  rotate: false
+  xy: 827, 158
+  size: 32, 162
+  orig: 32, 162
+  offset: 0, 0
+  index: -1
+coin_A_00
+  rotate: true
+  xy: 1266, 137
+  size: 72, 70
+  orig: 72, 70
+  offset: 0, 0
+  index: -1
+coin_A_01
+  rotate: false
+  xy: 628, 2
+  size: 68, 60
+  orig: 68, 60
+  offset: 0, 0
+  index: -1
+coin_A_02
+  rotate: false
+  xy: 1180, 90
+  size: 68, 61
+  orig: 68, 61
+  offset: 0, 0
+  index: -1
+coin_A_03
+  rotate: false
+  xy: 1144, 174
+  size: 69, 23
+  orig: 69, 23
+  offset: 0, 0
+  index: -1
+coin_A_04
+  rotate: false
+  xy: 1180, 49
+  size: 58, 39
+  orig: 58, 39
+  offset: 0, 0
+  index: -1
+coin_A_05
+  rotate: false
+  xy: 1180, 8
+  size: 58, 39
+  orig: 58, 39
+  offset: 0, 0
+  index: -1
+edge
+  rotate: false
+  xy: 701, 158
+  size: 124, 162
+  orig: 124, 162
+  offset: 0, 0
+  index: -1
+eff_spot_1
+  rotate: false
+  xy: 2, 14
+  size: 306, 306
+  orig: 410, 307
+  offset: 53, 0
+  index: -1
+fx_bloom
+  rotate: true
+  xy: 380, 22
+  size: 298, 84
+  orig: 322, 162
+  offset: 13, 0
+  index: -1
+fx_sparkle
+  rotate: false
+  xy: 1215, 153
+  size: 43, 50
+  orig: 50, 51
+  offset: 3, 0
+  index: -1
+images/symbol/payout_render_00000
+  rotate: true
+  xy: 1144, 199
+  size: 121, 40
+  orig: 160, 78
+  offset: 20, 18
+  index: -1
+images/symbol/payout_render_00001
+  rotate: true
+  xy: 1124, 6
+  size: 155, 54
+  orig: 160, 78
+  offset: 4, 11
+  index: -1
+images/symbol/payout_render_00002
+  rotate: true
+  xy: 1085, 163
+  size: 157, 57
+  orig: 160, 78
+  offset: 3, 9
+  index: -1
+images/symbol/payout_render_00003
+  rotate: false
+  xy: 466, 2
+  size: 160, 60
+  orig: 160, 78
+  offset: 0, 9
+  index: -1
+images/symbol/payout_render_00004
+  rotate: true
+  xy: 939, 160
+  size: 160, 65
+  orig: 160, 78
+  offset: 0, 7
+  index: -1
+images/symbol/payout_render_00005
+  rotate: false
+  xy: 962, 3
+  size: 160, 73
+  orig: 160, 78
+  offset: 0, 1
+  index: -1
+images/symbol/payout_render_00006
+  rotate: true
+  xy: 861, 160
+  size: 160, 76
+  orig: 160, 78
+  offset: 0, 0
+  index: -1
+images/symbol/payout_render_00007
+  rotate: false
+  xy: 701, 78
+  size: 157, 78
+  orig: 160, 78
+  offset: 3, 0
+  index: -1
+images/symbol/payout_render_00008
+  rotate: true
+  xy: 1006, 163
+  size: 157, 77
+  orig: 160, 78
+  offset: 2, 0
+  index: -1
+images/symbol/payout_render_00009
+  rotate: false
+  xy: 860, 78
+  size: 138, 78
+  orig: 160, 78
+  offset: 14, 0
+  index: -1
+images/symbol/payout_render_00010
+  rotate: false
+  xy: 1000, 80
+  size: 120, 78
+  orig: 160, 78
+  offset: 20, 0
+  index: -1
+images/symbol/payout_render_00011
+  rotate: true
+  xy: 1186, 205
+  size: 115, 78
+  orig: 160, 78
+  offset: 22, 0
+  index: -1
+images/symbol/payout_render_00012
+  rotate: false
+  xy: 848, 2
+  size: 112, 74
+  orig: 160, 78
+  offset: 23, 3
+  index: -1
+images/symbol/payout_render_00013
+  rotate: true
+  xy: 1266, 211
+  size: 109, 70
+  orig: 160, 78
+  offset: 25, 5
+  index: -1
+jackpot-item
+  rotate: true
+  xy: 466, 64
+  size: 256, 233
+  orig: 257, 233
+  offset: 0, 0
+  index: -1
