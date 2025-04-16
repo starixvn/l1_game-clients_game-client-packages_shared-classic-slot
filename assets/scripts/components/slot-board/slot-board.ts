@@ -1,9 +1,10 @@
-import { _decorator, AudioSource, Component, Node, v3, Vec2, Vec3 } from "cc";
+import { _decorator, AudioSource, Component, instantiate, Node, Prefab, v3, Vec2, Vec3 } from "cc";
 
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
 import { paylines } from "../config/slot-game-base-configs";
 import PreviewOddsPopup from "../others/preview-odds-popup";
+import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReel from "./slot-reel";
 import SlotReelItem from "./slot-reel-item";
 
@@ -29,6 +30,12 @@ export default class SlotBoard extends Component {
 
     @property(PreviewOddsPopup)
     previewPopup: PreviewOddsPopup = null;
+
+    @property(Prefab)
+    previewSymbolLeft: Prefab = null;
+
+    @property(Prefab)
+    previewSymbolRight: Prefab = null;
 
     public reels: SlotReel[] = [];
 
@@ -178,5 +185,13 @@ export default class SlotBoard extends Component {
         } else {
             return this.symbolCountPerReel + index * this.stepSymbolPerReel;
         }
+    }
+
+    showPreviewPopup(info: SymbolPreviewType, isInfoOnLeft: boolean, worldPosition: Vec3) {
+        const previewPrefab = isInfoOnLeft ? this.previewSymbolLeft : this.previewSymbolRight;
+        const previewNode = instantiate(previewPrefab);
+        const symbolPreview = previewNode.getComponent(SymbolPreview);
+        symbolPreview.setInfo(info);
+        this.showPreview(previewNode, worldPosition);
     }
 }

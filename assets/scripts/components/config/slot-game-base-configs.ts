@@ -1,7 +1,6 @@
 export interface SlotGameBaseConfigs {
     readonly itemTypeCount: number;
     readonly jackpotSymbolIndex: number;
-
     readonly showTotalBonusAmountDuration: number;
     readonly bonusTimeOut: number;
     readonly showJackpotWinningAmountDuration?: number;

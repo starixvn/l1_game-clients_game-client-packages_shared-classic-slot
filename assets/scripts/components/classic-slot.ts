@@ -1,11 +1,13 @@
 import gc from "@sg/game-client-base";
-import { _decorator, SpriteAtlas, Vec3 } from "cc";
+import { _decorator, JsonAsset, SpriteAtlas, Vec3 } from "cc";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
+import Observer from "observer";
 import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
 import { StandardSlotGameConfigs } from "./config/standard-slot-game-configs";
+import { ClassicSlotSound } from "./others/classic-slot-sound";
 import SlotBoard from "./slot-board/slot-board";
 const { ccclass, property } = _decorator;
-
+const { render, handle } = Observer;
 @ccclass
 export default class ClassicSlot extends GameComponent {
     @property(SlotBoard)
@@ -13,6 +15,12 @@ export default class ClassicSlot extends GameComponent {
 
     @property(SpriteAtlas)
     gameAtlas: SpriteAtlas = null;
+
+    @property(JsonAsset)
+    colorJson: JsonAsset = null;
+
+    gameConfigOdds: any;
+    jackpotEnabled = false;
 
     override isValidResult(result: gc.GameServiceMessage.TResult, settlementResult: gc.GameServiceMessage.TSettlementResult) {
         return !!result;
@@ -38,24 +46,29 @@ export default class ClassicSlot extends GameComponent {
     }
 
     onSymbolPreview(symbol, worldPosition: Vec3, isInfoOnLeft: boolean) {
-        // if (!this.gameConfigs?.odds || !this.isFinishedRound) {
-        //     return;
-        // }
-        // this.playSound(ClassicSlotSound.CLICK);
-        // const symbolCache = resourceCaches.slotSymbols;
-        // const spine = symbolCache[symbol.index].symbol;
-        // const previewPrefab = isInfoOnLeft ? this.previewSymbolLeft : this.previewSymbolRight;
-        // const previewNode = instantiate(previewPrefab);
-        // const symbolPreview = previewNode.getComponent(SymbolPreview);
-        // symbolPreview.setInfo({
-        //     symbol,
-        //     spine,
-        //     odds: this.gameConfigs.odds[symbol.index],
-        //     colorList: [this.colorConfig.previewOddsSymbolNumberColor, this.colorConfig.previewOddsWinValueColor],
-        //     borderColor: this.colorConfig.previewOddsBorderColor,
-        //     gameId: this.gameId,
-        //     jackpotEnabled: this.jackpotEnabled,
-        // });
-        // this.slotBoard.showPreview(previewNode, worldPosition);
+        if (
+            !this.gameConfigOdds
+            // || !this.isFinishedRound
+        ) {
+            return;
+        }
+        this.playSound(ClassicSlotSound.CLICK);
+        const symbolCache = resourceCaches.slotSymbols;
+        const spine = symbolCache[symbol.index].symbol;
+        const colorConfig = this.colorJson.json;
+        const info = {
+            symbol,
+            spine,
+            odds: this.gameConfigOdds[symbol.index],
+            colorList: [colorConfig.previewOddsSymbolNumberColor, colorConfig.previewOddsWinValueColor],
+            borderColor: colorConfig.previewOddsBorderColor,
+            jackpotEnabled: this.jackpotEnabled,
+        };
+        this.slotBoard.showPreviewPopup(info, isInfoOnLeft, worldPosition);
+    }
+
+    @render(gc.GameConfigs.GameConfigStore, (store) => store.odds)
+    renderGameOdd(odds) {
+        this.gameConfigOdds = odds;
     }
 }
