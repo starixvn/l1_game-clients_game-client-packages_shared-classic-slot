@@ -1,7 +1,7 @@
 import { _decorator, Button, Component, instantiate, Node, Prefab, Sprite, Tween } from "cc";
 import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
 import { AnimationUtils } from "db://shared-components/shared/utils";
-import { ClassicSlotSound } from "./ClassicSlotSound";
+import { ClassicSlotSound } from "./classic-slot-sound";
 import JackpotGameItem from "./JackpotGameItem";
 import JackpotWinningAmount from "./JackpotWinningAmount";
 import { StandardSlotGameConfigs } from "./StandardSlotGameConfigs";

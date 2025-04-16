@@ -1,7 +1,7 @@
 import _ = require("lodash");
 import { _decorator, Component, instantiate, Layout, Node, Prefab, Tween, tween, v2 } from "cc";
 import GameUtils from "../../common/GameUtils";
-import { SlotGameBaseConfigs, SpecialSymbol } from "./SlotGameBaseConfigs";
+import { SlotGameBaseConfigs, SpecialSymbol } from "./slot-game-base-configs";
 import SlotReelItem from "./SlotReelItem";
 
 const { ccclass, property } = _decorator;

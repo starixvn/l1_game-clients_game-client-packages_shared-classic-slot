@@ -2,7 +2,7 @@ import { _decorator, Color, Component, Label, Node, sp, Sprite } from "cc";
 import { getLocale } from "../../common/auth/SessionManager";
 import { uiManager } from "../../managers/GameUIManager";
 import { InternalEvents } from "../../managers/InternalEvents";
-import { SpecialSymbol } from "./SlotGameBaseConfigs";
+import { SpecialSymbol } from "./slot-game-base-configs";
 const { ccclass, property } = _decorator;
 
 export interface SymbolPreviewType {

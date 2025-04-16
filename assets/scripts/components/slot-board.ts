@@ -2,7 +2,7 @@ import { _decorator, AudioSource, Component, Node, v2, Vec2 } from "cc";
 
 import { GameUtils } from "@sg/game-client-base";
 import AudioManager from "db://shared-components/game/audios/scripts/audio-manager";
-import { paylines, SlotGameBaseConfigs } from "./SlotGameBaseConfigs";
+import { paylines, SlotGameBaseConfigs } from "./slot-game-base-configs";
 import SlotReel from "./SlotReel";
 
 enum SlotGameSound {

@@ -1,4 +1,4 @@
-import { SlotGameBaseConfigs } from "./SlotGameBaseConfigs";
+import { SlotGameBaseConfigs } from "./slot-game-base-configs";
 
 export class StandardSlotGameConfigs implements SlotGameBaseConfigs {
     itemTypeCount = 11;
@@ -17,7 +17,7 @@ export class StandardSlotGameConfigs implements SlotGameBaseConfigs {
 
         bigWinDuration: 4,
         showBigWinValueDuration: 1,
-        delayShowBigWinValue: 1.5
+        delayShowBigWinValue: 1.5,
     };
 
     turboMode = {
@@ -30,6 +30,6 @@ export class StandardSlotGameConfigs implements SlotGameBaseConfigs {
 
         bigWinDuration: 3.2,
         showBigWinValueDuration: 0.8,
-        delayShowBigWinValue: 1.2
+        delayShowBigWinValue: 1.2,
     };
 }

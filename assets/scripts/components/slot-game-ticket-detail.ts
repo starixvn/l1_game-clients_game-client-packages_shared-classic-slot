@@ -3,8 +3,8 @@ import * as i18n from "i18n/runtime-scripts/LanguageData";
 import { _decorator, Component, instantiate, Label, Layout, Node, Prefab, Sprite, SpriteAtlas, SpriteFrame } from "cc";
 import CommonDialog from "../../common/_base/view-models/CommonDialog";
 import GameUtils from "../../common/GameUtils";
+import SlotUtils from "./slot-utils";
 import SlotGameTicketDetailItem from "./SlotGameTicketDetailItem";
-import SlotUtils from "./SlotUtils";
 const { ccclass, property } = _decorator;
 
 @ccclass

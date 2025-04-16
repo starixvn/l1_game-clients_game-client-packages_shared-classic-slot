@@ -2,7 +2,7 @@ import { BundleManager } from "bundle-management";
 
 import { _decorator, AudioSource, Prefab } from "cc";
 import BonusDialog from "./BonusDialog";
-import { ClassicSlotSound } from "./ClassicSlotSound";
+import { ClassicSlotSound } from "./classic-slot-sound";
 const { ccclass, property } = _decorator;
 
 @ccclass

@@ -27,7 +27,7 @@ import JackpotPoolInfoBase from "../../lobby/main/view-models/JackpotPoolInfoBas
 import { uiManager } from "../../managers/GameUIManager";
 import { InternalEvents } from "../../managers/InternalEvents";
 import BonusDialog from "./BonusDialog";
-import { ClassicSlotSound } from "./ClassicSlotSound";
+import { ClassicSlotSound } from "./classic-slot-sound";
 import SlotBottomArea from "./SlotBottomArea";
 import SlotGameBase from "./SlotGameBase";
 import { SlotNotification } from "./SlotGameBottomMessage";

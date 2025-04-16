@@ -2,7 +2,7 @@ import { _decorator } from "cc";
 import GameUtils from "../../common/GameUtils";
 import { numberWithCommas } from "./../../common/helpers/NumberHelper";
 import SlotGameTopWinnerItem from "./SlotGameTopWinnerItem";
-import SlotUtils from "./SlotUtils";
+import SlotUtils from "./slot-utils";
 const { ccclass } = _decorator;
 
 @ccclass

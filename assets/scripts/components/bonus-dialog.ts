@@ -4,8 +4,8 @@ import AnimatedTime from "../../common/animated-time/view-models/AnimatedTime";
 import AudioManager from "../../common/audio/AudioManager";
 import { numberWithCommas } from "../../common/helpers/NumberHelper";
 import BonusItem from "./BonusItem";
-import { ClassicSlotSound } from "./ClassicSlotSound";
-import { SlotGameBaseConfigs } from "./SlotGameBaseConfigs";
+import { ClassicSlotSound } from "./classic-slot-sound";
+import { SlotGameBaseConfigs } from "./slot-game-base-configs";
 const { ccclass, property } = _decorator;
 
 @ccclass
