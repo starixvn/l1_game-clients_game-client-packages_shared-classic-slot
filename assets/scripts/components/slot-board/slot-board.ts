@@ -1,5 +1,6 @@
 import { _decorator, AudioSource, Component, instantiate, Node, Prefab, v3, Vec2, Vec3 } from "cc";
 
+import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
 import { paylines } from "../config/slot-game-base-configs";
@@ -31,12 +32,6 @@ export default class SlotBoard extends Component {
     @property(PreviewOddsPopup)
     previewPopup: PreviewOddsPopup = null;
 
-    @property(Prefab)
-    previewSymbolLeft: Prefab = null;
-
-    @property(Prefab)
-    previewSymbolRight: Prefab = null;
-
     public reels: SlotReel[] = [];
 
     public get reelCount() {
@@ -46,6 +41,9 @@ export default class SlotBoard extends Component {
     protected data: number[] = [];
     public gameId: number;
     public startReelDelayTime = 0.075;
+
+    protected previewSymbolLeft: Prefab = null;
+    protected previewSymbolRight: Prefab = null;
 
     turbo: boolean;
     symbolCountPerReel = 24;
@@ -187,11 +185,25 @@ export default class SlotBoard extends Component {
         }
     }
 
-    showPreviewPopup(info: SymbolPreviewType, isInfoOnLeft: boolean, worldPosition: Vec3) {
-        const previewPrefab = isInfoOnLeft ? this.previewSymbolLeft : this.previewSymbolRight;
+    async showPreviewPopup(info: SymbolPreviewType, isInfoOnLeft: boolean, worldPosition: Vec3) {
+        const previewPrefab = await this.getPreviewSymbolPrefab(isInfoOnLeft);
         const previewNode = instantiate(previewPrefab);
         const symbolPreview = previewNode.getComponent(SymbolPreview);
         symbolPreview.setInfo(info);
         this.showPreview(previewNode, worldPosition);
+    }
+
+    async getPreviewSymbolPrefab(isInfoOnLeft: boolean) {
+        if (isInfoOnLeft) {
+            if (!this.previewSymbolLeft) {
+                this.previewSymbolLeft = await bundleManager.loadResourcesAsset("prefabs/preview-odd-left", Prefab);
+            }
+            return this.previewSymbolLeft;
+        } else {
+            if (!this.previewSymbolRight) {
+                this.previewSymbolRight = await bundleManager.loadResourcesAsset("prefabs/preview-odd-right", Prefab);
+            }
+            return this.previewSymbolRight;
+        }
     }
 }
