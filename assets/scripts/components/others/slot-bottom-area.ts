@@ -64,24 +64,12 @@ export default class SlotBottomArea extends Component {
         this.createBetLevelContainer();
     }
 
-    setBetLevels(betLevels: number[]) {
-        this.betLevelsContainer.setBetLevels(betLevels);
-    }
-
     createBetLevelContainer() {
         const node = instantiate(this.betLevelsContainerPrefab);
         this.betLevelsContainerNode.addChild(node);
 
         this.betLevelsContainer = node.getComponent(BetLevelsContainer);
         this.stakeContainer = this.betLevelsContainer.containerNode.getComponent(ToggleContainer);
-        this.betLevelsContainer.onClickListener = {
-            onStakeToggleChanged: (event: Event, param: string) => {
-                this.onClickListener.onStakeToggleChanged(event, param);
-            },
-            onHideStakeContainer: () => {
-                this.onClickListener.onHideStakeContainer();
-            },
-        };
     }
 
     onStakeButtonClick() {

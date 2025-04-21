@@ -8,12 +8,10 @@ export default class BetLevelItem extends Component {
 
     private index = 0;
 
-    onClickListener = {
-        onStakeToggleChanged: (event, param) => {},
-    };
+    onStakeChanged = (param: number) => {};
 
     onStakeToggleChanged(event: Event) {
-        this.onClickListener.onStakeToggleChanged(event, this.index);
+        this.onStakeChanged(this.index);
     }
 
     setData(value: string, index: number) {

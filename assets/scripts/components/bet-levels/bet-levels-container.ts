@@ -1,10 +1,13 @@
-import { _decorator, Component, instantiate, Node, Prefab } from "cc";
-import { ComponentUtils } from "db://shared-components/shared/utils";
+import { _decorator, instantiate, Node, Prefab, tween, v3 } from "cc";
+import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
+import { AnimationUtils, ComponentUtils } from "db://shared-components/shared/utils";
+import Observer from "observer";
+import { BetControlStore } from "../../handlers/stores/bet-control-store";
 import BetLevelItem from "./bet-level-item";
 const { ccclass, property } = _decorator;
-
+const { render, handle } = Observer;
 @ccclass
-export default class BetLevelsContainer extends Component {
+export default class BetLevelsContainer extends ObserverComponent {
     @property(Prefab)
     stakeLevelItemPrefab: Prefab = null;
 
@@ -22,8 +25,10 @@ export default class BetLevelsContainer extends Component {
 
     onLoad() {
         this.containerNode.destroyAllChildren();
+        super.onLoad();
     }
 
+    @render(BetControlStore, (store) => store.betLevels)
     setBetLevels(betLevels: number[]) {
         if (betLevels.length <= 0) {
             return;
@@ -34,22 +39,20 @@ export default class BetLevelsContainer extends Component {
         this.calculateContainerHeight();
     }
 
-    initBetLevelItems() {
+    protected initBetLevelItems() {
         this.betLevels.forEach((value, index) => {
             const node = instantiate(this.stakeLevelItemPrefab);
             this.containerNode.addChild(node);
 
             const itemComp = node.getComponent(BetLevelItem);
             itemComp.setData(`${value}`, index);
-            itemComp.onClickListener = {
-                onStakeToggleChanged: (event: Event, param: string) => {
-                    this.onClickListener.onStakeToggleChanged(event, param);
-                },
+            itemComp.onStakeChanged = (param: number) => {
+                this.onStakeToggleChanged(param);
             };
         });
     }
 
-    private calculateContainerHeight() {
+    protected calculateContainerHeight() {
         let height = 0;
         if (this.betLevels.length >= this.itemsOfColumnMax) {
             height = this.itemsOfColumnMax * this.itemHeight + (this.itemsOfColumnMax + 1) * 10;
@@ -60,7 +63,27 @@ export default class BetLevelsContainer extends Component {
         ComponentUtils.setNodeTransform(this.containerNode, { height });
     }
 
-    onHideBetLevelContainer() {
-        this.onClickListener.onHideStakeContainer();
+    protected onHideBetLevelContainer() {
+        this.hide();
+    }
+
+    protected hide() {
+        const duration = 0.2;
+        AnimationUtils.fadeOut(this.node, duration);
+        tween(this.node)
+            .to(duration, { scale: v3(1, 0, 0) })
+            .call(() => {
+                this.node.active = false;
+            })
+            .start();
+    }
+
+    protected onStakeToggleChanged(index: number) {
+        this.setStake(this.betLevels[index]);
+    }
+
+    @handle(BetControlStore, (store, stake: number) => store.setStake(stake))
+    setStake(stake: number) {
+        return stake;
     }
 }

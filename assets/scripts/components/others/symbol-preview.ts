@@ -73,7 +73,7 @@ export default class SymbolPreview extends Component {
     }
 
     setInfo(info: SymbolPreviewType) {
-        const { symbol, spine, odds, borderColor, colorList, gameId } = info;
+        const { symbol, spine, odds, borderColor, colorList } = info;
         this.icon.skeletonData = spine;
         this.icon.setAnimation(0, "highlight", false);
         ComponentUtils.setNodeColor(this.border, borderColor);
