@@ -21,5 +21,5 @@ export class SlotBoardStore {
         setTimeout(() => {}, 0);
     }
 
-    spinResult: { result: number[]; duration: number } = { result: [], duration: 0 };
+    spinResult: { result: number[]; duration: number; turbo: boolean } = { result: [], duration: 0, turbo: false };
 }

@@ -91,8 +91,8 @@ export default class ClassicSlot extends GameComponent {
     }
 
     @render(SlotBoardStore, (store) => store.spinResult)
-    renderSpinResult(spinResult: { result: number[]; duration: number }) {
+    async renderSpinResult(spinResult: { result: number[]; duration: number; turbo: boolean }) {
         this.slotBoard.setBoardData(spinResult.result);
-        this.slotBoard.spin(spinResult.duration, false);
+        await this.slotBoard.spin(spinResult.duration, spinResult.turbo);
     }
 }

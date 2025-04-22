@@ -71,4 +71,19 @@ export class SlotDurationStore {
     get delayShowBigWinValue() {
         return this.configDuration.delayShowBigWinValue;
     }
+
+    get showTotalBonusAmountDuration() {
+        return this.config.showTotalBonusAmountDuration;
+    }
+
+    get showJackpotWinningAmountDuration() {
+        return this.config.showJackpotWinningAmountDuration;
+    }
+
+    get totalSpinDuration() {
+        const reelCount = 5;
+        const reelDelayTime = 0.075;
+        const totalDelay = this.betControlStore.isTurbo ? 0 : reelDelayTime * (reelCount - 1);
+        return this.spinDuration * (reelCount - 1) + totalDelay;
+    }
 }
