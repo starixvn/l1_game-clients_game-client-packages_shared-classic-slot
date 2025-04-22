@@ -1,4 +1,6 @@
-import { _decorator, Sprite } from "cc";
+import { _decorator, Sprite, SpriteFrame } from "cc";
+import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
+import { CLASSIC_SLOT_BUNDLE } from "../../utils/classic-slot-utils";
 import BigWinAnimation from "./big-win-animation";
 const { ccclass, property } = _decorator;
 
@@ -10,9 +12,13 @@ export default class JackpotWinningAmount extends BigWinAnimation {
     async loadPoolSprite(pool: string) {
         try {
             const prizeTxt = `text-${pool}`;
-            //TODO: fix
-            // const frame = await GameUtils.loadResourceAsset<SpriteFrame>(`shared/slot-game/textures/jackpot/${prizeTxt}`, SpriteFrame);
-            // this.poolSprite.spriteFrame = frame;
+            const frame = await bundleManager.loadAssetsFromBundle<SpriteFrame>(
+                CLASSIC_SLOT_BUNDLE,
+                `images/jackpot/${prizeTxt}`,
+                SpriteFrame,
+                null
+            );
+            this.poolSprite.spriteFrame = frame;
         } catch (error) {
             console.log("Failed to load pool image");
         }

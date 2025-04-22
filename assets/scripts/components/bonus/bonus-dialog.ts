@@ -1,14 +1,20 @@
 import gc from "@sg/game-client-base";
-import { _decorator, AudioSource, Button, Component, instantiate, Label, Node, Prefab, Tween, tween } from "cc";
+import { _decorator, AudioSource, Button, instantiate, Label, Node, Prefab, Tween, tween } from "cc";
 import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
+import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
+import Observer from "observer";
 import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
+import { SlotSettlementHandler } from "../../handlers/handlers/slot-settlement-handlers";
+import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
+import { initTimer } from "../../utils/classic-slot-utils";
 import { ClassicSlotSound } from "../others/classic-slot-sound";
 import BonusItem from "./bonus-item";
+const { handle, render } = Observer;
 const { ccclass, property } = _decorator;
 
 @ccclass
-export default class BonusDialog extends Component {
+export default class BonusDialog extends ObserverComponent {
     @property(Node)
     content: Node = null;
 
@@ -42,7 +48,6 @@ export default class BonusDialog extends Component {
     items: BonusItem[] = [];
 
     public onBonusFinished = () => {};
-    public onItemClicked = (index: number) => {};
     public slotGameConfigs: SlotGameBaseConfigs;
 
     private totalBonus = 0;
@@ -70,6 +75,9 @@ export default class BonusDialog extends Component {
         });
     }
 
+    @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
+    protected onItemClicked(index: number) {}
+
     playBonusItemSound() {
         //empty
     }
@@ -88,7 +96,12 @@ export default class BonusDialog extends Component {
         }
     }
 
-    openBonus(index: number, value: number) {
+    @render(SlotBoardStore, (store) => store.bonusChest)
+    openBonus(bonusChest: { index: number; value: number }) {
+        if (!bonusChest) {
+            return;
+        }
+        const { index, value } = bonusChest;
         const item = this.items[index];
         item && item.open(value);
         this.openedBonus++;
@@ -147,6 +160,6 @@ export default class BonusDialog extends Component {
 
     start() {
         const duration = this.slotGameConfigs.bonusTimeOut;
-        // this.timerTween = GameUtils.initSlotCountDownTimer(this.timer, duration, this.hideTimer.bind(this));
+        this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
     }
 }

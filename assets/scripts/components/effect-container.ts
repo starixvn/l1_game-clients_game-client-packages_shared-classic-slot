@@ -3,6 +3,7 @@ import { ObserverComponent } from "db://shared-components/shared/common-componen
 import Observer from "observer";
 import { paylines } from "../definitions";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
+import BonusDialog from "./bonus/bonus-dialog";
 import CallbackAnimation from "./callback-animation/callback-animation";
 import JackpotGame from "./others/jackpot-game";
 import SlotBoard from "./slot-board/slot-board";
@@ -21,6 +22,7 @@ export default class EffectContainer extends ObserverComponent {
     protected effectBonus: Prefab = null;
     protected effectFreeSpin: Prefab = null;
     protected jackpotGamePrefab: Prefab = null;
+    protected bonusDialogPrefab: Prefab = null;
 
     @render(SlotBoardStore, (store) => store.receivedJackpot)
     async receivedJackpot(receivedJackpot: { jackpot: any; duration: number }) {
@@ -58,6 +60,24 @@ export default class EffectContainer extends ObserverComponent {
             return;
         }
         const { bonus, duration } = receivedBonus;
+        // this.playSound(ClassicSlotSound.BONUS);
+        return new Promise<void>(async (resolve, reject) => {
+            const effect = instantiate(this.effectBonus);
+            const animation = effect.getComponent(CallbackAnimation);
+            animation.setDuration(duration);
+            await this.showEffect(effect);
+            this.showBonusDialog(bonus, resolve);
+        });
+    }
+
+    showBonusDialog(bonus: any, onBonusFinished: () => void) {
+        const node = instantiate(this.bonusDialogPrefab);
+        this.node.addChild(node);
+        const dialog = node.getComponent(BonusDialog);
+        // dialog.gameId = this.gameId;
+        // dialog.playSoundCallback = this.bonusDialogPlaySound.bind(this);
+        dialog.setBonusCount(bonus);
+        dialog.onBonusFinished = onBonusFinished;
     }
 
     protected async playEffectTransition() {

@@ -34,8 +34,12 @@ export class SlotSettlementHandler {
         this.receivedJackpot = false;
     }
 
-    emitJackpot(index: number) {
+    requestOpenJackpot(index: number) {
         this.connectionStore.connection.emit("jackpot", { chest: index });
+    }
+
+    requestOpenBonus(index: number) {
+        this.connectionStore.connection.emit("bonus", { chest: index });
     }
 
     async handleJackpot(jackpot: any) {

@@ -22,6 +22,8 @@ export const setSlotGameConfigs = (configs: SlotGameBaseConfigs) => {
     slotGameConfigs = configs;
 };
 
+export const CLASSIC_SLOT_BUNDLE = "classic-slot-bundle";
+
 export enum InternalEvents {
     LOAD_OTHER_ICONS_AND_BANNERS = "lobby= load other icons and banners",
     OPEN_GAME_MINI = "lobby= open game mini",

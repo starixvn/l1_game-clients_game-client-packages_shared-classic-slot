@@ -9,7 +9,7 @@ import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
 import { SlotSettlementHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
-import { initTimer } from "../../utils/classic-slot-utils";
+import { CLASSIC_SLOT_BUNDLE, initTimer } from "../../utils/classic-slot-utils";
 import { ClassicSlotSound } from "./classic-slot-sound";
 import JackpotGameItem from "./jackpot-game-item";
 import JackpotWinningAmount from "./jackpot-winning-amount";
@@ -55,7 +55,7 @@ export default class JackpotGame extends ObserverComponent {
         super.onLoad();
     }
 
-    @handle(SlotSettlementHandler, (handler, index: number) => handler.emitJackpot(index))
+    @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
     onItemClicked(index: number) {
         return index;
     }
@@ -163,7 +163,7 @@ export default class JackpotGame extends ObserverComponent {
         try {
             const title = `jackpot-title-${gc.Translator.getCurrentLanguageId()}`;
             const frame = await bundleManager.loadAssetsFromBundle<SpriteFrame>(
-                "classic-slot-bundle",
+                CLASSIC_SLOT_BUNDLE,
                 `images/jackpot/${title}`,
                 SpriteFrame,
                 null

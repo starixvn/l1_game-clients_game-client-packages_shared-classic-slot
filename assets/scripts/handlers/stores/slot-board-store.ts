@@ -28,4 +28,6 @@ export class SlotBoardStore {
     receivedJackpot = null;
 
     winningJackpot = null;
+
+    bonusChest = null;
 }
