@@ -2,7 +2,7 @@ import gc from "@sg/game-client-base";
 import { _decorator, AudioSource, Button, Component, instantiate, Label, Node, Prefab, Tween, tween } from "cc";
 import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
 import { ComponentUtils } from "db://shared-components/shared/utils";
-import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
+import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
 import { ClassicSlotSound } from "../others/classic-slot-sound";
 import BonusItem from "./bonus-item";
 const { ccclass, property } = _decorator;

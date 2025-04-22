@@ -3,7 +3,7 @@ import { _decorator, AudioSource, Component, instantiate, Node, Prefab, v3, Vec2
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
-import { paylines } from "../config/slot-game-base-configs";
+import { paylines } from "../../definitions";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReel from "./slot-reel";

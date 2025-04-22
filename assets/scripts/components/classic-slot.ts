@@ -2,8 +2,11 @@ import gc from "@sg/game-client-base";
 import { _decorator, JsonAsset, SpriteAtlas, Vec3 } from "cc";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
 import Observer from "observer";
+import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
+import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
+import { SlotBoardStore } from "../handlers/stores/slot-board-store";
+import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
 import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
-import { StandardSlotGameConfigs } from "./config/standard-slot-game-configs";
 import { ClassicSlotSound } from "./others/classic-slot-sound";
 import SlotBoard from "./slot-board/slot-board";
 const { ccclass, property } = _decorator;
@@ -34,10 +37,25 @@ export default class ClassicSlot extends GameComponent {
     }
 
     async initSharedCaches() {
-        setSlotGameConfigs(new StandardSlotGameConfigs());
+        this.initSlotGameConfigs();
         resourceCaches.gameAtlas = this.gameAtlas;
         await loadSlotSymbols(true);
         await loadWinningSymbolAnimation();
+    }
+
+    protected initSlotGameConfigs() {
+        const config = this.customSlotGameConfigs();
+        this.setSlotGameConfigs(config);
+    }
+
+    protected customSlotGameConfigs() {
+        return new StandardSlotGameConfigs();
+    }
+
+    @handle(SlotDurationStore, (store, config: SlotGameBaseConfigs) => store.setConfig(config))
+    protected setSlotGameConfigs(config: SlotGameBaseConfigs) {
+        setSlotGameConfigs(config);
+        return config;
     }
 
     initSlotBoard() {
@@ -70,5 +88,11 @@ export default class ClassicSlot extends GameComponent {
     @render(gc.GameConfigs.GameConfigStore, (store) => store.odds)
     renderGameOdd(odds) {
         this.gameConfigOdds = odds;
+    }
+
+    @render(SlotBoardStore, (store) => store.spinResult)
+    renderSpinResult(spinResult: { result: number[]; duration: number }) {
+        this.slotBoard.setBoardData(spinResult.result);
+        this.slotBoard.spin(spinResult.duration, false);
     }
 }

@@ -1,6 +1,6 @@
 import { EventTarget, sp, SpriteAtlas } from "cc";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
-import { SlotGameBaseConfigs } from "../components/config/slot-game-base-configs";
+import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 
 interface ResourceCaches {
     slotSymbols?: any;

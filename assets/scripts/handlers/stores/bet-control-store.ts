@@ -37,6 +37,8 @@ export class BetControlStore {
     betLevels: number[] = [];
     stake = 0;
 
+    roundId = -1;
+
     readonly linesCount = 25;
 
     get totalBet() {

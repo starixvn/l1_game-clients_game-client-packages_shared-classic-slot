@@ -2,8 +2,8 @@ import { _decorator, Component, instantiate, Layout, Node, Prefab, Tween, tween,
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
 import { AnimationUtils } from "db://shared-components/shared/utils/utils";
 import * as _ from "lodash-es";
+import { SpecialSymbol } from "../../definitions";
 import { getSlotGameConfigs, globalEmitter, InternalEvents } from "../../utils/classic-slot-utils";
-import { SpecialSymbol } from "../config/slot-game-base-configs";
 import { ClassicSlotSound } from "../others/classic-slot-sound";
 import SlotReelItem from "./slot-reel-item";
 

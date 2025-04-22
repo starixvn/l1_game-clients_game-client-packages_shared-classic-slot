@@ -1,7 +1,7 @@
 import { _decorator, Component, Label, Node, sp, Sprite } from "cc";
 import { ComponentUtils } from "db://shared-components/shared/utils";
+import { SpecialSymbol } from "../../definitions";
 import { globalEmitter, InternalEvents, resourceCaches } from "../../utils/classic-slot-utils";
-import { SpecialSymbol } from "../config/slot-game-base-configs";
 const { ccclass, property } = _decorator;
 
 export interface SymbolPreviewType {
