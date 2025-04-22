@@ -1,4 +1,5 @@
-import { EventTarget, sp, SpriteAtlas } from "cc";
+import { EventTarget, sp, SpriteAtlas, tween } from "cc";
+import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 
@@ -110,4 +111,22 @@ export const loadWinningSymbolAnimation = async () => {
         const data = await bundleManager.loadResourcesAsset<sp.SkeletonData>(path, sp.SkeletonData);
         resourceCaches.slotWinningAnimation = data;
     }
+};
+
+export const initTimer = (timer: RawTwoDigitsTimer, duration: number, hideTimer: () => void) => {
+    let count = 0;
+    return tween(timer.node)
+        .repeat(
+            duration,
+            tween()
+                .call(() => {
+                    timer.setTime(duration - count);
+                    count++;
+                })
+                .delay(1)
+        )
+        .call(() => {
+            hideTimer();
+        })
+        .start();
 };

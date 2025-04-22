@@ -22,4 +22,10 @@ export class SlotBoardStore {
     }
 
     spinResult: { result: number[]; duration: number; turbo: boolean } = { result: [], duration: 0, turbo: false };
+
+    receivedBonus = null;
+
+    receivedJackpot = null;
+
+    winningJackpot = null;
 }

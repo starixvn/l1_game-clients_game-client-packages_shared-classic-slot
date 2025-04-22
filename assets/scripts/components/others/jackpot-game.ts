@@ -1,10 +1,19 @@
-import { _decorator, Button, Component, instantiate, Node, Prefab, Sprite, Tween } from "cc";
+import gc from "@sg/game-client-base";
+import { _decorator, Button, instantiate, Node, Prefab, Sprite, SpriteFrame, Tween } from "cc";
 import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
+import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
+import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils } from "db://shared-components/shared/utils";
+import Observer from "observer";
+import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
+import { SlotSettlementHandler } from "../../handlers";
+import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
+import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
+import { initTimer } from "../../utils/classic-slot-utils";
 import { ClassicSlotSound } from "./classic-slot-sound";
 import JackpotGameItem from "./jackpot-game-item";
 import JackpotWinningAmount from "./jackpot-winning-amount";
-import { StandardSlotGameConfigs } from "./standard-slot-game-configs";
+const { handle, render } = Observer;
 
 const { ccclass, property } = _decorator;
 
@@ -14,7 +23,7 @@ interface IWinningJackpot {
     amount: number;
 }
 @ccclass
-export default class JackpotGame extends Component {
+export default class JackpotGame extends ObserverComponent {
     @property(Node)
     content: Node = null;
 
@@ -36,14 +45,19 @@ export default class JackpotGame extends Component {
     items: JackpotGameItem[] = [];
 
     public onJackpotGameFinished = () => {};
-    public onItemClicked = (index: number) => {};
-    public slotGameConfigs: StandardSlotGameConfigs;
+    protected slotGameConfigs: SlotGameBaseConfigs;
     private timerTween: Tween;
     prizes = 0;
     public playSoundCallback = (type: ClassicSlotSound) => {};
 
     onLoad() {
         this.loadTitleJackpot();
+        super.onLoad();
+    }
+
+    @handle(SlotSettlementHandler, (handler, index: number) => handler.emitJackpot(index))
+    onItemClicked(index: number) {
+        return index;
     }
 
     initJackpotItems() {
@@ -83,6 +97,12 @@ export default class JackpotGame extends Component {
         }
     }
 
+    @render(SlotDurationStore, (store) => store.config)
+    renderConfig(config: SlotGameBaseConfigs) {
+        this.slotGameConfigs = config;
+    }
+
+    @render(SlotBoardStore, (store) => store.winningJackpot)
     async openJackpot(data: IWinningJackpot) {
         try {
             const delayTime = 1;
@@ -105,11 +125,10 @@ export default class JackpotGame extends Component {
         const { amount, pool } = data;
         const jackpotWinningAmount = winningAmount.getComponent(JackpotWinningAmount);
 
-        //TODO: fix
-        // jackpotWinningAmount.setAmount({
-        //     amount: GameUtils.getValueByCurrency(amount),
-        //     duration: this.slotGameConfigs.showJackpotWinningAmountDuration - delayTime,
-        // });
+        jackpotWinningAmount.setAmount({
+            amount: amount,
+            duration: this.slotGameConfigs.showJackpotWinningAmountDuration - delayTime,
+        });
         jackpotWinningAmount.loadPoolSprite(pool);
     }
 
@@ -137,16 +156,19 @@ export default class JackpotGame extends Component {
 
     start() {
         const duration = this.slotGameConfigs.jackpotTimeOut;
-        //TODO: fix
-        // this.timerTween = GameUtils.initSlotCountDownTimer(this.timer, duration, this.hideTimer.bind(this));
+        this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
     }
 
     async loadTitleJackpot() {
         try {
-            const title = `jackpot-title-${window.i18n.curLang}`;
-            //TODO: fix
-            // const frame = await GameUtils.loadResourceAsset<SpriteFrame>(`shared/slot-game/textures/jackpot/${title}`, SpriteFrame);
-            // this.sprTitle.spriteFrame = frame;
+            const title = `jackpot-title-${gc.Translator.getCurrentLanguageId()}`;
+            const frame = await bundleManager.loadAssetsFromBundle<SpriteFrame>(
+                "classic-slot-bundle",
+                `images/jackpot/${title}`,
+                SpriteFrame,
+                null
+            );
+            this.sprTitle.spriteFrame = frame;
         } catch (error) {
             console.log("Failed to load jackpot title image");
         }
