@@ -1,38 +1,71 @@
 import { _decorator, instantiate, Node, Prefab } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
-import { paylines } from "../definitions";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import BonusDialog from "./bonus/bonus-dialog";
 import CallbackAnimation from "./callback-animation/callback-animation";
+import BigWinAnimation from "./others/big-win-animation";
 import JackpotGame from "./others/jackpot-game";
-import SlotBoard from "./slot-board/slot-board";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
 export default class EffectContainer extends ObserverComponent {
-    @property(SlotBoard)
-    slotBoard: SlotBoard = null;
-
-    @property(Node)
-    lineContainer: Node = null;
-
+    @property(Prefab)
     protected effectTransitionPrefab: Prefab = null;
+    @property(Prefab)
     protected effectJackpot: Prefab = null;
+    @property(Prefab)
     protected effectBonus: Prefab = null;
+    @property(Prefab)
     protected effectFreeSpin: Prefab = null;
+    @property(Prefab)
+    protected effectBigWin: Prefab = null;
+    @property(Prefab)
     protected jackpotGamePrefab: Prefab = null;
+    @property(Prefab)
     protected bonusDialogPrefab: Prefab = null;
 
-    @render(SlotBoardStore, (store) => store.receivedJackpot)
+    @render(SlotBoardStore, (store) => store.receivedFreeSpins, { fireImmediately: false })
+    async receivedFreeSpins(receivedFreeSpins: { freeSpins: any; duration: number }) {
+        if (!receivedFreeSpins) {
+            return;
+        }
+        const { duration } = receivedFreeSpins;
+        // this.playSound(ClassicSlotSound.FREESPIN);
+        const effect = instantiate(this.effectFreeSpin);
+        const animation = effect.getComponent(CallbackAnimation);
+        animation.setDuration(duration);
+        await this.showEffect(effect);
+    }
+
+    @render(SlotBoardStore, (store) => store.receivedBigWin, { fireImmediately: false })
+    async receivedBigWin(receivedBigWin: {
+        bigWin: any;
+        duration: number;
+        showBigWinValue: number;
+        delayShowBigWinValue: number;
+        amount: number;
+    }) {
+        if (!receivedBigWin) {
+            return;
+        }
+        const { duration, showBigWinValue, delayShowBigWinValue, amount } = receivedBigWin;
+        // this.playSound(ClassicSlotSound.BIG_WIN);
+        const effect = instantiate(this.effectBigWin);
+        const callbackAnim = effect.getComponent(CallbackAnimation);
+        callbackAnim.setDuration(duration);
+        const bigWinAnimation = effect.getComponent(BigWinAnimation);
+        bigWinAnimation.setAmount({ amount, duration: showBigWinValue, delayTime: delayShowBigWinValue });
+        await this.showEffect(effect);
+    }
+
+    @render(SlotBoardStore, (store) => store.receivedJackpot, { fireImmediately: false })
     async receivedJackpot(receivedJackpot: { jackpot: any; duration: number }) {
         if (!receivedJackpot) {
             return;
         }
         const { jackpot, duration } = receivedJackpot;
         // this.playSound(ClassicSlotSound.JACKPOT);
-        this.showLine(jackpot.winningLine + 1);
-        this.slotBoard.showWinningEffect(paylines[jackpot.winningLine], jackpot.symbol);
         const transtition = await this.playEffectTransition();
         const effect = instantiate(this.effectJackpot);
         const animation = effect.getComponent(CallbackAnimation);
@@ -54,7 +87,7 @@ export default class EffectContainer extends ObserverComponent {
         });
     }
 
-    @render(SlotBoardStore, (store) => store.receivedBonus)
+    @render(SlotBoardStore, (store) => store.receivedBonus, { fireImmediately: false })
     async receivedBonus(receivedBonus: { bonus: any; duration: number }) {
         if (!receivedBonus) {
             return;
@@ -104,12 +137,5 @@ export default class EffectContainer extends ObserverComponent {
             };
             animation.play();
         });
-    }
-
-    showLine(num: number, show = true) {
-        const line = this.lineContainer.getChildByName(`${num}`);
-        if (line) {
-            line.active = show;
-        }
     }
 }

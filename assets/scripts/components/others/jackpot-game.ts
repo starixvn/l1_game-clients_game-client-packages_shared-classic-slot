@@ -1,7 +1,5 @@
-import gc from "@sg/game-client-base";
-import { _decorator, Button, instantiate, Node, Prefab, Sprite, SpriteFrame, Tween } from "cc";
+import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
 import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
-import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
@@ -9,7 +7,7 @@ import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
 import { SlotSettlementHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
-import { CLASSIC_SLOT_BUNDLE, initTimer } from "../../utils/classic-slot-utils";
+import { initTimer } from "../../utils/classic-slot-utils";
 import { ClassicSlotSound } from "./classic-slot-sound";
 import JackpotGameItem from "./jackpot-game-item";
 import JackpotWinningAmount from "./jackpot-winning-amount";
@@ -39,9 +37,6 @@ export default class JackpotGame extends ObserverComponent {
     @property(Prefab)
     jackpotWinningAmountPrefab: Prefab = null;
 
-    @property(Sprite)
-    sprTitle: Sprite = null;
-
     items: JackpotGameItem[] = [];
 
     public onJackpotGameFinished = () => {};
@@ -49,11 +44,6 @@ export default class JackpotGame extends ObserverComponent {
     private timerTween: Tween;
     prizes = 0;
     public playSoundCallback = (type: ClassicSlotSound) => {};
-
-    onLoad() {
-        this.loadTitleJackpot();
-        super.onLoad();
-    }
 
     @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
     onItemClicked(index: number) {
@@ -102,8 +92,11 @@ export default class JackpotGame extends ObserverComponent {
         this.slotGameConfigs = config;
     }
 
-    @render(SlotBoardStore, (store) => store.winningJackpot)
+    @render(SlotBoardStore, (store) => store.winningJackpot, { fireImmediately: false })
     async openJackpot(data: IWinningJackpot) {
+        if (!data) {
+            return;
+        }
         try {
             const delayTime = 1;
             await AnimationUtils.delayTime(delayTime);
@@ -157,20 +150,5 @@ export default class JackpotGame extends ObserverComponent {
     start() {
         const duration = this.slotGameConfigs.jackpotTimeOut;
         this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
-    }
-
-    async loadTitleJackpot() {
-        try {
-            const title = `jackpot-title-${gc.Translator.getCurrentLanguageId()}`;
-            const frame = await bundleManager.loadAssetsFromBundle<SpriteFrame>(
-                CLASSIC_SLOT_BUNDLE,
-                `images/jackpot/${title}`,
-                SpriteFrame,
-                null
-            );
-            this.sprTitle.spriteFrame = frame;
-        } catch (error) {
-            console.log("Failed to load jackpot title image");
-        }
     }
 }

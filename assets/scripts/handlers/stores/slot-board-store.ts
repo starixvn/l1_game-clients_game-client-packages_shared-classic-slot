@@ -24,10 +24,24 @@ export class SlotBoardStore {
     spinResult: { result: number[]; duration: number; turbo: boolean } = { result: [], duration: 0, turbo: false };
 
     receivedBonus = null;
-
     receivedJackpot = null;
-
+    receivedFreeSpins = null;
+    receivedBigWin = null;
     winningJackpot = null;
-
     bonusChest = null;
+    winningItems = [];
+    winningLines = [];
+    highlightSpecialSymbols = [];
+
+    reset() {
+        this.receivedBonus = null;
+        this.receivedJackpot = null;
+        this.receivedFreeSpins = null;
+        this.receivedBigWin = null;
+        this.winningItems = [];
+        this.winningLines = [];
+        this.highlightSpecialSymbols = [];
+        this.winningJackpot = null;
+        this.bonusChest = null;
+    }
 }

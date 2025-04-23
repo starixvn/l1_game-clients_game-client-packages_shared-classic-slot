@@ -1,5 +1,5 @@
 import gc from "@sg/game-client-base";
-import { _decorator, AudioSource, Button, instantiate, Label, Node, Prefab, Tween, tween } from "cc";
+import { _decorator, Button, instantiate, Label, Node, Prefab, Tween, tween } from "cc";
 import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
@@ -29,9 +29,6 @@ export default class BonusDialog extends ObserverComponent {
 
     @property(Label)
     totalBonusLabel: Label = null;
-
-    @property({ type: AudioSource })
-    soundBigWin: AudioSource = null;
 
     @property(Prefab)
     bonusItem: Prefab = null;
@@ -96,7 +93,7 @@ export default class BonusDialog extends ObserverComponent {
         }
     }
 
-    @render(SlotBoardStore, (store) => store.bonusChest)
+    @render(SlotBoardStore, (store) => store.bonusChest, { fireImmediately: false })
     openBonus(bonusChest: { index: number; value: number }) {
         if (!bonusChest) {
             return;
@@ -117,10 +114,8 @@ export default class BonusDialog extends ObserverComponent {
 
     showTotalAmount() {
         this.playSoundCallback(ClassicSlotSound.BONUS_TOTAL);
-        if (this.soundBigWin) {
-            //TODO: fix
-            // FunctionUtils.playSFX(this.soundBigWin.clip);
-        }
+        //TODO: fix
+        // FunctionUtils.playSFX(this.soundBigWin.clip);
         this.hideTimer();
         this.totalBonusNode.active = true;
         this.totalBonusLabel.string = `+${gc.FormatUtils.numberWithCommas(this.totalValue, 2)}`;

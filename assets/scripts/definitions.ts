@@ -36,3 +36,9 @@ export enum SpecialSymbol {
     FREESPIN = 7,
     BONUS = 8,
 }
+
+export interface LineData {
+    payline: number;
+    positions: number[];
+    symbol: number;
+}

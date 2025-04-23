@@ -55,12 +55,18 @@ export class BetControlStore {
 
     interactableBet = false;
 
+    winningBet = 0;
+
     setStake(stake: number) {
         this.stake = stake;
     }
 
     setBetLevels(betLevels: number[]) {
         this.betLevels = betLevels;
+    }
+
+    setTotalFreeSpins(totalFreeSpins: number) {
+        this.freeSpinCount = totalFreeSpins;
     }
 
     onLoadStorage() {

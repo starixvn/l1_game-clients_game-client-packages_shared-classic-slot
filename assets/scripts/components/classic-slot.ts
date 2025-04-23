@@ -1,9 +1,10 @@
 import gc from "@sg/game-client-base";
-import { _decorator, JsonAsset, SpriteAtlas, Vec3 } from "cc";
+import { _decorator, JsonAsset, Node, SpriteAtlas, Vec3 } from "cc";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
 import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
+import { LineData } from "../definitions";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
 import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
@@ -21,6 +22,9 @@ export default class ClassicSlot extends GameComponent {
 
     @property(JsonAsset)
     colorJson: JsonAsset = null;
+
+    @property(Node)
+    lineContainer: Node = null;
 
     gameConfigOdds: any;
     jackpotEnabled = false;
@@ -94,5 +98,34 @@ export default class ClassicSlot extends GameComponent {
     async renderSpinResult(spinResult: { result: number[]; duration: number; turbo: boolean }) {
         this.slotBoard.setBoardData(spinResult.result);
         await this.slotBoard.spin(spinResult.duration, spinResult.turbo);
+    }
+
+    @render(SlotBoardStore, (store) => store.winningLines, { fireImmediately: false })
+    renderWinningLines(winningLines: LineData[]) {
+        if (!winningLines) {
+            return;
+        }
+
+        winningLines.forEach((line) => {
+            this.showLine(line.payline + 1);
+        });
+        this.renderWinningItems(winningLines);
+    }
+
+    @render(SlotBoardStore, (store) => store.winningItems, { fireImmediately: false })
+    renderWinningItems(winningLines: LineData[]) {
+        winningLines.forEach((line) => {
+            this.slotBoard.showWinningEffect(line.positions, +line.symbol);
+        });
+    }
+
+    showLine(num: number, show = true) {
+        if (!this.lineContainer) {
+            return;
+        }
+        const line = this.lineContainer.getChildByName(`${num}`);
+        if (line) {
+            line.active = show;
+        }
     }
 }
