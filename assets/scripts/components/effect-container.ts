@@ -107,7 +107,7 @@ export default class EffectContainer extends ObserverComponent {
         const node = instantiate(this.bonusDialogPrefab);
         this.node.addChild(node);
         const dialog = node.getComponent(BonusDialog);
-        // dialog.gameId = this.gameId;
+        dialog.initBonusItems();
         // dialog.playSoundCallback = this.bonusDialogPlaySound.bind(this);
         dialog.setBonusCount(bonus);
         dialog.onBonusFinished = onBonusFinished;

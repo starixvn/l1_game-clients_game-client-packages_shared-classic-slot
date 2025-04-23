@@ -7,6 +7,7 @@ import Observer from "observer";
 import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
 import { SlotSettlementHandler } from "../../handlers/handlers/slot-settlement-handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
+import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
 import { initTimer } from "../../utils/classic-slot-utils";
 import { ClassicSlotSound } from "../others/classic-slot-sound";
 import BonusItem from "./bonus-item";
@@ -32,15 +33,6 @@ export default class BonusDialog extends ObserverComponent {
 
     @property(Prefab)
     bonusItem: Prefab = null;
-
-    protected _gameId;
-    public set gameId(value: number) {
-        this._gameId = value;
-        this.initBonusItems();
-    }
-    public get gameId(): number {
-        return this._gameId;
-    }
 
     items: BonusItem[] = [];
 
@@ -72,8 +64,10 @@ export default class BonusDialog extends ObserverComponent {
         });
     }
 
-    @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
-    protected onItemClicked(index: number) {}
+    @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenBonus(index))
+    protected onItemClicked(index: number) {
+        return index;
+    }
 
     playBonusItemSound() {
         //empty
@@ -93,16 +87,21 @@ export default class BonusDialog extends ObserverComponent {
         }
     }
 
+    @render(SlotDurationStore, (store) => store.config)
+    renderConfig(config: SlotGameBaseConfigs) {
+        this.slotGameConfigs = config;
+    }
+
     @render(SlotBoardStore, (store) => store.bonusChest, { fireImmediately: false })
-    openBonus(bonusChest: { index: number; value: number }) {
+    openBonus(bonusChest: { chest: number; amount: number }) {
         if (!bonusChest) {
             return;
         }
-        const { index, value } = bonusChest;
-        const item = this.items[index];
-        item && item.open(value);
+        const { chest, amount } = bonusChest;
+        const item = this.items[chest];
+        item && item.open(amount);
         this.openedBonus++;
-        this.totalValue += value;
+        this.totalValue += amount;
         this.updateBonusCount();
         this.checkFinishBonus();
     }
