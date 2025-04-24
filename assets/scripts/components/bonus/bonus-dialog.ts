@@ -1,6 +1,6 @@
 import gc from "@sg/game-client-base";
 import { _decorator, Button, instantiate, Label, Node, Prefab, Tween, tween } from "cc";
-import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
+import RawTimer from "db://shared-components/game/game-timer/scripts/raw-timer";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
@@ -22,8 +22,8 @@ export default class BonusDialog extends ObserverComponent {
     @property(Label)
     bonusCount: Label = null;
 
-    @property(RawTwoDigitsTimer)
-    timer: RawTwoDigitsTimer = null;
+    @property(RawTimer)
+    timer: RawTimer = null;
 
     @property(Node)
     totalBonusNode: Node = null;

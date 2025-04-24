@@ -1,5 +1,5 @@
 import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
-import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
+import RawTimer from "db://shared-components/game/game-timer/scripts/raw-timer";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
@@ -25,8 +25,8 @@ export default class JackpotGame extends ObserverComponent {
     @property(Node)
     content: Node = null;
 
-    @property(RawTwoDigitsTimer)
-    timer: RawTwoDigitsTimer = null;
+    @property(RawTimer)
+    timer: RawTimer = null;
 
     @property(Node)
     winningNode: Node = null;
