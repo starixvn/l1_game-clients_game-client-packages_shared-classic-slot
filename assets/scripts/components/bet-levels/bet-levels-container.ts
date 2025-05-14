@@ -9,7 +9,7 @@ const { render, handle } = Observer;
 @ccclass
 export default class BetLevelsContainer extends ObserverComponent {
     @property(Prefab)
-    stakeLevelItemPrefab: Prefab = null;
+    itemPrefab: Prefab = null;
 
     @property(Node)
     containerNode: Node = null;
@@ -41,7 +41,7 @@ export default class BetLevelsContainer extends ObserverComponent {
 
     protected initBetLevelItems() {
         this.betLevels.forEach((value, index) => {
-            const node = instantiate(this.stakeLevelItemPrefab);
+            const node = instantiate(this.itemPrefab);
             this.containerNode.addChild(node);
 
             const itemComp = node.getComponent(BetLevelItem);
