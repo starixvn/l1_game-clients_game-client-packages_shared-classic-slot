@@ -42,6 +42,10 @@ export default class BetControl extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.winningBet)
     renderTotalWin(totalWin: number) {
+        if (totalWin === 0) {
+            this.lblTotalWin.string = "0";
+            return;
+        }
         floatToNumber({
             from: 0,
             to: totalWin,
