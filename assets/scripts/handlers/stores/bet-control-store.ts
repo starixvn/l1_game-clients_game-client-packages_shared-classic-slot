@@ -57,8 +57,52 @@ export class BetControlStore {
 
     winningBet = 0;
 
+    stakeSelectorShow = false;
+    stakeSelectorDisabled = false;
+
+    triggerAutoSpin = true;
+
     setStake(stake: number) {
         this.stake = stake;
+    }
+
+    get stakeIndex() {
+        return this.betLevels.indexOf(this.stake);
+    }
+
+    quickChangeStake(increase: boolean) {
+        const index = this.stakeIndex;
+        if (index === -1) {
+            return;
+        }
+
+        if (increase) {
+            if (index === this.betLevels.length - 1) {
+                return;
+            }
+            this.stake = this.betLevels[index + 1];
+        } else {
+            if (index === 0) {
+                return;
+            }
+            this.stake = this.betLevels[index - 1];
+        }
+    }
+
+    get disableIncreaseStake() {
+        return this.stakeIndex === this.betLevels.length - 1 || this.stakeIndex === -1;
+    }
+
+    get disableDecreaseStake() {
+        return this.stakeIndex === 0 || this.stakeIndex === -1;
+    }
+
+    setStakeSelectorShow(showStakeSelector: boolean) {
+        this.stakeSelectorShow = showStakeSelector;
+    }
+
+    setStakeSelectorDisabled(disabled: boolean) {
+        this.stakeSelectorDisabled = disabled;
     }
 
     setBetLevels(betLevels: number[]) {
@@ -67,6 +111,10 @@ export class BetControlStore {
 
     setTotalFreeSpins(totalFreeSpins: number) {
         this.freeSpinCount = totalFreeSpins;
+    }
+
+    setTurbo(turbo: boolean) {
+        this.isTurbo = turbo;
     }
 
     onLoadStorage() {

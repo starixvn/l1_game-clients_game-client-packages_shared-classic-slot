@@ -1,39 +1,112 @@
-import { _decorator, Button, Component, Label } from "cc";
+import { _decorator, EventTouch, game, Input, input, Intersection2D, KeyCode, math, Node, PolygonCollider2D, sp } from "cc";
+import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
+import Observer from "observer";
+import { SlotBetHandler } from "../../handlers/handlers/slot-bet-handlers";
 const { ccclass, property } = _decorator;
+const { handle, render } = Observer;
 
 @ccclass
-export default abstract class SpinButton extends Component {
-    @property(Button)
-    spinButton: Button = null;
+export default class StandardSlotSpinButton extends ObserverComponent {
+    @property(sp.Skeleton)
+    spine: sp.Skeleton = null;
 
-    @property(Label)
-    autoSpinCountLabel: Label = null;
+    @property(PolygonCollider2D)
+    polygonCollider2D: PolygonCollider2D = null;
 
-    needShowAutoSpin = true;
-
-    hideAutoSpin() {
-        this.needShowAutoSpin = false;
+    protected touchInPolygon(event: EventTouch) {
+        const location = event.getUILocation();
+        const polygon = this.polygonCollider2D.worldPoints;
+        return Intersection2D.pointInPolygon(math.v2(location.x, location.y), polygon);
     }
 
-    setAutoSpinCount(count: number) {
-        this.needShowAutoSpin && (this.autoSpinCountLabel.string = count.toString());
+    @handle(SlotBetHandler, (handler) => handler.callBet())
+    onSpin() {
+        console.log("onSpin");
     }
 
-    active() {
-        this.spinButton.interactable = true;
+    protected playAnimationSpin() {
+        this.spine && this.spine.setAnimation(0, "spin", true);
+        this.spine && this.spine.setAnimation(3, "spin-extra", false);
     }
 
-    deactive() {
-        this.spinButton.interactable = false;
+    protected playAnimationIdle() {
+        this.spine && this.spine.setAnimation(0, "idle", true);
     }
 
-    abstract playAnimationSpin();
+    protected showAutoSpinMode() {}
+    protected hideAll() {}
+    protected showNormalMode() {}
 
-    abstract playAnimationSpinTurbo();
+    ////
+    protected readonly spinButtonSound = "spin_button";
 
-    abstract playAnimationIdle();
+    onBlur = () => {
+        this.clearTriggerAction();
+    };
 
-    abstract showAutoSpinMode();
+    onLoad() {
+        this.addEvent();
+        this.registerTouchEvents();
+        super.onLoad();
+    }
 
-    abstract showNormalMode();
+    onDestroy() {
+        game.canvas.removeEventListener("blur", this.onBlur);
+        super.onDestroy();
+    }
+
+    protected addEvent() {
+        input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
+        input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
+    }
+
+    protected registerTouchEvents() {
+        this.node.on(Node.EventType.TOUCH_START, this.onTouchStart, this);
+        this.node.on(Node.EventType.TOUCH_MOVE, this.handleTouchMove, this);
+        this.node.on(Node.EventType.TOUCH_CANCEL, this.onTouchEnd, this);
+        this.node.on(Node.EventType.TOUCH_END, this.onTouchEnd, this);
+
+        game.canvas.addEventListener("blur", this.onBlur);
+    }
+
+    protected handleTouchMove(event: EventTouch) {
+        if (!this.touchInPolygon(event)) {
+            this.clearTriggerAction();
+        }
+    }
+
+    protected onTouchStart(event: EventTouch) {
+        if (this.touchInPolygon(event)) {
+            this.callTriggerAction();
+        }
+    }
+
+    protected onTouchEnd() {
+        this.clearTriggerAction();
+    }
+
+    protected removeEvent() {
+        input.off(Input.EventType.KEY_DOWN, this.onKeyDown, this);
+        input.off(Input.EventType.KEY_UP, this.onKeyUp, this);
+    }
+
+    protected onKeyDown(event) {
+        const { keyCode } = event;
+        if (keyCode === KeyCode.SPACE || keyCode === KeyCode.ENTER || keyCode === KeyCode.NUM_ENTER) {
+            this.callTriggerAction();
+        }
+    }
+
+    protected onKeyUp(event) {
+        const { keyCode } = event;
+        if (keyCode === KeyCode.SPACE || keyCode === KeyCode.ENTER || keyCode === KeyCode.NUM_ENTER) {
+            this.clearTriggerAction();
+        }
+    }
+
+    @handle(SlotBetHandler, (handler) => handler.callTriggerAction())
+    callTriggerAction() {}
+
+    @handle(SlotBetHandler, (handler) => handler.clearTriggerAction())
+    clearTriggerAction() {}
 }

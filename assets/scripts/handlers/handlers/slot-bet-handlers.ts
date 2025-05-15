@@ -7,6 +7,9 @@ const { injectable, inject } = inversify;
 export class SlotBetHandler extends gc.Bet.BetHandler {
     @inject(BetControlStore) private betControlStore: BetControlStore;
 
+    protected timeoutHolding: NodeJS.Timeout;
+    protected readonly HOLDING_THRESHOLD = 1000;
+
     handle() {
         this.callBet();
     }
@@ -19,6 +22,22 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         });
 
         this.handleBetData(betData);
+    }
+
+    callTriggerAction() {
+        if (!this.betControlStore.triggerAutoSpin) {
+            //check available bet
+
+            this.callBet();
+            this.timeoutHolding = setTimeout(() => {
+                this.betControlStore.triggerAutoSpin = true;
+            }, this.HOLDING_THRESHOLD);
+        }
+    }
+
+    clearTriggerAction() {
+        this.betControlStore.triggerAutoSpin = false;
+        this.timeoutHolding && clearTimeout(this.timeoutHolding);
     }
 
     isValidBet(amount: number) {

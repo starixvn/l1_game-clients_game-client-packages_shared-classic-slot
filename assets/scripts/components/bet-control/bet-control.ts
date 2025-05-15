@@ -1,14 +1,84 @@
-import { _decorator } from "cc";
+import gc from "@sg/game-client-base";
+import { _decorator, Button, Label, Toggle } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
-import { SlotBetHandler } from "../../handlers";
+import { BetControlStore } from "../../handlers";
 const { ccclass, property } = _decorator;
-const { handle } = Observer;
+const { handle, render } = Observer;
 
 @ccclass("BetControl")
 export default class BetControl extends ObserverComponent {
-    @handle(SlotBetHandler, (handler) => handler.callBet())
-    onSpin() {
-        console.log("onSpin");
+    @property(Label)
+    lblStake: Label = null;
+
+    @property(Label)
+    lblTotalBet: Label = null;
+
+    @property(Label)
+    lblTotalWin: Label = null;
+
+    @property(Toggle)
+    toggleAutoSpin: Toggle = null;
+
+    @property(Toggle)
+    toggleTurbo: Toggle = null;
+
+    @property(Button)
+    btnIncreaseStake: Button = null;
+
+    @property(Button)
+    btnDecreaseStake: Button = null;
+
+    @render(BetControlStore, (store) => store.totalBet)
+    renderTotalBet(totalBet: number) {
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet);
     }
+
+    @render(BetControlStore, (store) => store.stake)
+    renderStake(stake: number) {
+        this.lblStake.string = gc.FormatUtils.numberWithCommas(stake);
+    }
+
+    @render(BetControlStore, (store) => store.totalWin)
+    renderTotalWin(totalWin: number) {
+        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(totalWin);
+    }
+
+    @handle(BetControlStore, (store, turbo: boolean) => store.setTurbo(turbo))
+    onToggleTurbo() {
+        return this.toggleTurbo.isChecked;
+    }
+
+    onToggleAutoSpin() {
+        console.log("onToggleAutoSpin ", this.toggleAutoSpin.isChecked);
+    }
+
+    @handle(BetControlStore, (store, show: boolean) => store.setStakeSelectorShow(show))
+    showStakeSelector(show: boolean) {
+        return show;
+    }
+
+    openStakeSelector() {
+        this.showStakeSelector(true);
+    }
+
+    closeStakeSelector() {
+        this.showStakeSelector(false);
+    }
+
+    @render(BetControlStore, (store) => store.disableIncreaseStake)
+    renderDisableIncreaseStake(disableIncreaseStake: boolean) {
+        this.btnIncreaseStake.interactable = !disableIncreaseStake;
+    }
+
+    @render(BetControlStore, (store) => store.disableDecreaseStake)
+    renderDisableDecreaseStake(disableDecreaseStake: boolean) {
+        this.btnDecreaseStake.interactable = !disableDecreaseStake;
+    }
+
+    @handle(BetControlStore, (store) => store.quickChangeStake(true))
+    onIncreaseStake() {}
+
+    @handle(BetControlStore, (store) => store.quickChangeStake(false))
+    onDecreaseStake() {}
 }

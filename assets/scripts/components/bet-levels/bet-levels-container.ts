@@ -17,6 +17,7 @@ export default class BetLevelsContainer extends ObserverComponent {
     private betLevels: number[] = [];
     private readonly itemHeight = 60;
     private readonly itemsOfColumnMax = 5;
+    private stakeIndex = -1;
 
     onClickListener = {
         onStakeToggleChanged: (event, param) => {},
@@ -25,6 +26,7 @@ export default class BetLevelsContainer extends ObserverComponent {
 
     onLoad() {
         this.containerNode.destroyAllChildren();
+        this.onHidden();
         super.onLoad();
     }
 
@@ -35,6 +37,7 @@ export default class BetLevelsContainer extends ObserverComponent {
         }
         betLevels.sort((a, b) => a - b);
         this.betLevels = betLevels;
+        console.log("setBetLevels", this.betLevels);
         this.initBetLevelItems();
         this.calculateContainerHeight();
     }
@@ -50,6 +53,7 @@ export default class BetLevelsContainer extends ObserverComponent {
                 this.onStakeToggleChanged(param);
             };
         });
+        this.updateStateSelected(this.stakeIndex);
     }
 
     protected calculateContainerHeight() {
@@ -63,18 +67,27 @@ export default class BetLevelsContainer extends ObserverComponent {
         ComponentUtils.setNodeTransform(this.containerNode, { height });
     }
 
-    protected onHideBetLevelContainer() {
-        this.hide();
-    }
-
-    protected hide() {
+    protected onHide() {
         const duration = 0.2;
         AnimationUtils.fadeOut(this.node, duration);
         tween(this.node)
             .to(duration, { scale: v3(1, 0, 0) })
             .call(() => {
-                this.node.active = false;
+                this.onHidden();
             })
+            .start();
+    }
+
+    protected onHidden() {
+        this.node.active = false;
+    }
+
+    protected onShow() {
+        this.node.active = true;
+        const duration = 0.2;
+        AnimationUtils.fadeIn(this.node, duration);
+        tween(this.node)
+            .to(duration, { scale: v3(1, 1, 1) })
             .start();
     }
 
@@ -86,4 +99,35 @@ export default class BetLevelsContainer extends ObserverComponent {
     setStake(stake: number) {
         return stake;
     }
+
+    @render(BetControlStore, (store) => store.stakeSelectorShow)
+    renderStakeSelectorShow(showStakeSelector: boolean) {
+        if (showStakeSelector) {
+            this.onShow();
+        } else {
+            this.onHide();
+        }
+    }
+
+    @render(BetControlStore, (store) => store.stakeIndex)
+    renderStakeIndex(stakeIndex: number) {
+        console.log("renderStakeIndex", stakeIndex);
+        this.stakeIndex = stakeIndex;
+        this.updateStateSelected(stakeIndex);
+    }
+
+    private updateStateSelected(stakeIndex: number) {
+        if (stakeIndex === -1) {
+            return;
+        }
+        this.containerNode.children.forEach((child, index) => {
+            const itemComp = child.getComponent(BetLevelItem);
+            if (itemComp) {
+                itemComp.setActive(index === stakeIndex);
+            }
+        });
+    }
+
+    @handle(BetControlStore, (store) => store.setStakeSelectorShow(false))
+    closeStakeSelector() {}
 }
