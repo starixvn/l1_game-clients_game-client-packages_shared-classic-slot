@@ -132,3 +132,21 @@ export const initTimer = (timer: RawTwoDigitsTimer, duration: number, hideTimer:
         })
         .start();
 };
+
+export const floatToNumber = (data: { from: number; to: number; duration: number; progress: (value: number) => void }) => {
+    const { from, to, duration, progress } = data;
+    tween({ value: from })
+        .to(
+            duration,
+            { value: to },
+            {
+                onUpdate: (target) => {
+                    progress(target.value);
+                },
+            }
+        )
+        .call(() => {
+            progress(to);
+        })
+        .start();
+};

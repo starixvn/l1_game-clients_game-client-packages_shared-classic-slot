@@ -3,6 +3,7 @@ import { _decorator, Button, Label, Toggle } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { BetControlStore } from "../../handlers";
+import { floatToNumber } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
 
@@ -39,9 +40,16 @@ export default class BetControl extends ObserverComponent {
         this.lblStake.string = gc.FormatUtils.numberWithCommas(stake);
     }
 
-    @render(BetControlStore, (store) => store.totalWin)
+    @render(BetControlStore, (store) => store.winningBet)
     renderTotalWin(totalWin: number) {
-        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(totalWin);
+        floatToNumber({
+            from: 0,
+            to: totalWin,
+            duration: 1,
+            progress: (value) => {
+                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value);
+            },
+        });
     }
 
     @handle(BetControlStore, (store, turbo: boolean) => store.setTurbo(turbo))

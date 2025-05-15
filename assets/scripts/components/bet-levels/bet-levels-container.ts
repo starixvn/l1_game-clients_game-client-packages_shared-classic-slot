@@ -37,7 +37,6 @@ export default class BetLevelsContainer extends ObserverComponent {
         }
         betLevels.sort((a, b) => a - b);
         this.betLevels = betLevels;
-        console.log("setBetLevels", this.betLevels);
         this.initBetLevelItems();
         this.calculateContainerHeight();
     }
@@ -111,7 +110,6 @@ export default class BetLevelsContainer extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.stakeIndex)
     renderStakeIndex(stakeIndex: number) {
-        console.log("renderStakeIndex", stakeIndex);
         this.stakeIndex = stakeIndex;
         this.updateStateSelected(stakeIndex);
     }
