@@ -123,6 +123,10 @@ export class BetControlStore {
         this.autoSpinEnabled = true;
     }
 
+    decreaseAutoSpinCount() {
+        this.autoSpinCount--;
+    }
+
     cancelAutoSpin() {
         this.autoSpinEnabled = false;
     }

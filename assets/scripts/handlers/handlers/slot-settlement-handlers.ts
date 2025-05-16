@@ -6,6 +6,7 @@ import { LineData, paylines } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
+import { SlotBetHandler } from "./slot-bet-handlers";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotSettlementHandler {
@@ -13,6 +14,7 @@ export class SlotSettlementHandler {
     @inject(SlotBoardStore) private slotBoardStore: SlotBoardStore;
     @inject(SlotDurationStore) private slotDurationStore: SlotDurationStore;
     @inject(gc.Connection.ConnectionStore) private connectionStore: gc.Connection.ConnectionStore;
+    @inject(SlotBetHandler) private slotBetHandler: SlotBetHandler;
 
     eventHandleList = [
         {
@@ -137,7 +139,7 @@ export class SlotSettlementHandler {
         const needWaitEffect = bigWin || freeSpins.count > 0 || betByFreeSpin || this.betControlStore.autoSpinEnabled;
         if (!needWaitEffect) {
             // this.main.updateModeSpinButton(this.main.isFreeSpin());
-            this.finishSettlement();
+            this.canSpinNext();
         }
         if (betWin === 0) {
             // this.main.updateWinningBetLabel(betWin);
@@ -211,7 +213,7 @@ export class SlotSettlementHandler {
                 }
 
                 this.finishSettlement();
-                this.checkSpinNextRound(freeSpins);
+                this.checkSpinNextRound();
             })
             .start();
     }
@@ -222,30 +224,28 @@ export class SlotSettlementHandler {
         }
     }
 
+    protected canSpinNext() {}
+
     protected finishSettlement() {
+        this.slotBoardStore.reset();
         // this.main.isAnimatingResult = false;
         // this.main.clearHoldActionFlag();
         // this.main.activeButtons();
     }
 
-    protected checkSpinNextRound(freeSpins: any) {
-        // this.main.updateBottomMessageStatus();
-        // this.main.showMessageDisplay(SlotNotification.SETTLED);
-        // this.main.waitingSpinResult = false;
-        // if (!this.main.gotApiError()) {
-        //     const isAutoSpinMode = this.main.isAutoSpinMode();
-        //     const stillAutoSpin = this.main.stillAutoSpin();
-        //     const autoSpin = isAutoSpinMode && stillAutoSpin;
-        //     if (freeSpins.count > 0 || autoSpin || this.main.isFreeSpin()) {
-        //         this.main.spin();
-        //     } else if (isAutoSpinMode && !stillAutoSpin && !this.main.isShowAutoSpinSettingDialog) {
-        //         this.main.createAutoSpinDialog();
-        //         this.main.autoOpenAutoSpinDialog = true;
-        //     } else {
-        //         if (!this.main.isShowAutoSpinSettingDialog) {
-        //             this.main.resetStateButtons();
-        //         }
-        //     }
-        // }
+    protected checkSpinNextRound() {
+        if (this.betControlStore.freeSpinCount > 0) {
+            this.slotBetHandler.callBet();
+        } else {
+            if (this.betControlStore.autoSpinEnabled) {
+                this.slotBetHandler.actionAutoSpin();
+            } else {
+                if (this.betControlStore.triggerAutoSpin) {
+                    setTimeout(() => {
+                        this.slotBetHandler.callBet();
+                    }, 1000);
+                }
+            }
+        }
     }
 }

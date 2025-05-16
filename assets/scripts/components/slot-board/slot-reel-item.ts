@@ -23,8 +23,11 @@ export default class SlotReelItem extends Component {
     public gameId: number;
 
     onLoad() {
-        // this.showWinningEffect(false);
-        this.blurSymbol && AnimationUtils.setOpacityNode(this.blurSymbol, 1);
+        this.showWinningEffect(false);
+        if (this.blurSymbol) {
+            AnimationUtils.setOpacityNode(this.blurSymbol, 1);
+            this.blurSymbol.active = false;
+        }
     }
 
     setItem(index: number) {
@@ -45,12 +48,15 @@ export default class SlotReelItem extends Component {
         if (!this.effectSpine || !this.blurSymbol) {
             return;
         }
+
+        this.blurSymbol.active = isShowBlurSymbol;
+        this.effectSpine.node.active = !isShowBlurSymbol;
         if (isShowBlurSymbol) {
             AnimationUtils.setOpacityNode(this.blurSymbol, 255);
             this.blurSymbol.scale = v3(1, 1, 1).multiplyScalar(1.5);
-            AnimationUtils.setOpacityNode(this.effectSpine.node, 0);
+            AnimationUtils.setOpacityNode(this.effectSpine.node, 1);
         } else {
-            AnimationUtils.setOpacityNode(this.blurSymbol, 0);
+            AnimationUtils.setOpacityNode(this.blurSymbol, 1);
             AnimationUtils.setOpacityNode(this.effectSpine.node, 255);
         }
     }

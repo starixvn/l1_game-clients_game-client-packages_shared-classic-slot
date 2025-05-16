@@ -3,6 +3,7 @@ import { _decorator, Event, Label, Node, Toggle } from "cc";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
+import { SlotBetHandler } from "../../handlers";
 import { BetControlStore } from "../../handlers/stores/bet-control-store";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
@@ -81,7 +82,7 @@ export default class AutoSpinDialog extends ObserverComponent {
         }
     }
 
-    @handle(BetControlStore, (store, autoSpinCount: number) => store.acceptAutoSpinValue(autoSpinCount))
+    @handle(SlotBetHandler, (store, autoSpinCount: number) => store.confirmAutoSpin(autoSpinCount))
     onConfirmCallback(autoSpinCount: number) {
         return autoSpinCount;
     }

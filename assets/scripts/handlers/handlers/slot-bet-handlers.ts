@@ -10,6 +10,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
 
     protected timeoutHolding: NodeJS.Timeout;
     protected readonly HOLDING_THRESHOLD = 1000;
+    protected timeoutStartAutoSpin: NodeJS.Timeout;
 
     handle() {
         this.callBet();
@@ -56,6 +57,16 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         return true;
     }
 
+    confirmAutoSpin(value: number) {
+        this.betControlStore.acceptAutoSpinValue(value);
+        this.timeoutStartAutoSpin = setTimeout(() => this.actionAutoSpin(), 300);
+    }
+
+    actionAutoSpin() {
+        this.betControlStore.decreaseAutoSpinCount();
+        this.callBet();
+    }
+
     handleClickAutoSpin() {
         if (this.betControlStore.autoSpinEnabled) {
             this.cancelAutoSpin();
@@ -65,6 +76,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     cancelAutoSpin() {
+        this.timeoutStartAutoSpin && clearTimeout(this.timeoutStartAutoSpin);
         this.betControlStore.cancelAutoSpin();
     }
 
