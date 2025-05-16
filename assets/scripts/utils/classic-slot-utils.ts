@@ -1,4 +1,4 @@
-import { EventTarget, sp, SpriteAtlas, tween } from "cc";
+import { Asset, EventTarget, sp, SpriteAtlas, tween } from "cc";
 import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
@@ -23,6 +23,10 @@ export const setSlotGameConfigs = (configs: SlotGameBaseConfigs) => {
 };
 
 export const CLASSIC_SLOT_BUNDLE = "classic-slot-bundle";
+
+export const loadSharedClassicSlotAsset = <T extends Asset>(path: string, type: any) => {
+    return bundleManager.loadAssetsFromBundle<T>(CLASSIC_SLOT_BUNDLE, path, type, null, true);
+};
 
 export enum InternalEvents {
     LOAD_OTHER_ICONS_AND_BANNERS = "lobby= load other icons and banners",

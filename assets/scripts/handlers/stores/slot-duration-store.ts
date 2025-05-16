@@ -33,7 +33,7 @@ export class SlotDurationStore {
     }
 
     get configDuration() {
-        return this.betControlStore.isTurbo ? this.config.turboMode : this.config.normalMode;
+        return this.betControlStore.turboEnabled ? this.config.turboMode : this.config.normalMode;
     }
 
     get spinDuration() {
@@ -83,7 +83,7 @@ export class SlotDurationStore {
     get totalSpinDuration() {
         const reelCount = 5;
         const reelDelayTime = 0.075;
-        const totalDelay = this.betControlStore.isTurbo ? 0 : reelDelayTime * (reelCount - 1);
+        const totalDelay = this.betControlStore.turboEnabled ? 0 : reelDelayTime * (reelCount - 1);
         return this.spinDuration * (reelCount - 1) + totalDelay;
     }
 }

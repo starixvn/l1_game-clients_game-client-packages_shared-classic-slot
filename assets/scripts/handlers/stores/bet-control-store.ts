@@ -3,6 +3,7 @@ import mobx from "mobx";
 const { injectable, inject } = inversify;
 
 import gc from "@sg/game-client-base";
+import { SLOT_LINES } from "../../definitions";
 
 @injectable()
 export class BetControlStore {
@@ -39,27 +40,27 @@ export class BetControlStore {
 
     roundId = -1;
 
-    readonly linesCount = 25;
-
     get totalBet() {
-        return this.stake * this.linesCount;
+        return this.stake * SLOT_LINES;
     }
 
-    readonly betChoice = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
-    autoSpinCount = 0;
-    isAutoSpin = false;
-    freeSpinCount = 0;
-    isFreeSpin = false;
-    isTurbo = false;
-
     interactableBet = false;
-
     winningBet = 0;
 
     stakeSelectorShow = false;
     stakeSelectorDisabled = false;
 
     triggerAutoSpin = true;
+    autoSpinCount = 0;
+    autoSpinEnabled = false;
+    autoSpinDialogOpenEvent = null;
+    autoSpinSelectedValue = 10;
+    readonly autoSpinOptions = [10, 30, 50, 80, 100, 200, 500, 1000];
+
+    freeSpinCount = 0;
+    freeSpinEnabled = false;
+
+    turboEnabled = false;
 
     setStake(stake: number) {
         this.stake = stake;
@@ -113,7 +114,17 @@ export class BetControlStore {
     }
 
     setTurbo(turbo: boolean) {
-        this.isTurbo = turbo;
+        this.turboEnabled = turbo;
+    }
+
+    acceptAutoSpinValue(autoSpinCount: number) {
+        this.autoSpinCount = autoSpinCount;
+        this.autoSpinSelectedValue = autoSpinCount;
+        this.autoSpinEnabled = true;
+    }
+
+    cancelAutoSpin() {
+        this.autoSpinEnabled = false;
     }
 
     onLoadStorage() {

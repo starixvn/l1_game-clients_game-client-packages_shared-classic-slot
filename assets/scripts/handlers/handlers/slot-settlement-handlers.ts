@@ -98,7 +98,11 @@ export class SlotSettlementHandler {
     }
 
     protected async spin(result: number[]) {
-        this.slotBoardStore.spinResult = { result, duration: this.slotDurationStore.spinDuration, turbo: this.betControlStore.isTurbo };
+        this.slotBoardStore.spinResult = {
+            result,
+            duration: this.slotDurationStore.spinDuration,
+            turbo: this.betControlStore.turboEnabled,
+        };
         await AnimationUtils.delayTime(this.slotDurationStore.totalSpinDuration);
     }
 
@@ -130,7 +134,7 @@ export class SlotSettlementHandler {
         this.slotBoardStore.highlightSpecialSymbols = highlightSpecialSymbols;
 
         this.betControlStore.setTotalFreeSpins(totalOfFreeSpins);
-        const needWaitEffect = bigWin || freeSpins.count > 0 || betByFreeSpin || this.betControlStore.isAutoSpin;
+        const needWaitEffect = bigWin || freeSpins.count > 0 || betByFreeSpin || this.betControlStore.autoSpinEnabled;
         if (!needWaitEffect) {
             // this.main.updateModeSpinButton(this.main.isFreeSpin());
             this.finishSettlement();

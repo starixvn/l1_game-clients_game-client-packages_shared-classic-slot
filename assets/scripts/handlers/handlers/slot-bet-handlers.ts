@@ -1,5 +1,6 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
+import { SLOT_BET_CHOICES } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 const { injectable, inject } = inversify;
 
@@ -18,7 +19,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         const betData = this.createBetData({});
         Object.assign(betData, {
             amount: this.betControlStore.stake,
-            betChoice: this.betControlStore.betChoice,
+            betChoice: SLOT_BET_CHOICES,
         });
 
         this.handleBetData(betData);
@@ -53,5 +54,21 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         }
 
         return true;
+    }
+
+    handleClickAutoSpin() {
+        if (this.betControlStore.autoSpinEnabled) {
+            this.cancelAutoSpin();
+        } else {
+            this.openAutoSpinDialog();
+        }
+    }
+
+    cancelAutoSpin() {
+        this.betControlStore.cancelAutoSpin();
+    }
+
+    openAutoSpinDialog() {
+        this.betControlStore.autoSpinDialogOpenEvent = {};
     }
 }

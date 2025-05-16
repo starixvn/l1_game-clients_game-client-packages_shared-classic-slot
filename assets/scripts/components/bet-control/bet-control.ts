@@ -2,7 +2,7 @@ import gc from "@sg/game-client-base";
 import { _decorator, Button, Label, Toggle } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
-import { BetControlStore } from "../../handlers";
+import { BetControlStore, SlotBetHandler } from "../../handlers";
 import { floatToNumber } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
@@ -61,9 +61,20 @@ export default class BetControl extends ObserverComponent {
         return this.toggleTurbo.isChecked;
     }
 
-    onToggleAutoSpin() {
-        console.log("onToggleAutoSpin ", this.toggleAutoSpin.isChecked);
+    @render(BetControlStore, (store) => store.turboEnabled)
+    renderToggleTurbo(turboEnabled: boolean) {
+        if (turboEnabled !== this.toggleTurbo.isChecked) {
+            this.toggleTurbo.isChecked = turboEnabled;
+        }
     }
+
+    @render(BetControlStore, (store) => store.autoSpinEnabled)
+    renderToggleAutoSpin(autoSpinEnabled: boolean) {
+        this.toggleAutoSpin.isChecked = autoSpinEnabled;
+    }
+
+    @handle(SlotBetHandler, (store) => store.handleClickAutoSpin())
+    onAutoSpinClick() {}
 
     @handle(BetControlStore, (store, show: boolean) => store.setStakeSelectorShow(show))
     showStakeSelector(show: boolean) {
