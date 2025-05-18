@@ -2,7 +2,7 @@ import gc from "@sg/game-client-base";
 import { tween } from "cc";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import inversify from "inversify";
-import { LineData, paylines } from "../../definitions";
+import { LineData, paylines, SlotState, SpecialSymbol } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
@@ -39,13 +39,11 @@ export class SlotSettlementHandler {
         },
     ];
 
-    protected receivedJackpot = false;
-    protected processingSettlement = null;
-
     settleTween = null;
 
     reset() {
-        this.receivedJackpot = false;
+        this.stopSettleTween();
+        this.slotBoardStore.reset();
     }
 
     requestOpenJackpot(index: number) {
@@ -68,7 +66,6 @@ export class SlotSettlementHandler {
 
     async handleJackpot(jackpot: any) {
         console.log("handleJackpot", jackpot);
-        this.receivedJackpot = true;
         await this.spinResultSpecialCase(jackpot);
         this.slotBoardStore.winningItems = [
             { payline: jackpot.winningLine, positions: paylines[jackpot.winningLine], symbol: jackpot.symbol },
@@ -81,7 +78,7 @@ export class SlotSettlementHandler {
 
     async handleBonuses(bonuses: any) {
         console.log("handleBonuses", bonuses);
-        if (this.receivedJackpot) {
+        if (this.slotBoardStore.receivedJackpot) {
             await AnimationUtils.delayTime(this.slotDurationStore.showJackpotWinningAmountDuration);
         } else {
             await this.spinResultSpecialCase(bonuses);
@@ -100,6 +97,7 @@ export class SlotSettlementHandler {
     }
 
     protected async spin(result: number[]) {
+        this.slotBoardStore.slotState = SlotState.SPINNING;
         this.slotBoardStore.spinResult = {
             result,
             duration: this.slotDurationStore.spinDuration,
@@ -112,15 +110,17 @@ export class SlotSettlementHandler {
         console.log("handleFinish", finish);
         const { result, settlementResult, betWin, bigWin, roundId, totalOfFreeSpins, betByFreeSpin } = finish;
         const { winningLines, jackpot, bonus, freeSpins } = settlementResult;
+        const newFreeSpinCount = freeSpins.count ?? 0;
 
         this.betControlStore.roundId = roundId;
+
+        //TODO : check again case jackpot and bonus
         if (bonus.count > 0) {
             await AnimationUtils.delayTime(this.slotDurationStore.showTotalBonusAmountDuration);
         } else {
             if (jackpot) {
                 await AnimationUtils.delayTime(this.slotDurationStore.showJackpotWinningAmountDuration);
             } else {
-                // this.updateFreeSpinCount();
                 await this.spin(result);
             }
         }
@@ -128,32 +128,91 @@ export class SlotSettlementHandler {
         this.slotBoardStore.winningItems = winningLines;
         const highlightSpecialSymbols = [];
         if (bonus.count > 0) {
-            highlightSpecialSymbols.push(+bonus.symbol);
+            highlightSpecialSymbols.push(SpecialSymbol.BONUS);
         }
-        if (freeSpins.count > 0) {
-            highlightSpecialSymbols.push(+freeSpins.symbol);
+        if (newFreeSpinCount > 0) {
+            highlightSpecialSymbols.push(SpecialSymbol.FREESPIN);
         }
         this.slotBoardStore.highlightSpecialSymbols = highlightSpecialSymbols;
 
         this.betControlStore.setTotalFreeSpins(totalOfFreeSpins);
-        const needWaitEffect = bigWin || freeSpins.count > 0 || betByFreeSpin || this.betControlStore.autoSpinEnabled;
-        if (!needWaitEffect) {
-            // this.main.updateModeSpinButton(this.main.isFreeSpin());
-            this.canSpinNext();
+        const isSpecialCases = bigWin || newFreeSpinCount > 0 || betByFreeSpin || this.betControlStore.autoSpinEnabled;
+        if (!isSpecialCases) {
+            this.settleDone();
         }
         if (betWin === 0) {
-            // this.main.updateWinningBetLabel(betWin);
-            //TODO : update winning bet label
             this.betControlStore.winningBet = betWin;
         }
-        this.handlePayline(jackpot, betWin, winningLines, bigWin, freeSpins);
+
+        const bigWinOrGotFreeSpin = bigWin || newFreeSpinCount > 0;
+        if (!bigWinOrGotFreeSpin) {
+            // this.main.showMessageDisplay(SlotNotification.SETTLED);
+        }
+        const showResultBoardDuration =
+            betWin > 0 && !bigWin ? this.slotDurationStore.winningDuration : this.slotDurationStore.noWinningDuration;
+
+        const sequenceTweens = [];
+        sequenceTweens.push(tween().delay(showResultBoardDuration));
+        sequenceTweens.push(tween().call(() => this.showWinningLines(betWin, bigWin, jackpot, winningLines)));
+        if (bigWin) {
+            sequenceTweens.push(this.createTweenShowBigWin(betWin, bigWin));
+        }
+        if (bigWinOrGotFreeSpin) {
+            sequenceTweens.push(
+                tween().call(() => {
+                    // this.showMessageDisplay(SlotNotification.SETTLED);
+                })
+            );
+        }
+        if (newFreeSpinCount > 0) {
+            sequenceTweens.push(this.createTweenShowFreeSpins(freeSpins));
+        }
+
+        this.settleTween = tween(this)
+            .sequence(...sequenceTweens)
+            .call(() => {
+                this.finishSettlement();
+                this.checkSpinNextRound();
+            })
+            .start();
+    }
+
+    createTweenShowFreeSpins(freeSpins: any) {
+        return tween()
+            .call(() => {
+                this.slotBoardStore.highlightSpecialSymbols = [SpecialSymbol.FREESPIN];
+                this.slotBoardStore.receivedFreeSpins = { freeSpins, duration: this.slotDurationStore.freespinDuration };
+            })
+            .delay(this.slotDurationStore.freespinDuration)
+            .call(() => (this.betControlStore.freeSpinCount = freeSpins.count));
+    }
+
+    createTweenShowBigWin(betWin: number, bigWin: boolean) {
+        const duration = this.slotDurationStore.bigWinDuration;
+        const showBigWinValue = this.slotDurationStore.showBigWinValueDuration;
+        const delayShowBigWinValue = this.slotDurationStore.delayShowBigWinValue;
+
+        const delayToUpdateWinningBet = showBigWinValue + delayShowBigWinValue;
+        const delayToEndBigWin = duration - delayToUpdateWinningBet;
+        return tween()
+            .call(() => {
+                this.slotBoardStore.receivedBigWin = {
+                    amount: betWin,
+                    bigWin,
+                    duration,
+                    showBigWinValue,
+                    delayShowBigWinValue,
+                };
+            })
+            .delay(delayToUpdateWinningBet)
+            .call(() => (this.betControlStore.winningBet = betWin))
+            .delay(delayToEndBigWin)
+            .start();
     }
 
     protected showWinningLines(betWin: number, bigWin: boolean, jackpot: any, winningLines: LineData[]) {
-        if (betWin > 0) {
-            if (!bigWin) {
-                this.betControlStore.winningBet = betWin;
-            }
+        if (betWin > 0 && !bigWin) {
+            this.betControlStore.winningBet = betWin;
         }
 
         const lines: LineData[] = [];
@@ -168,69 +227,20 @@ export class SlotSettlementHandler {
         this.slotBoardStore.winningLines = lines;
     }
 
-    handlePayline(jackpot: any, betWin: number, winningLines: LineData[], bigWin: boolean, freeSpins: any) {
-        const delayTime = betWin > 0 && !bigWin ? this.slotDurationStore.winningDuration : this.slotDurationStore.noWinningDuration;
-        const notWinBigEffect = freeSpins.count === 0 && !bigWin;
-
-        if (notWinBigEffect) {
-            // this.main.showMessageDisplay(SlotNotification.SETTLED);
-        }
-        this.settleTween = tween(this)
-            .delay(delayTime)
-            .call(async () => {
-                this.showWinningLines(betWin, bigWin, jackpot, winningLines);
-                if (bigWin) {
-                    const duration = this.slotDurationStore.bigWinDuration;
-                    const showBigWinValue = this.slotDurationStore.showBigWinValueDuration;
-                    const delayShowBigWinValue = this.slotDurationStore.delayShowBigWinValue;
-                    this.slotBoardStore.receivedBigWin = {
-                        amount: betWin,
-                        bigWin,
-                        duration,
-                        showBigWinValue,
-                        delayShowBigWinValue,
-                    };
-                    const delayToUpdateWinningBet = showBigWinValue + delayShowBigWinValue;
-                    const delayToEndBigWin = duration - delayToUpdateWinningBet;
-                    await AnimationUtils.delayTime(delayToUpdateWinningBet);
-                    this.betControlStore.winningBet = betWin;
-                    await AnimationUtils.delayTime(delayToEndBigWin);
-                }
-
-                if (!notWinBigEffect) {
-                    // this.main.showMessageDisplay(SlotNotification.SETTLED);
-                }
-
-                if (freeSpins.count > 0) {
-                    // this.main.updateDisplaySpinButtons();
-                    this.slotBoardStore.highlightSpecialSymbols = [+freeSpins.symbol];
-
-                    this.slotBoardStore.receivedFreeSpins = { freeSpins, duration: this.slotDurationStore.freespinDuration };
-                    await AnimationUtils.delayTime(this.slotDurationStore.freespinDuration);
-                    this.betControlStore.freeSpinCount = freeSpins.count;
-                } else {
-                    // this.main.updateModeSpinButton(this.main.isFreeSpin());
-                }
-
-                this.finishSettlement();
-                this.checkSpinNextRound();
-            })
-            .start();
-    }
-
     stopSettleTween() {
         if (this.settleTween) {
             this.settleTween.stop();
+            this.settleTween = null;
         }
     }
 
-    protected canSpinNext() {}
+    protected settleDone() {
+        this.slotBoardStore.slotState = SlotState.SETTLED;
+    }
 
     protected finishSettlement() {
         this.slotBoardStore.reset();
-        // this.main.isAnimatingResult = false;
-        // this.main.clearHoldActionFlag();
-        // this.main.activeButtons();
+        this.slotBoardStore.slotState = SlotState.READY;
     }
 
     protected checkSpinNextRound() {

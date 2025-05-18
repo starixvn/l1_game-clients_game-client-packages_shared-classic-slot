@@ -45,3 +45,11 @@ export interface LineData {
     positions: number[];
     symbol: number;
 }
+
+export enum SlotState {
+    NOT_READY = 0,
+    READY = 1,
+    BET = 2,
+    SPINNING = 3,
+    SETTLED = 4,
+}

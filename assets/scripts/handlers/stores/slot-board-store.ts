@@ -3,6 +3,7 @@ import mobx from "mobx";
 const { injectable, inject } = inversify;
 
 import gc from "@sg/game-client-base";
+import { SlotState } from "../../definitions";
 
 @injectable()
 export class SlotBoardStore {
@@ -32,6 +33,8 @@ export class SlotBoardStore {
     winningItems = [];
     winningLines = [];
     highlightSpecialSymbols = [];
+
+    slotState = SlotState.NOT_READY;
 
     reset() {
         this.receivedBonus = null;
