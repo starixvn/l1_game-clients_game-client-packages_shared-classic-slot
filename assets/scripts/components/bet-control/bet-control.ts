@@ -1,5 +1,5 @@
 import gc from "@sg/game-client-base";
-import { _decorator, Button, Label, Toggle } from "cc";
+import { _decorator, Button, Label, Toggle, Tween } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { BetControlStore, SlotBetHandler } from "../../handlers";
@@ -31,6 +31,8 @@ export default class BetControl extends ObserverComponent {
     @property(Button)
     btnDecreaseStake: Button = null;
 
+    tweenFloatNumber: Tween = null;
+
     @render(BetControlStore, (store) => store.totalBet)
     renderTotalBet(totalBet: number) {
         this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet);
@@ -43,14 +45,15 @@ export default class BetControl extends ObserverComponent {
 
     @render(SlotBoardStore, (store) => store.winningBet)
     renderTotalWin(totalWin: number) {
+        this.tweenFloatNumber && this.tweenFloatNumber.stop();
         if (totalWin === 0) {
             this.lblTotalWin.string = "0";
             return;
         }
-        floatToNumber({
+        this.tweenFloatNumber = floatToNumber({
             from: 0,
             to: totalWin,
-            duration: 1,
+            duration: 0.6,
             progress: (value) => {
                 this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value);
             },

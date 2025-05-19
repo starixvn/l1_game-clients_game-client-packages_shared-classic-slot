@@ -139,7 +139,7 @@ export const initTimer = (timer: RawTwoDigitsTimer, duration: number, hideTimer:
 
 export const floatToNumber = (data: { from: number; to: number; duration: number; progress: (value: number) => void }) => {
     const { from, to, duration, progress } = data;
-    tween({ value: from })
+    return tween({ value: from })
         .to(
             duration,
             { value: to },

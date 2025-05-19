@@ -44,7 +44,6 @@ export class SlotBoardStore {
     }
 
     reset() {
-        this.winningBet = 0;
         this.receivedBonus = null;
         this.receivedJackpot = null;
         this.receivedFreeSpins = null;
