@@ -23,8 +23,6 @@ export default class LineView extends Component {
     public light: Node = null;
     private subLines = {};
 
-    debugNode: Node = null;
-
     onLoad() {
         this.light = instantiate(this.lightPrefab);
         this.light.active = false;

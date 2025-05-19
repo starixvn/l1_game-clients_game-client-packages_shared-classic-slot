@@ -3,7 +3,7 @@ import mobx from "mobx";
 const { injectable, inject } = inversify;
 
 import gc from "@sg/game-client-base";
-import { SlotNotification, SlotState } from "../../definitions";
+import { LineData, SlotNotification, SlotState } from "../../definitions";
 
 @injectable()
 export class SlotBoardStore {
@@ -31,7 +31,7 @@ export class SlotBoardStore {
     winningJackpot = null;
     bonusChest = null;
     winningItems = [];
-    winningLines = [];
+    winningLines: LineData[] = [];
     highlightSpecialSymbols = [];
 
     slotState = SlotState.NOT_READY;
@@ -50,11 +50,15 @@ export class SlotBoardStore {
         this.receivedJackpot = null;
         this.receivedFreeSpins = null;
         this.receivedBigWin = null;
-        this.winningItems = [];
-        this.winningLines = [];
+
         this.highlightSpecialSymbols = [];
         this.winningJackpot = null;
         this.bonusChest = null;
         this.slotState = SlotState.READY;
+    }
+
+    resetOnNewSpin() {
+        this.winningItems = [];
+        this.winningLines = [];
     }
 }

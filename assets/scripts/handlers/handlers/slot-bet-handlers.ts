@@ -25,7 +25,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         }
 
         console.log("------------------- callBet ", this.slotBoardStore.slotState);
-        this.forceStopSettleTweens();
+        this.resetOnNewSpin();
         const betData = this.createBetData({});
         Object.assign(betData, {
             amount: this.betControlStore.stake,
@@ -36,8 +36,9 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         this.slotBoardStore.bottomMessageState = SlotNotification.SPINNING;
     }
 
-    forceStopSettleTweens() {
+    resetOnNewSpin() {
         this.slotBoardStore.forceStopSettle = {};
+        this.slotBoardStore.resetOnNewSpin();
     }
 
     callTriggerAction() {
