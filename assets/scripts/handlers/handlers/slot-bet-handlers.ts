@@ -1,6 +1,6 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
-import { SLOT_BET_CHOICES, SlotState } from "../../definitions";
+import { SLOT_BET_CHOICES, SlotNotification, SlotState } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 const { injectable, inject } = inversify;
@@ -33,6 +33,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         });
         this.handleBetData(betData);
         this.slotBoardStore.slotState = SlotState.BET;
+        this.slotBoardStore.bottomMessageState = SlotNotification.SPINNING;
     }
 
     forceStopSettleTweens() {
@@ -76,8 +77,13 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     actionAutoSpin() {
-        this.betControlStore.decreaseAutoSpinCount();
-        this.callBet();
+        const success = this.betControlStore.decreaseAutoSpinCount();
+        if (success) {
+            this.callBet();
+        } else {
+            this.cancelAutoSpin();
+            this.openAutoSpinDialog();
+        }
     }
 
     handleClickAutoSpin() {

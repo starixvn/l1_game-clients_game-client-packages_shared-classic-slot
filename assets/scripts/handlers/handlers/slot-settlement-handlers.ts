@@ -3,7 +3,7 @@ import { tween } from "cc";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import inversify from "inversify";
 import mobx from "mobx";
-import { LineData, paylines, SlotState, SpecialSymbol } from "../../definitions";
+import { LineData, paylines, SlotNotification, SlotState, SpecialSymbol } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
@@ -159,7 +159,7 @@ export class SlotSettlementHandler {
 
         const bigWinOrGotFreeSpin = bigWin || newFreeSpinCount > 0;
         if (!bigWinOrGotFreeSpin) {
-            // this.main.showMessageDisplay(SlotNotification.SETTLED);
+            this.slotBoardStore.bottomMessageState = SlotNotification.SETTLED;
         }
         const showResultBoardDuration =
             betWin > 0 && !bigWin ? this.slotDurationStore.winningDuration : this.slotDurationStore.noWinningDuration;
@@ -173,7 +173,7 @@ export class SlotSettlementHandler {
         if (bigWinOrGotFreeSpin) {
             sequenceTweens.push(
                 tween().call(() => {
-                    // this.showMessageDisplay(SlotNotification.SETTLED);
+                    this.slotBoardStore.bottomMessageState = SlotNotification.SETTLED;
                 })
             );
         }

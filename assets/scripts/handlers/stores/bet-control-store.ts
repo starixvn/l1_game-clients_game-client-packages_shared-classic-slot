@@ -57,7 +57,9 @@ export class BetControlStore {
     readonly autoSpinOptions = [10, 30, 50, 80, 100, 200, 500, 1000];
 
     freeSpinCount = 0;
-    freeSpinEnabled = false;
+    get freeSpinEnabled() {
+        return this.freeSpinCount > 0;
+    }
 
     turboEnabled = false;
 
@@ -123,7 +125,11 @@ export class BetControlStore {
     }
 
     decreaseAutoSpinCount() {
+        if (this.autoSpinCount === 0) {
+            return false;
+        }
         this.autoSpinCount--;
+        return true;
     }
 
     cancelAutoSpin() {

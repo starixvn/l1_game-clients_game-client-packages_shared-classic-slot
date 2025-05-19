@@ -3,7 +3,7 @@ import mobx from "mobx";
 const { injectable, inject } = inversify;
 
 import gc from "@sg/game-client-base";
-import { SlotState } from "../../definitions";
+import { SlotNotification, SlotState } from "../../definitions";
 
 @injectable()
 export class SlotBoardStore {
@@ -42,6 +42,8 @@ export class SlotBoardStore {
     get isReadyBet() {
         return this.slotState === SlotState.READY || this.slotState === SlotState.SETTLED;
     }
+
+    bottomMessageState = SlotNotification.READY;
 
     reset() {
         this.receivedBonus = null;
