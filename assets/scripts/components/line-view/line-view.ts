@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, misc, Node, Prefab, Tween, tween, v2, v3, Vec3, Widget } from "cc";
+import { _decorator, Component, instantiate, misc, Node, Prefab, tween, Tween, v3, Vec3, Widget } from "cc";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
 import SlotBoard from "../slot-board/slot-board";
 const { ccclass, property } = _decorator;
@@ -23,6 +23,8 @@ export default class LineView extends Component {
     public light: Node = null;
     private subLines = {};
 
+    debugNode: Node = null;
+
     onLoad() {
         this.light = instantiate(this.lightPrefab);
         this.light.active = false;
@@ -37,9 +39,9 @@ export default class LineView extends Component {
         const positions = [];
         const offset = transform.width / 2;
         if (this.isLabelLeft) {
-            positions.push(v2(labelPos.x + offset, labelPos.y), ...linePositions);
+            positions.push(v3(labelPos.x + offset, labelPos.y), ...linePositions);
         } else {
-            positions.push(...linePositions, v2(labelPos.x - offset, labelPos.y));
+            positions.push(...linePositions, v3(labelPos.x - offset, labelPos.y));
         }
         this.createLines(positions);
     }
@@ -96,13 +98,16 @@ export default class LineView extends Component {
         let lastNode: Node;
         for (let i = 0; i < positions.length - 1; i++) {
             const transform = ComponentUtils.getTransform(this.node);
-            const start = transform.convertToNodeSpaceAR(v3(positions[i]));
-            const end = transform.convertToNodeSpaceAR(v3(positions[i + 1]));
+            const wStart = v3(positions[i]);
+            const start = transform.convertToNodeSpaceAR(wStart);
+            const wEnd = v3(positions[i + 1]);
+            const end = transform.convertToNodeSpaceAR(wEnd);
+
             const angle = this.calculateAngle(start, end);
-            const width = start.subtract(end).length();
+            const width = Vec3.distance(start, end);
             if (lastNode !== undefined && Math.abs(lastNode.angle - angle) < 2) {
                 const lastNodeTransform = ComponentUtils.getTransform(lastNode);
-                lastNodeTransform.width += width;
+                ComponentUtils.setNodeTransform(lastNode, { width: lastNodeTransform.width + width });
                 lastNode.angle = angle;
                 continue;
             }
@@ -114,9 +119,9 @@ export default class LineView extends Component {
             }
             lastNode = node;
 
-            node.angle = this.calculateAngle(start, end);
+            node.angle = angle; // this.calculateAngle(start, end);
             node.position = v3(start);
-            node.width = width;
+            ComponentUtils.setNodeTransform(node, { width });
         }
     }
 
