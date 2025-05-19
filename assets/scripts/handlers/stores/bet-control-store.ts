@@ -45,7 +45,6 @@ export class BetControlStore {
     }
 
     interactableBet = false;
-    winningBet = 0;
 
     stakeSelectorShow = false;
     stakeSelectorDisabled = false;
@@ -62,12 +61,20 @@ export class BetControlStore {
 
     turboEnabled = false;
 
-    setStake(stake: number) {
-        this.stake = stake;
-    }
-
     get stakeIndex() {
         return this.betLevels.indexOf(this.stake);
+    }
+
+    get disableIncreaseStake() {
+        return this.stakeIndex === this.betLevels.length - 1 || this.stakeIndex === -1;
+    }
+
+    get disableDecreaseStake() {
+        return this.stakeIndex === 0 || this.stakeIndex === -1;
+    }
+
+    setStake(stake: number) {
+        this.stake = stake;
     }
 
     quickChangeStake(increase: boolean) {
@@ -87,14 +94,6 @@ export class BetControlStore {
             }
             this.stake = this.betLevels[index - 1];
         }
-    }
-
-    get disableIncreaseStake() {
-        return this.stakeIndex === this.betLevels.length - 1 || this.stakeIndex === -1;
-    }
-
-    get disableDecreaseStake() {
-        return this.stakeIndex === 0 || this.stakeIndex === -1;
     }
 
     setStakeSelectorShow(showStakeSelector: boolean) {

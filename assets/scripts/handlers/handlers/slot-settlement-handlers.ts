@@ -2,6 +2,7 @@ import gc from "@sg/game-client-base";
 import { tween } from "cc";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import inversify from "inversify";
+import mobx from "mobx";
 import { LineData, paylines, SlotState, SpecialSymbol } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
@@ -40,9 +41,21 @@ export class SlotSettlementHandler {
     ];
 
     settleTween = null;
+    timeoutNextSpin: NodeJS.Timeout;
+
+    constructor() {
+        setTimeout(() => {
+            mobx.reaction(
+                () => this.slotBoardStore.forceStopSettle,
+                () => this.finishSettlement()
+            );
+        }, 0);
+    }
 
     reset() {
         this.stopSettleTween();
+        this.timeoutNextSpin && clearTimeout(this.timeoutNextSpin);
+        this.timeoutNextSpin = null;
         this.slotBoardStore.reset();
     }
 
@@ -141,7 +154,7 @@ export class SlotSettlementHandler {
             this.settleDone();
         }
         if (betWin === 0) {
-            this.betControlStore.winningBet = betWin;
+            this.slotBoardStore.winningBet = betWin;
         }
 
         const bigWinOrGotFreeSpin = bigWin || newFreeSpinCount > 0;
@@ -205,14 +218,14 @@ export class SlotSettlementHandler {
                 };
             })
             .delay(delayToUpdateWinningBet)
-            .call(() => (this.betControlStore.winningBet = betWin))
+            .call(() => (this.slotBoardStore.winningBet = betWin))
             .delay(delayToEndBigWin)
             .start();
     }
 
     protected showWinningLines(betWin: number, bigWin: boolean, jackpot: any, winningLines: LineData[]) {
         if (betWin > 0 && !bigWin) {
-            this.betControlStore.winningBet = betWin;
+            this.slotBoardStore.winningBet = betWin;
         }
 
         const lines: LineData[] = [];
@@ -239,8 +252,8 @@ export class SlotSettlementHandler {
     }
 
     protected finishSettlement() {
-        this.slotBoardStore.reset();
-        this.slotBoardStore.slotState = SlotState.READY;
+        console.log("------------------- finishSettlement");
+        this.reset();
     }
 
     protected checkSpinNextRound() {
@@ -251,7 +264,7 @@ export class SlotSettlementHandler {
                 this.slotBetHandler.actionAutoSpin();
             } else {
                 if (this.betControlStore.triggerAutoSpin) {
-                    setTimeout(() => {
+                    this.timeoutNextSpin = setTimeout(() => {
                         this.slotBetHandler.callBet();
                     }, 1000);
                 }

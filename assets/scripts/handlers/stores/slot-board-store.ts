@@ -35,8 +35,16 @@ export class SlotBoardStore {
     highlightSpecialSymbols = [];
 
     slotState = SlotState.NOT_READY;
+    forceStopSettle = null;
+
+    winningBet = 0;
+
+    get isReadyBet() {
+        return this.slotState === SlotState.READY || this.slotState === SlotState.SETTLED;
+    }
 
     reset() {
+        this.winningBet = 0;
         this.receivedBonus = null;
         this.receivedJackpot = null;
         this.receivedFreeSpins = null;
@@ -46,5 +54,6 @@ export class SlotBoardStore {
         this.highlightSpecialSymbols = [];
         this.winningJackpot = null;
         this.bonusChest = null;
+        this.slotState = SlotState.READY;
     }
 }

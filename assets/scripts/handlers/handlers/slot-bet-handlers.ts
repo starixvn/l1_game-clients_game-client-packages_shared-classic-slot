@@ -1,29 +1,42 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
-import { SLOT_BET_CHOICES } from "../../definitions";
+import { SLOT_BET_CHOICES, SlotState } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
+import { SlotBoardStore } from "../stores/slot-board-store";
 const { injectable, inject } = inversify;
 
 @injectable()
 export class SlotBetHandler extends gc.Bet.BetHandler {
     @inject(BetControlStore) private betControlStore: BetControlStore;
+    @inject(SlotBoardStore) private slotBoardStore: SlotBoardStore;
 
     protected timeoutHolding: NodeJS.Timeout;
     protected readonly HOLDING_THRESHOLD = 1000;
     protected timeoutStartAutoSpin: NodeJS.Timeout;
 
     handle() {
+        console.log("------------------- handle");
         this.callBet();
     }
 
     callBet() {
+        if (!this.slotBoardStore.isReadyBet) {
+            return;
+        }
+
+        console.log("------------------- callBet ", this.slotBoardStore.slotState);
+        this.forceStopSettleTweens();
         const betData = this.createBetData({});
         Object.assign(betData, {
             amount: this.betControlStore.stake,
             betChoice: SLOT_BET_CHOICES,
         });
-
         this.handleBetData(betData);
+        this.slotBoardStore.slotState = SlotState.BET;
+    }
+
+    forceStopSettleTweens() {
+        this.slotBoardStore.forceStopSettle = {};
     }
 
     callTriggerAction() {
