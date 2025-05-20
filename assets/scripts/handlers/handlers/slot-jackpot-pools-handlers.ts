@@ -1,15 +1,11 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
-import { BetControlStore } from "../stores/bet-control-store";
-import { SlotBoardStore } from "../stores/slot-board-store";
-import { SlotDurationStore } from "../stores/slot-duration-store";
+import { JackpotPool, JackpotPoolStore } from "../stores/jackpot-pool-store";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotJackpotPoolsHandler {
-    @inject(BetControlStore) private betControlStore: BetControlStore;
-    @inject(SlotBoardStore) private slotBoardStore: SlotBoardStore;
-    @inject(SlotDurationStore) private slotDurationStore: SlotDurationStore;
-    @inject(gc.Connection.ConnectionStore) private connectionStore: gc.Connection.ConnectionStore;
+    @inject(JackpotPoolStore) private jackpotPoolStore: JackpotPoolStore;
+    @inject(gc.Player.MainPlayerStore) private readonly mainPlayerStore: gc.Player.MainPlayerStore;
 
     eventHandleList = [
         {
@@ -22,11 +18,22 @@ export class SlotJackpotPoolsHandler {
         },
     ];
 
-    handleJackpotPool(jackpotPool: any) {
+    handleJackpotPool(jackpotPool: JackpotPool) {
         console.log("handleJackpotPool", jackpotPool);
+        jackpotPool.amount = gc.NumberUtils.getValueByCurrency(jackpotPool.amount, this.mainPlayerStore.rate);
+        this.jackpotPoolStore.jackpotPools[jackpotPool.pool] = jackpotPool;
     }
 
-    handleJackpotPools(jackpotPools: any) {
+    handleJackpotPools(jackpotPools: JackpotPool[]) {
         console.log("handleJackpotPools", jackpotPools);
+
+        const data: Record<string, JackpotPool> = {};
+
+        jackpotPools.forEach((pool) => {
+            pool.amount = gc.NumberUtils.getValueByCurrency(pool.amount, this.mainPlayerStore.rate);
+            data[pool.pool] = pool;
+        });
+
+        this.jackpotPoolStore.jackpotPools = data;
     }
 }
