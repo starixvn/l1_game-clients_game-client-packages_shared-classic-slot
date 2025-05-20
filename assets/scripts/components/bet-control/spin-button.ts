@@ -1,9 +1,21 @@
 import { _decorator, EventTouch, game, Input, input, Intersection2D, KeyCode, math, Node, PolygonCollider2D, sp } from "cc";
+import { ButtonState } from "db://shared-components/shared/common-components/button/button-state";
+import { CustomButton, StateChangedEvent } from "db://shared-components/shared/common-components/button/custom-button";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
+import { AnimationUtils } from "db://shared-components/shared/utils/utils";
 import Observer from "observer";
+import { SlotState } from "../../definitions";
+import { BetControlStore } from "../../handlers";
 import { SlotBetHandler } from "../../handlers/handlers/slot-bet-handlers";
+import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
+
+enum SpineAnimationTrack {
+    MAIN = 0,
+    HOVER = 1,
+    EXTRA = 2,
+}
 
 @ccclass
 export default class StandardSlotSpinButton extends ObserverComponent {
@@ -13,32 +25,30 @@ export default class StandardSlotSpinButton extends ObserverComponent {
     @property(PolygonCollider2D)
     polygonCollider2D: PolygonCollider2D = null;
 
+    protected button: CustomButton;
+    protected isSpinning = false;
+    protected isTurbo = false;
+
     protected touchInPolygon(event: EventTouch) {
         const location = event.getUILocation();
         const polygon = this.polygonCollider2D.worldPoints;
         return Intersection2D.pointInPolygon(math.v2(location.x, location.y), polygon);
     }
 
-    @handle(SlotBetHandler, (handler) => handler.callBet())
-    onSpin() {
-        console.log("onSpin");
+    playAnimationSpin() {
+        AnimationUtils.playSpine(this.spine, "spin", true);
+        this.spine.timeScale = 1;
     }
 
-    protected playAnimationSpin() {
-        this.spine && this.spine.setAnimation(0, "spin", true);
-        this.spine && this.spine.setAnimation(3, "spin-extra", false);
+    playAnimationIdle() {
+        AnimationUtils.playSpine(this.spine, "idle", true);
+        this.spine.timeScale = 1;
     }
 
-    protected playAnimationIdle() {
-        this.spine && this.spine.setAnimation(0, "idle", true);
+    playAnimationSpinTurbo() {
+        AnimationUtils.playSpine(this.spine, "spin", true);
+        this.spine.timeScale = 2;
     }
-
-    protected showAutoSpinMode() {}
-    protected hideAll() {}
-    protected showNormalMode() {}
-
-    ////
-    protected readonly spinButtonSound = "spin_button";
 
     onBlur = () => {
         this.clearTriggerAction();
@@ -47,7 +57,37 @@ export default class StandardSlotSpinButton extends ObserverComponent {
     onLoad() {
         this.addEvent();
         this.registerTouchEvents();
+
+        this.button = this.getComponent(CustomButton);
+        this.button.node.on(StateChangedEvent, this.onButtonStateChanged, this);
         super.onLoad();
+    }
+
+    onButtonStateChanged(state: ButtonState) {
+        if (state === ButtonState.HOVER) {
+            this.spine.setAnimation(SpineAnimationTrack.HOVER, "hover", true);
+        } else {
+            this.spine.clearAnimation(SpineAnimationTrack.HOVER);
+        }
+    }
+
+    changeAnimationSpinning() {
+        if (!this.isSpinning) {
+            return;
+        }
+        if (this.isTurbo) {
+            this.playAnimationSpinTurbo();
+        } else {
+            this.playAnimationSpin();
+        }
+    }
+
+    playAnimationSpinExtra() {
+        this.spine.setAnimation(SpineAnimationTrack.EXTRA, "spin-extra", true);
+    }
+
+    stopAnimationSpinExtra() {
+        this.spine.clearAnimation(SpineAnimationTrack.EXTRA);
     }
 
     onDestroy() {
@@ -109,4 +149,31 @@ export default class StandardSlotSpinButton extends ObserverComponent {
 
     @handle(SlotBetHandler, (handler) => handler.clearTriggerAction())
     clearTriggerAction() {}
+
+    @render(BetControlStore, (store) => store.turboEnabled)
+    renderTurboEnabled(turboEnabled: boolean) {
+        this.isTurbo = turboEnabled;
+    }
+
+    @render(SlotBoardStore, (store) => store.slotState)
+    renderSpinButtonState(slotState: SlotState) {
+        this.isSpinning = slotState === SlotState.SPINNING;
+        if (this.isSpinning) {
+            this.playAnimationSpinExtra();
+            this.changeAnimationSpinning();
+        } else {
+            this.stopAnimationSpinExtra();
+            this.playAnimationIdle();
+        }
+    }
+
+    @render(SlotBoardStore, (store) => store.isReadyBet)
+    renderCascadingState(isReadyBet: boolean) {
+        //HACK: disable button too fast will cause the button transition scale not working
+        setTimeout(() => {
+            try {
+                this.button.interactable = isReadyBet;
+            } catch (error) {}
+        }, 100);
+    }
 }
