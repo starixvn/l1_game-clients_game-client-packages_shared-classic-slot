@@ -61,3 +61,7 @@ export enum SlotState {
     SPINNING = 3,
     SETTLED = 4,
 }
+
+export enum InGameMenuEvents {
+    OPEN_TOP_WINNER = "open_top_winner",
+}
