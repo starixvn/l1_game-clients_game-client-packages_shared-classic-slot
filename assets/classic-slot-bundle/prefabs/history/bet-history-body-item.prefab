@@ -969,7 +969,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "bet-level",
+    "_name": "bet",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -1988,25 +1988,33 @@
     "__prefab": {
       "__id__": 102
     },
-    "bg": {
-      "__id__": 2
-    },
-    "time": {
+    "lblTime": {
       "__id__": 12
     },
-    "roundID": {
+    "lblRound": {
       "__id__": 25
     },
-    "betLevel": {
-      "__id__": 47
+    "lblTotalStake": {
+      "__id__": 71
     },
+    "lblWin": {
+      "__id__": 85
+    },
+    "nodeBackground": {
+      "__id__": 2
+    },
+    "lblDate": null,
+    "lblHour": null,
+    "btnRound": null,
+    "result": null,
+    "lblWinLoss": null,
     "lblLine": {
       "__id__": 59
     },
-    "totalBet": {
-      "__id__": 71
+    "lblBet": {
+      "__id__": 47
     },
-    "totalWin": {
+    "lblTotalWin": {
       "__id__": 85
     },
     "textHighlightColor": {
@@ -2023,6 +2031,7 @@
       "b": 255,
       "a": 255
     },
+    "jackpotIcon": null,
     "_id": ""
   },
   {
