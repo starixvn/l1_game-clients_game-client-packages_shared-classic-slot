@@ -1,21 +1,28 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
 import { BetControlStore } from "../stores/bet-control-store";
-import { WinnersData } from "../stores/top-winners-store";
+import { TopWinnersStore, TopWinnerType, Winner, WinnersData } from "../stores/top-winners-store";
 const { injectable, inject } = inversify;
+
+enum TopWinnerEvent {
+    BigWinningWinners = "getBigWinningWinners",
+    JackpotWinners = "getJackpotWinners",
+}
+
 @injectable()
 export class TopWinnersHandler {
     @inject(BetControlStore) private betControlStore: BetControlStore;
+    @inject(TopWinnersStore) private topWinnersStore: TopWinnersStore;
     @inject(gc.Connection.ConnectionStore) private connectionStore: gc.Connection.ConnectionStore;
 
     @inject(gc.Player.MainPlayerStore) private mainPlayerStore: gc.Player.MainPlayerStore;
     eventHandleList = [
         {
-            name: "bigWinningWinners",
+            name: TopWinnerType.BigWinningWinners,
             handle: this.receivedBigWinningWinners,
         },
         {
-            name: "jackpotWinners",
+            name: TopWinnerType.JackpotWinners,
             handle: this.receivedJackpotWinners,
         },
     ];
@@ -24,17 +31,37 @@ export class TopWinnersHandler {
         setTimeout(() => {}, 0);
     }
 
-    receivedBigWinningWinners(data: WinnersData) {
-        console.log("receivedBigWinningWinners", data);
+    getData(page: number) {
+        const event = this.getEventName();
+        this.connectionStore.connection.emit(event, { page });
     }
 
-    receivedJackpotWinners(data: WinnersData) {
+    private getEventName() {
+        return this.topWinnersStore.type === TopWinnerType.BigWinningWinners
+            ? TopWinnerEvent.BigWinningWinners
+            : TopWinnerEvent.JackpotWinners;
+    }
+
+    swapType() {
+        this.topWinnersStore.type =
+            this.topWinnersStore.type === TopWinnerType.BigWinningWinners ? TopWinnerType.JackpotWinners : TopWinnerType.BigWinningWinners;
+        this.getData(1);
+    }
+
+    protected receivedBigWinningWinners(data: WinnersData) {
+        console.log("receivedBigWinningWinners", data);
+        this.topWinnersStore.data = this.convertDataWinners(data);
+    }
+
+    protected receivedJackpotWinners(data: WinnersData) {
         console.log("receivedJackpotWinners", data);
+        this.topWinnersStore.data = this.convertDataWinners(data);
     }
 
     protected convertDataWinners(data: WinnersData) {
-        const winners = data.winners.map((winner) => {
-            return winner;
+        const winners = data.winners;
+        winners.forEach((winner) => {
+            this.convertWinner(winner);
         });
 
         return {
@@ -65,14 +92,14 @@ export class TopWinnersHandler {
         const { baseWinningAmount, winningAmount, rate, exchangeRateCode } = winner;
 
         if (winner.pool) {
-            winner.amountValue = this.formatNamePool(winner.pool);
+            winner.amountString = this.formatNamePool(winner.pool);
         } else {
             const freeSpin = winner.freeSpin;
             if (freeSpin) {
-                winner.amountValue = "Free Spin";
+                winner.amountString = "Free Spin";
             } else {
                 const { baseTotalAmount, totalAmount } = winner;
-                winner.amountValue = gc.FormatUtils.numberWithCommas(
+                winner.amountString = gc.FormatUtils.numberWithCommas(
                     this.getValueByExchangeRateCode(baseTotalAmount ?? totalAmount * rate, exchangeRateCode),
                     2
                 );
@@ -80,7 +107,7 @@ export class TopWinnersHandler {
         }
 
         const winValue = winner.pool ? winningAmount : baseWinningAmount ?? winningAmount * rate;
-        winner.winningAmount = gc.FormatUtils.numberWithCommas(this.getValueByExchangeRateCode(winValue, exchangeRateCode), 2);
+        winner.winningAmount = this.getValueByExchangeRateCode(winValue, exchangeRateCode);
     }
 
     protected shortenName(name: string) {

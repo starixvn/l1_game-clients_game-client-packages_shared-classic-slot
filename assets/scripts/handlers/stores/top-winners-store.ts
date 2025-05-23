@@ -33,12 +33,14 @@ export interface JackpotWinner {
 export interface Winner {
     name: string;
     time: string;
+    amountString: string;
     winningAmount: number;
     exchangeRateId: number;
     exchangeRateCode: {
         [key: string]: number;
     };
 
+    highlight?: boolean;
     freeSpin?: boolean;
     totalAmount?: number;
     baseTotalAmount?: number;
@@ -52,6 +54,11 @@ export interface WinnersData {
     pageSize: number;
     total: number;
     winners: Winner[];
+}
+
+export enum TopWinnerType {
+    BigWinningWinners = "bigWinningWinners",
+    JackpotWinners = "jackpotWinners",
 }
 
 @injectable()
@@ -71,5 +78,6 @@ export class TopWinnersStore {
         setTimeout(() => {}, 0);
     }
 
+    type = TopWinnerType.BigWinningWinners;
     data: WinnersData = null;
 }
