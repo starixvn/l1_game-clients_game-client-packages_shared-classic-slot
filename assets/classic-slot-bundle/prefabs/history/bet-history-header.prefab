@@ -582,7 +582,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 79.29595947265625,
+      "width": 79.29597473144531,
       "height": 55.44
     },
     "_anchorPoint": {
@@ -775,7 +775,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "BET LEVEL",
+    "_string": "CASCADINGSLOT.BET_LEVEL_SHORTEN",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 21,
@@ -857,7 +857,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 119.2799072265625,
+      "width": 439.5296630859375,
       "height": 35.28
     },
     "_anchorPoint": {
@@ -1050,7 +1050,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "COIN VALUE",
+    "_string": "CASCADINGSLOT.COIN_VALUE",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 21,
@@ -1132,7 +1132,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 133.3079071044922,
+      "width": 333.8577575683594,
       "height": 55.44
     },
     "_anchorPoint": {
@@ -1407,7 +1407,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 439.59259033203125,
+      "width": 439.5926513671875,
       "height": 35.28
     },
     "_anchorPoint": {
@@ -1600,7 +1600,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "WIN",
+    "_string": "CASCADINGSLOT.TOTAL_WIN",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 21,
@@ -1682,7 +1682,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 42.06298828125,
+      "width": 318.1707763671875,
       "height": 55.44
     },
     "_anchorPoint": {
