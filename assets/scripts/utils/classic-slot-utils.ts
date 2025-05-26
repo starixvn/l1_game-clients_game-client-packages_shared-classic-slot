@@ -25,6 +25,9 @@ export const setSlotGameConfigs = (configs: SlotGameBaseConfigs) => {
 export const CLASSIC_SLOT_BUNDLE = "classic-slot-bundle";
 
 export const loadSharedClassicSlotAsset = <T extends Asset>(path: string, type: any) => {
+    if (bundleManager.cachedAssets[path]) {
+        return bundleManager.cachedAssets[path];
+    }
     return bundleManager.loadAssetsFromBundle<T>(CLASSIC_SLOT_BUNDLE, path, type, null, true);
 };
 
