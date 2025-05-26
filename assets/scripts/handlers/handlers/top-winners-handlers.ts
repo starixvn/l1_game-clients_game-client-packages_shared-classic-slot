@@ -1,5 +1,6 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
+import { formatNamePool } from "../../utils/classic-slot-utils";
 import { BetControlStore } from "../stores/bet-control-store";
 import { TopWinnersStore, TopWinnerType, Winner, WinnersData } from "../stores/top-winners-store";
 const { injectable, inject } = inversify;
@@ -92,7 +93,7 @@ export class TopWinnersHandler {
         const { baseWinningAmount, winningAmount, rate, exchangeRateCode } = winner;
 
         if (winner.pool) {
-            winner.amountString = this.formatNamePool(winner.pool);
+            winner.amountString = formatNamePool(winner.pool);
         } else {
             const freeSpin = winner.freeSpin;
             if (freeSpin) {
