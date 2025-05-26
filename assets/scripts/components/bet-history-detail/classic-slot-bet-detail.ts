@@ -5,7 +5,7 @@ import { ObserverComponent } from "db://shared-components/shared/common-componen
 import { AppUtils } from "db://shared-components/shared/utils/app-utils";
 import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
-import { formatNamePool, resourceCaches } from "../../utils/classic-slot-utils";
+import { formatNamePool, getSpriteLine, resourceCaches } from "../../utils/classic-slot-utils";
 import { ClassicSlotBaseBetDetailLogItem } from "./classic-slot-bet-detail-log-item";
 const { ccclass, property } = _decorator;
 const { handle } = Observer;
@@ -20,9 +20,6 @@ export class ClassicSlotBetDetail extends ObserverComponent {
 
     @property(Label)
     lblRound: Label = null;
-
-    @property(SpriteAtlas)
-    paylinesAtlas: SpriteAtlas = null;
 
     @property(Node)
     symbolSample: Node = null;
@@ -85,7 +82,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         winningLines.forEach((line) => {
             const itemData = {
                 order,
-                paylineSprite: this.getSpriteLine(line.payline),
+                paylineSprite: getSpriteLine(line.payline),
                 symbolsSprite: this.setSymbolFrame(+line.symbol),
                 amount: line.count,
                 payout: line.odds,
@@ -107,10 +104,6 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         }
     }
 
-    protected getSpriteLine(line: number): SpriteFrame {
-        return this.paylinesAtlas.getSpriteFrame(`line-selection-${line + 1}`);
-    }
-
     protected addJackpotLog(jackpot: any, bet, order: number) {
         let jackpotName = gc.Translator.gameTranslate("ui.jackpot");
         const { pool } = jackpot;
@@ -122,7 +115,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
 
         this.creatLogItem({
             order,
-            paylineSprite: this.getSpriteLine(jackpot.winningLine),
+            paylineSprite: getSpriteLine(jackpot.winningLine),
             symbolsSprite: this.setSymbolFrame(SpecialSymbol.JACKPOT),
             amount: "5",
             payout: jackpotName,

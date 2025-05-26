@@ -103,4 +103,8 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     openAutoSpinDialog() {
         this.betControlStore.autoSpinDialogOpenEvent = {};
     }
+
+    showLineSelection() {
+        this.betControlStore.showLineSelection = {};
+    }
 }

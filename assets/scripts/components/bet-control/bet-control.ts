@@ -108,4 +108,7 @@ export default class BetControl extends ObserverComponent {
 
     @handle(BetControlStore, (store) => store.quickChangeStake(false))
     onDecreaseStake() {}
+
+    @handle(SlotBetHandler, (handler) => handler.showLineSelection())
+    showLineSelection() {}
 }

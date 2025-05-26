@@ -21,6 +21,9 @@ export default class ClassicSlot extends GameComponent {
     @property(SpriteAtlas)
     gameAtlas: SpriteAtlas = null;
 
+    @property(SpriteAtlas)
+    sharedSlotAtlas: SpriteAtlas = null;
+
     @property(JsonAsset)
     colorJson: JsonAsset = null;
 
@@ -44,6 +47,7 @@ export default class ClassicSlot extends GameComponent {
     async initSharedCaches() {
         this.initSlotGameConfigs();
         resourceCaches.gameAtlas = this.gameAtlas;
+        resourceCaches.sharedSlotAtlas = this.sharedSlotAtlas;
         await loadSlotSymbols(true);
         await loadWinningSymbolAnimation();
     }

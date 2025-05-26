@@ -7,6 +7,7 @@ interface ResourceCaches {
     slotSymbols?: any;
     slotWinningAnimation?: any;
     gameAtlas?: SpriteAtlas;
+    sharedSlotAtlas?: SpriteAtlas;
 }
 export const resourceCaches: ResourceCaches = {};
 
@@ -156,4 +157,8 @@ export const floatToNumber = (data: { from: number; to: number; duration: number
             progress(to);
         })
         .start();
+};
+
+export const getSpriteLine = (line: number) => {
+    return resourceCaches.sharedSlotAtlas.getSpriteFrame(`line-selection-${line + 1}`);
 };

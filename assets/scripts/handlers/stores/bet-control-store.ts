@@ -49,6 +49,8 @@ export class BetControlStore {
     stakeSelectorShow = false;
     stakeSelectorDisabled = false;
 
+    showLineSelection = null;
+
     triggerAutoSpin = true;
     autoSpinCount = 0;
     autoSpinEnabled = false;

@@ -4422,10 +4422,6 @@
     "lblRound": {
       "__id__": 33
     },
-    "paylinesAtlas": {
-      "__uuid__": "274b102a-9505-4157-90c4-cc537af86c68",
-      "__expectedType__": "cc.SpriteAtlas"
-    },
     "symbolSample": {
       "__id__": 69
     },
