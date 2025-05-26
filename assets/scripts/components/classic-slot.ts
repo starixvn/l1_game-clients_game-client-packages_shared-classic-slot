@@ -5,6 +5,7 @@ import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
 import { LineData } from "../definitions";
+import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
 import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
@@ -60,6 +61,17 @@ export default class ClassicSlot extends GameComponent {
     protected setSlotGameConfigs(config: SlotGameBaseConfigs) {
         setSlotGameConfigs(config);
         return config;
+    }
+
+    @render(BetControlStore, (store) => store.roundId)
+    renderSpinRoundId(roundId: number) {
+        if (roundId !== -1) {
+            this.lblRoundId.string = `#${roundId}`;
+        }
+    }
+
+    override renderRoundId(roundId: number) {
+        // override to not use round id from round store
     }
 
     initSlotBoard() {
