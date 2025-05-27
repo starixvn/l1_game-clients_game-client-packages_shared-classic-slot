@@ -1,5 +1,7 @@
 import gc from "@sg/game-client-base";
-import { _decorator, Button, Label, Toggle, Tween } from "cc";
+import { _decorator, Button, Label, sp, Toggle, Tween } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { BetControlStore, SlotBetHandler } from "../../handlers";
@@ -18,6 +20,9 @@ export default class BetControl extends ObserverComponent {
 
     @property(Label)
     lblTotalWin: Label = null;
+
+    @property(sp.Skeleton)
+    spineEffectWin: sp.Skeleton = null;
 
     @property(Toggle)
     toggleAutoSpin: Toggle = null;
@@ -48,8 +53,12 @@ export default class BetControl extends ObserverComponent {
         this.tweenFloatNumber && this.tweenFloatNumber.stop();
         if (totalWin === 0) {
             this.lblTotalWin.string = "0";
+            this.hideWinEffect();
             return;
         }
+
+        AudioUtils.playSFX(AudioIds.WIN);
+        this.playWinEffect();
         this.tweenFloatNumber = floatToNumber({
             from: 0,
             to: totalWin,
@@ -60,8 +69,18 @@ export default class BetControl extends ObserverComponent {
         });
     }
 
+    protected playWinEffect() {
+        this.spineEffectWin.node.active = true;
+        this.spineEffectWin.setAnimation(0, "coin", false);
+    }
+
+    protected hideWinEffect() {
+        this.spineEffectWin.node.active = false;
+    }
+
     @handle(BetControlStore, (store, turbo: boolean) => store.setTurbo(turbo))
     onToggleTurbo() {
+        AudioUtils.playClick();
         return this.toggleTurbo.isChecked;
     }
 
@@ -78,7 +97,9 @@ export default class BetControl extends ObserverComponent {
     }
 
     @handle(SlotBetHandler, (store) => store.handleClickAutoSpin())
-    onAutoSpinClick() {}
+    onAutoSpinClick() {
+        AudioUtils.playClick();
+    }
 
     @handle(BetControlStore, (store, show: boolean) => store.setStakeSelectorShow(show))
     showStakeSelector(show: boolean) {
@@ -86,10 +107,12 @@ export default class BetControl extends ObserverComponent {
     }
 
     openStakeSelector() {
+        AudioUtils.playClick();
         this.showStakeSelector(true);
     }
 
     closeStakeSelector() {
+        AudioUtils.playClick();
         this.showStakeSelector(false);
     }
 
@@ -104,11 +127,17 @@ export default class BetControl extends ObserverComponent {
     }
 
     @handle(BetControlStore, (store) => store.quickChangeStake(true))
-    onIncreaseStake() {}
+    onIncreaseStake() {
+        AudioUtils.playClick();
+    }
 
     @handle(BetControlStore, (store) => store.quickChangeStake(false))
-    onDecreaseStake() {}
+    onDecreaseStake() {
+        AudioUtils.playClick();
+    }
 
     @handle(SlotBetHandler, (handler) => handler.showLineSelection())
-    showLineSelection() {}
+    showLineSelection() {
+        AudioUtils.playClick();
+    }
 }

@@ -50,7 +50,7 @@ export default class PreviewOddsPopup extends Component {
     hideOtherPreview() {
         this.previewOverlay.children.forEach((node) => {
             AnimationUtils.fadeOut(node, 0.3).then(() => {
-                node.destroy();
+                node?.isValid && node.destroy();
                 this.previewOverlay.active = this.previewOverlay.children.length > 0;
             });
         });

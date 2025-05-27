@@ -1,4 +1,6 @@
 import { _decorator, instantiate, Node, Prefab } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
@@ -31,7 +33,7 @@ export default class EffectContainer extends ObserverComponent {
             return;
         }
         const { duration } = receivedFreeSpins;
-        // this.playSound(ClassicSlotSound.FREESPIN);
+        AudioUtils.playSFX(AudioIds.FREESPIN);
         const effect = instantiate(this.effectFreeSpin);
         const animation = effect.getComponent(CallbackAnimation);
         animation.setDuration(duration);
@@ -50,7 +52,7 @@ export default class EffectContainer extends ObserverComponent {
             return;
         }
         const { duration, showBigWinValue, delayShowBigWinValue, amount } = receivedBigWin;
-        // this.playSound(ClassicSlotSound.BIG_WIN);
+        AudioUtils.playSFX(AudioIds.BIG_WIN);
         const effect = instantiate(this.effectBigWin);
         const callbackAnim = effect.getComponent(CallbackAnimation);
         callbackAnim.setDuration(duration);
@@ -65,7 +67,7 @@ export default class EffectContainer extends ObserverComponent {
             return;
         }
         const { jackpot, duration } = receivedJackpot;
-        // this.playSound(ClassicSlotSound.JACKPOT);
+        AudioUtils.playSFX(AudioIds.JACKPOT_HIT);
         const transtition = await this.playEffectTransition();
         const effect = instantiate(this.effectJackpot);
         const animation = effect.getComponent(CallbackAnimation);
@@ -82,7 +84,6 @@ export default class EffectContainer extends ObserverComponent {
             const dialog = node.getComponent(JackpotGame);
             dialog.prizes = prizes;
             dialog.initJackpotItems();
-            // dialog.playSoundCallback = this.bonusDialogPlaySound.bind(this);
             dialog.onJackpotGameFinished = resolve;
         });
     }
@@ -93,12 +94,13 @@ export default class EffectContainer extends ObserverComponent {
             return;
         }
         const { bonus, duration } = receivedBonus;
-        // this.playSound(ClassicSlotSound.BONUS);
+        AudioUtils.playSFX(AudioIds.BONUS);
         return new Promise<void>(async (resolve, reject) => {
             const effect = instantiate(this.effectBonus);
             const animation = effect.getComponent(CallbackAnimation);
             animation.setDuration(duration);
             await this.showEffect(effect);
+            AudioUtils.playSFX(AudioIds.BONUS_POPUP);
             this.showBonusDialog(bonus, resolve);
         });
     }
@@ -108,7 +110,6 @@ export default class EffectContainer extends ObserverComponent {
         this.node.addChild(node);
         const dialog = node.getComponent(BonusDialog);
         dialog.initBonusItems();
-        // dialog.playSoundCallback = this.bonusDialogPlaySound.bind(this);
         dialog.setBonusCount(bonus);
         dialog.onBonusFinished = onBonusFinished;
     }
@@ -121,7 +122,7 @@ export default class EffectContainer extends ObserverComponent {
         const animation = effect.getComponent(CallbackAnimation);
         animation.autoDestroyNode = false;
 
-        // this.playSound(ClassicSlotSound.TRANSITION);
+        AudioUtils.playSFX(AudioIds.TRANSITION);
         await this.showEffect(effect);
 
         return effect;

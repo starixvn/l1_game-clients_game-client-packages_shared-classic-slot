@@ -1,4 +1,5 @@
 import { _decorator, Component, Label, Node } from "cc";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 const { ccclass, property } = _decorator;
 
 @ccclass
@@ -17,6 +18,7 @@ export default class BetLevelItem extends Component {
     onStakeChanged = (param: number) => {};
 
     onClick() {
+        AudioUtils.playClick();
         this.onStakeChanged(this.index);
     }
 

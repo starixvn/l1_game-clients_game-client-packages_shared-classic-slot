@@ -1,5 +1,7 @@
 import { _decorator, AudioSource, Component, instantiate, Node, Prefab, v3, Vec2, Vec3 } from "cc";
 
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
@@ -159,6 +161,7 @@ export default class SlotBoard extends Component {
     }
 
     async spin(duration: number, turbo: boolean) {
+        AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
         this.playSpinningAudio(turbo);
         const columns = this.convertDataToColumns(this.data);

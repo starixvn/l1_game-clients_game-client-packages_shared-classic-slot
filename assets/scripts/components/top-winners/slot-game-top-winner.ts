@@ -1,4 +1,5 @@
 import { _decorator, instantiate, Node, Prefab, ToggleContainer } from "cc";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import RawPagination from "db://shared-components/game/pagination/scripts/components/raw-pagination";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
@@ -67,5 +68,7 @@ export default class SlotGameTopWinner extends ObserverComponent {
     }
 
     @handle(TopWinnersHandler, (handler) => handler.swapType())
-    onToggleChanged() {}
+    onToggleChanged() {
+        AudioUtils.playClick();
+    }
 }

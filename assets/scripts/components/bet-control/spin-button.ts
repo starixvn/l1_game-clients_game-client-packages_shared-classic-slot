@@ -1,4 +1,6 @@
 import { _decorator, EventTouch, game, Input, input, Intersection2D, KeyCode, math, Node, PolygonCollider2D, sp } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ButtonState } from "db://shared-components/shared/common-components/button/button-state";
 import { CustomButton, StateChangedEvent } from "db://shared-components/shared/common-components/button/custom-button";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
@@ -145,7 +147,9 @@ export default class StandardSlotSpinButton extends ObserverComponent {
     }
 
     @handle(SlotBetHandler, (handler) => handler.callTriggerAction())
-    callTriggerAction() {}
+    callTriggerAction() {
+        AudioUtils.playSFX(AudioIds.SPIN_BUTTON);
+    }
 
     @handle(SlotBetHandler, (handler) => handler.clearTriggerAction())
     clearTriggerAction() {}
