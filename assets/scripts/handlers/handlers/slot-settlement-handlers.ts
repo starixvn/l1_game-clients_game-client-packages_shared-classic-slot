@@ -8,6 +8,7 @@ import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
 import { SlotBetHandler } from "./slot-bet-handlers";
+import { SlotErrorHandler } from "./slot-error-handler";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotSettlementHandler {
@@ -16,6 +17,9 @@ export class SlotSettlementHandler {
     @inject(SlotDurationStore) private slotDurationStore: SlotDurationStore;
     @inject(gc.Connection.ConnectionStore) private connectionStore: gc.Connection.ConnectionStore;
     @inject(SlotBetHandler) private slotBetHandler: SlotBetHandler;
+    @inject(gc.Bet.BetStore) private readonly betStore: gc.Bet.BetStore;
+    @inject(gc.Error.ErrorStore) private readonly errorStore: gc.Error.ErrorStore;
+    @inject(SlotErrorHandler) private readonly slotErrorHandler: SlotErrorHandler;
 
     eventHandleList = [
         {
@@ -48,6 +52,24 @@ export class SlotSettlementHandler {
             mobx.reaction(
                 () => this.slotBoardStore.forceStopSettle,
                 () => this.finishSettlement()
+            );
+
+            mobx.reaction(
+                () => this.errorStore.apiError,
+                (apiError) => {
+                    if (apiError) {
+                        this.slotBetHandler.handlePlaceBetFailed();
+                    }
+                }
+            );
+
+            mobx.reaction(
+                () => this.betStore.lastReceivedBet,
+                (lastReceivedBet) => {
+                    if (lastReceivedBet?.value === -1) {
+                        this.slotBetHandler.handlePlaceBetFailed();
+                    }
+                }
             );
         }, 0);
     }
@@ -185,6 +207,7 @@ export class SlotSettlementHandler {
             .sequence(...sequenceTweens)
             .call(() => {
                 this.finishSettlement();
+                this.slotErrorHandler.handleEndGameApiError();
                 this.checkSpinNextRound();
             })
             .start();

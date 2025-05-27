@@ -107,4 +107,11 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     showLineSelection() {
         this.betControlStore.showLineSelection = {};
     }
+
+    handlePlaceBetFailed() {
+        this.cancelAutoSpin();
+        this.clearTriggerAction();
+        this.slotBoardStore.reset();
+        this.betControlStore.clearFreeSpins();
+    }
 }

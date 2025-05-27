@@ -143,4 +143,8 @@ export class BetControlStore {
         if (data) {
         }
     }
+
+    clearFreeSpins() {
+        this.freeSpinCount = 0;
+    }
 }
