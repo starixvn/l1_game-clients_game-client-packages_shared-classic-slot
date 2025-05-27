@@ -20,7 +20,9 @@ export class SlotConfigsHandler {
         console.log("handleGameConfigs", data);
         const { betLevels, defaultBetLevel } = data;
         this.betControlStore.setBetLevels(betLevels);
-        this.betControlStore.setStake(defaultBetLevel);
+        if (this.betControlStore.stake === 0) {
+            this.betControlStore.setStake(defaultBetLevel);
+        }
         this.slotBoardStore.slotState = SlotState.READY;
     }
 }

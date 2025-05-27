@@ -3,6 +3,7 @@ export * from "./handlers/slot-bet-response-handlers";
 export * from "./handlers/slot-configs-handlers";
 export * from "./handlers/slot-error-handler";
 export * from "./handlers/slot-jackpot-pools-handlers";
+export * from "./handlers/slot-setting-handlers";
 export * from "./handlers/slot-settlement-handlers";
 export * from "./handlers/top-winners-handlers";
 
