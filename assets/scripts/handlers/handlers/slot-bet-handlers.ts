@@ -26,14 +26,15 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
 
         console.log("------------------- callBet ", this.slotBoardStore.slotState);
         this.resetOnNewSpin();
+        this.slotBoardStore.slotState = SlotState.BET;
+        this.slotBoardStore.bottomMessageState = SlotNotification.SPINNING;
+
         const betData = this.createBetData({});
         Object.assign(betData, {
             amount: this.betControlStore.stake,
             betChoice: SLOT_BET_CHOICES,
         });
         this.handleBetData(betData);
-        this.slotBoardStore.slotState = SlotState.BET;
-        this.slotBoardStore.bottomMessageState = SlotNotification.SPINNING;
     }
 
     resetOnNewSpin() {
@@ -63,9 +64,10 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
             return false;
         }
 
-        const availableBalance = this.betStore.availableBalance;
-        if (this.gameSetting?.validateBalanceWhenBet && amount > availableBalance) {
+        const totalBet = this.betControlStore.totalBet;
+        if (!this.betControlStore.freeSpinEnabled && totalBet > this.betStore.availableBalance) {
             this.showNoticePlaceBetFailure();
+            this.handlePlaceBetFailed();
             return false;
         }
 
