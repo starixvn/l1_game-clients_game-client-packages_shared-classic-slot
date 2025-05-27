@@ -775,7 +775,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "CASCADINGSLOT.BET_LEVEL_SHORTEN",
+    "_string": "BET",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 21,
@@ -857,7 +857,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 439.5296630859375,
+      "width": 43.78497314453125,
       "height": 35.28
     },
     "_anchorPoint": {
@@ -883,7 +883,7 @@
     "__prefab": {
       "__id__": 43
     },
-    "key": "cascadingslot.bet_level_shorten",
+    "key": "Classicslot.bet",
     "format": 1,
     "prefix": "",
     "suffix": "",
@@ -1050,7 +1050,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "CASCADINGSLOT.COIN_VALUE",
+    "_string": "LINES",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 21,
@@ -1132,7 +1132,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 333.8577575683594,
+      "width": 63.77696228027344,
       "height": 55.44
     },
     "_anchorPoint": {
@@ -1158,7 +1158,7 @@
     "__prefab": {
       "__id__": 59
     },
-    "key": "cascadingslot.coin_value",
+    "key": "Classicslot.lines",
     "format": 1,
     "prefix": "",
     "suffix": "",
@@ -1325,7 +1325,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "CASCADINGSLOT.TOTAL_BET_SHORTEN",
+    "_string": "TOTAL BET",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 21,
@@ -1407,7 +1407,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 439.5926513671875,
+      "width": 121.12789916992188,
       "height": 35.28
     },
     "_anchorPoint": {
@@ -1433,7 +1433,7 @@
     "__prefab": {
       "__id__": 75
     },
-    "key": "cascadingslot.total_bet_shorten",
+    "key": "Classicslot.total_bet",
     "format": 1,
     "prefix": "",
     "suffix": "",
@@ -1600,7 +1600,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "CASCADINGSLOT.TOTAL_WIN",
+    "_string": "WIN",
     "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 21,
@@ -1682,7 +1682,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 318.1707763671875,
+      "width": 42.06298828125,
       "height": 55.44
     },
     "_anchorPoint": {
@@ -1745,7 +1745,7 @@
     "__prefab": {
       "__id__": 95
     },
-    "key": "cascadingslot.total_win",
+    "key": "Common.win",
     "format": 1,
     "prefix": "",
     "suffix": "",

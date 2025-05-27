@@ -889,7 +889,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 344.47381591796875,
+      "width": 145.9379425048828,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -925,7 +925,7 @@
       "b": 2,
       "a": 255
     },
-    "_string": "CLASSICSLOT.AUTO_SPIN",
+    "_string": "AUTO SPIN",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 26,
@@ -986,7 +986,7 @@
     "__prefab": {
       "__id__": 39
     },
-    "key": "classicslot.auto_spin",
+    "key": "Classicslot.auto_spin",
     "format": 1,
     "prefix": "",
     "suffix": "",
@@ -1117,7 +1117,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 410.69976806640625,
+      "width": 260.01983642578125,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1153,7 +1153,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "CLASSICSLOT.AUTO_SPIN_GUIDE_TEXT:",
+    "_string": "NUMBER OF AUTO SPINS:",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
@@ -1214,7 +1214,7 @@
     "__prefab": {
       "__id__": 51
     },
-    "key": "classicslot.auto_spin_guide_text",
+    "key": "Classicslot.auto_spin_guide_text",
     "format": 1,
     "prefix": "",
     "suffix": ":",
@@ -7008,7 +7008,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 200.2499237060547,
+      "x": 122.06996154785156,
       "y": 0,
       "z": 0
     },
@@ -7049,7 +7049,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 300.4998474121094,
+      "width": 144.13992309570312,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -7085,8 +7085,8 @@
       "b": 255,
       "a": 255
     },
-    "_string": "CLASSICSLOT.TURBO_MODE",
-    "_horizontalAlign": 1,
+    "_string": "TURBO MODE",
+    "_horizontalAlign": 0,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
     "_fontSize": 20,
@@ -7146,7 +7146,7 @@
     "__prefab": {
       "__id__": 302
     },
-    "key": "classicslot.turbo_mode",
+    "key": "Classicslot.turbo_mode",
     "format": 1,
     "prefix": "",
     "suffix": "",
@@ -7203,7 +7203,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 350.4998474121094,
+      "width": 194.13992309570312,
       "height": 100
     },
     "_anchorPoint": {
@@ -7473,7 +7473,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 220.5398712158203,
+      "width": 69.4599609375,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -7509,7 +7509,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "CLASSICSLOT.START",
+    "_string": "START",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
@@ -7570,7 +7570,7 @@
     "__prefab": {
       "__id__": 321
     },
-    "key": "classicslot.start",
+    "key": "Classicslot.start",
     "format": 1,
     "prefix": "",
     "suffix": "",
