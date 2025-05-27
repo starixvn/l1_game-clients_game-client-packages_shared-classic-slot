@@ -5340,6 +5340,7 @@
       "__id__": 14
     },
     "autoShowWhenEnable": true,
+    "playClickWhenHide": true,
     "_id": ""
   },
   {

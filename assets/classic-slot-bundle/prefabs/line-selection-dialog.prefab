@@ -3076,6 +3076,7 @@
       "__id__": 18
     },
     "autoShowWhenEnable": true,
+    "playClickWhenHide": true,
     "_id": ""
   },
   {
