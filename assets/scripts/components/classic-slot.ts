@@ -1,5 +1,6 @@
 import gc from "@sg/game-client-base";
 import { _decorator, JsonAsset, Node, SpriteAtlas, Vec3 } from "cc";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
 import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
@@ -9,7 +10,6 @@ import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
 import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
-import { ClassicSlotSound } from "./others/classic-slot-sound";
 import SlotBoard from "./slot-board/slot-board";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
@@ -90,7 +90,7 @@ export default class ClassicSlot extends GameComponent {
         ) {
             return;
         }
-        this.playSound(ClassicSlotSound.CLICK);
+        AudioUtils.playClick();
         const symbolCache = resourceCaches.slotSymbols;
         const spine = symbolCache[symbol.index].symbol;
         const colorConfig = this.colorJson.json;

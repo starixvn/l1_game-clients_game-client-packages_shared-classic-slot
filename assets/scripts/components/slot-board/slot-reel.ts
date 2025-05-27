@@ -1,10 +1,11 @@
 import { _decorator, Component, instantiate, Layout, Node, Prefab, Tween, tween, v3 } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
 import { AnimationUtils } from "db://shared-components/shared/utils/utils";
 import * as _ from "lodash-es";
 import { SpecialSymbol } from "../../definitions";
-import { getSlotGameConfigs, globalEmitter, InternalEvents } from "../../utils/classic-slot-utils";
-import { ClassicSlotSound } from "../others/classic-slot-sound";
+import { getSlotGameConfigs } from "../../utils/classic-slot-utils";
 import SlotReelItem from "./slot-reel-item";
 
 const { ccclass, property } = _decorator;
@@ -185,7 +186,7 @@ export default class SlotReel extends Component {
                     tween()
                         .delay(0.15)
                         .call(() => {
-                            globalEmitter.emit(InternalEvents.SLOT_PLAY_SOUND, ClassicSlotSound.REEL_STOP);
+                            AudioUtils.playSFX(AudioIds.REEL_STOP);
                         })
                 )
 

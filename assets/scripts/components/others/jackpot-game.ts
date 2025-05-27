@@ -1,4 +1,6 @@
 import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import RawTimer from "db://shared-components/game/game-timer/scripts/raw-timer";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils } from "db://shared-components/shared/utils";
@@ -8,7 +10,6 @@ import { SlotSettlementHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
 import { initTimer } from "../../utils/classic-slot-utils";
-import { ClassicSlotSound } from "./classic-slot-sound";
 import JackpotGameItem from "./jackpot-game-item";
 import JackpotWinningAmount from "./jackpot-winning-amount";
 const { handle, render } = Observer;
@@ -43,7 +44,6 @@ export default class JackpotGame extends ObserverComponent {
     protected slotGameConfigs: SlotGameBaseConfigs;
     private timerTween: Tween;
     prizes = 0;
-    public playSoundCallback = (type: ClassicSlotSound) => {};
 
     @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
     onItemClicked(index: number) {
@@ -57,8 +57,7 @@ export default class JackpotGame extends ObserverComponent {
             item && this.items.push(item);
 
             child.on("click", () => {
-                this.playSoundCallback(ClassicSlotSound.CLICK);
-                this.playJackpotItemSound();
+                AudioUtils.playSFX(AudioIds.JACKPOT_ITEM);
                 this.onItemClicked(index);
                 item.open();
                 this.items.forEach((item) => {
@@ -67,10 +66,6 @@ export default class JackpotGame extends ObserverComponent {
                 });
             });
         });
-    }
-
-    playJackpotItemSound() {
-        this.playSoundCallback(ClassicSlotSound.JACKPOT_ITEM);
     }
 
     createJackpotItems() {
@@ -131,7 +126,7 @@ export default class JackpotGame extends ObserverComponent {
     }
 
     showJackpotWin() {
-        this.playSoundCallback(ClassicSlotSound.JACKPOT_WIN);
+        AudioUtils.playSFX(AudioIds.JACKPOT_WIN);
         this.hideTimer();
         this.winningNode.active = true;
     }

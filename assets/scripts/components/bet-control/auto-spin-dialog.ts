@@ -1,5 +1,6 @@
 import gc from "@sg/game-client-base";
 import { _decorator, Event, Label, Node, Toggle } from "cc";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
@@ -60,18 +61,18 @@ export default class AutoSpinDialog extends ObserverComponent {
     }
 
     onChoiceClick(event: Event) {
-        // FunctionUtils.playClick();
+        AudioUtils.playClick();
         this.tempSelectedValue = +event.target.name;
         console.log("onChoiceClick", this.tempSelectedValue);
     }
 
     onCloseClick() {
-        // FunctionUtils.playClick();
+        AudioUtils.playClick();
         this.dialog.hide();
     }
 
     onConfirmClick() {
-        // FunctionUtils.playClick();
+        AudioUtils.playClick();
         this.confirmed = true;
         this.dialog.hide();
     }
@@ -89,6 +90,7 @@ export default class AutoSpinDialog extends ObserverComponent {
 
     @handle(BetControlStore, (store, turbo: boolean) => store.setTurbo(turbo))
     onToggleTurbo(toggle: Toggle) {
+        AudioUtils.playClick();
         return toggle.isChecked;
     }
 }

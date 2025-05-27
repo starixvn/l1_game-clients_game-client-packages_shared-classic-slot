@@ -1,5 +1,7 @@
 import gc from "@sg/game-client-base";
 import { _decorator, Button, instantiate, Label, Node, Prefab, Tween, tween } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import RawTimer from "db://shared-components/game/game-timer/scripts/raw-timer";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
@@ -9,7 +11,6 @@ import { SlotSettlementHandler } from "../../handlers/handlers/slot-settlement-h
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
 import { initTimer } from "../../utils/classic-slot-utils";
-import { ClassicSlotSound } from "../others/classic-slot-sound";
 import BonusItem from "./bonus-item";
 const { handle, render } = Observer;
 const { ccclass, property } = _decorator;
@@ -45,8 +46,6 @@ export default class BonusDialog extends ObserverComponent {
     private timerTween: Tween;
     private readonly bonusNumber = 10;
 
-    public playSoundCallback = (type: ClassicSlotSound) => {};
-
     initBonusItems() {
         this.createBonusItems();
         this.content.children.forEach((child, index) => {
@@ -54,8 +53,7 @@ export default class BonusDialog extends ObserverComponent {
             item && this.items.push(item);
             child.on("click", () => {
                 if (this.openedBonus < this.totalBonus) {
-                    this.playSoundCallback(ClassicSlotSound.CLICK);
-                    this.playBonusItemSound();
+                    AudioUtils.playSFX(AudioIds.BONUS_ITEM);
                     this.onItemClicked(index);
                     const button = child.getComponent(Button);
                     button.interactable = false;
@@ -67,10 +65,6 @@ export default class BonusDialog extends ObserverComponent {
     @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenBonus(index))
     protected onItemClicked(index: number) {
         return index;
-    }
-
-    playBonusItemSound() {
-        //empty
     }
 
     createBonusItems() {
@@ -112,9 +106,7 @@ export default class BonusDialog extends ObserverComponent {
     }
 
     showTotalAmount() {
-        this.playSoundCallback(ClassicSlotSound.BONUS_TOTAL);
-        //TODO: fix
-        // FunctionUtils.playSFX(this.soundBigWin.clip);
+        AudioUtils.playSFX(AudioIds.BONUS_TOTAL);
         this.hideTimer();
         this.totalBonusNode.active = true;
         this.totalBonusLabel.string = `+${gc.FormatUtils.numberWithCommas(this.totalValue, 2)}`;
