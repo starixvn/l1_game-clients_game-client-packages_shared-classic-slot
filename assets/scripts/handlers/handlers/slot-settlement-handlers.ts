@@ -90,17 +90,14 @@ export class SlotSettlementHandler {
     }
 
     handleBonusChest(bonusChest: any) {
-        console.log("handleBonusChest", bonusChest);
         this.slotBoardStore.bonusChest = bonusChest;
     }
 
     handleWinningJackpot(winningJackpot: any) {
-        console.log("handleWinningJackpot", winningJackpot);
         this.slotBoardStore.winningJackpot = winningJackpot;
     }
 
     async handleJackpot(jackpot: any) {
-        console.log("handleJackpot", jackpot);
         await this.spinResultSpecialCase(jackpot);
         this.slotBoardStore.winningItems = [
             { payline: jackpot.winningLine, positions: paylines[jackpot.winningLine], symbol: jackpot.symbol },
@@ -112,7 +109,6 @@ export class SlotSettlementHandler {
     }
 
     async handleBonuses(bonuses: any) {
-        console.log("handleBonuses", bonuses);
         if (this.slotBoardStore.receivedJackpot) {
             await AnimationUtils.delayTime(this.slotDurationStore.showJackpotWinningAmountDuration);
         } else {
@@ -125,7 +121,6 @@ export class SlotSettlementHandler {
     }
 
     async spinResultSpecialCase(data: { roundId: number; result: number[] }) {
-        console.log("spinResultSpecialCase", data);
         const { roundId, result } = data;
         this.betControlStore.roundId = roundId;
         await this.spin(result);
@@ -142,14 +137,12 @@ export class SlotSettlementHandler {
     }
 
     async handleFinish(finish: any) {
-        console.log("handleFinish", finish);
         const { result, settlementResult, betWin, bigWin, roundId, totalOfFreeSpins, betByFreeSpin } = finish;
         const { winningLines, jackpot, bonus, freeSpins } = settlementResult;
         const newFreeSpinCount = freeSpins.count ?? 0;
 
         this.betControlStore.roundId = roundId;
 
-        //TODO : check again case jackpot and bonus
         if (bonus.count > 0) {
             await AnimationUtils.delayTime(this.slotDurationStore.showTotalBonusAmountDuration);
         } else {
@@ -275,7 +268,6 @@ export class SlotSettlementHandler {
     }
 
     protected finishSettlement() {
-        console.log("------------------- finishSettlement");
         this.reset();
     }
 

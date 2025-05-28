@@ -19,14 +19,11 @@ export class SlotJackpotPoolsHandler {
     ];
 
     handleJackpotPool(jackpotPool: JackpotPool) {
-        console.log("handleJackpotPool", jackpotPool);
         jackpotPool.amount = gc.NumberUtils.getValueByCurrency(jackpotPool.amount, this.mainPlayerStore.rate);
         this.jackpotPoolStore.jackpotPools[jackpotPool.pool] = jackpotPool;
     }
 
     handleJackpotPools(jackpotPools: JackpotPool[]) {
-        console.log("handleJackpotPools", jackpotPools);
-
         const data: Record<string, JackpotPool> = {};
 
         jackpotPools.forEach((pool) => {
