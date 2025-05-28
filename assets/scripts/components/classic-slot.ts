@@ -113,13 +113,18 @@ export default class ClassicSlot extends GameComponent {
         await this.slotBoard.spin(spinResult.duration, spinResult.turbo);
     }
 
-    @render(SlotBoardStore, (store) => store.winningItems, { fireImmediately: false })
-    renderWinningItems(winningItems: LineData[]) {
+    @render(SlotBoardStore, (store) => store.highlightSpecialSymbols, { fireImmediately: false })
+    renderHighlightSpecialSymbols(highlightSpecialSymbols: number[]) {
+        this.slotBoard.highlightSpecialSymbols(highlightSpecialSymbols);
+    }
+
+    @render(SlotBoardStore, (store) => store.winningItemsOnLines, { fireImmediately: false })
+    renderWinningItems(winningItemsOnLines: LineData[]) {
         this.slotBoard.hideWinningEffect();
-        if (winningItems.length === 0) {
+        if (winningItemsOnLines.length === 0) {
             return;
         }
-        winningItems.forEach((line) => {
+        winningItemsOnLines.forEach((line) => {
             this.slotBoard.showWinningEffectOnLine(line);
         });
     }

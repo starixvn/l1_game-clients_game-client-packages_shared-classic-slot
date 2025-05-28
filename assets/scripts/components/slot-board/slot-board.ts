@@ -116,16 +116,18 @@ export default class SlotBoard extends Component {
         this.showWinningEffect(line.positions, +line.symbol);
     }
 
+    highlightSpecialSymbols(symbols: number[]) {
+        this.reels.forEach((reel) => {
+            symbols.forEach((symbol) => reel.showHighlightSpecialSymbols(symbol));
+        });
+    }
+
     showWinningEffect(positions: number[], symbol: number) {
         positions.forEach((position) => {
             const { col, row } = this.getLocation(position);
             this.reels[col].showWinningEffect(row, symbol);
         });
         this.winningOverlayNode.active = true;
-    }
-
-    showHighlightSpecialSymbols(symbol: number) {
-        this.reels.forEach((reel) => reel.showHighlightSpecialSymbols(symbol));
     }
 
     hideWinningEffect() {

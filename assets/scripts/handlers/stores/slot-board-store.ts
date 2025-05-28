@@ -30,7 +30,7 @@ export class SlotBoardStore {
     receivedBigWin = null;
     winningJackpot = null;
     bonusChest = null;
-    winningItems = [];
+    winningItemsOnLines = [];
     winningLines: LineData[] = [];
     highlightSpecialSymbols = [];
 
@@ -58,7 +58,7 @@ export class SlotBoardStore {
     }
 
     resetOnNewSpin() {
-        this.winningItems = [];
+        this.winningItemsOnLines = [];
         this.winningLines = [];
     }
 }

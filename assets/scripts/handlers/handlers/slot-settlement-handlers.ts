@@ -99,7 +99,7 @@ export class SlotSettlementHandler {
 
     async handleJackpot(jackpot: any) {
         await this.spinResultSpecialCase(jackpot);
-        this.slotBoardStore.winningItems = [
+        this.slotBoardStore.winningItemsOnLines = [
             { payline: jackpot.winningLine, positions: paylines[jackpot.winningLine], symbol: jackpot.symbol },
         ];
         this.slotBoardStore.winningLines = [
@@ -153,7 +153,7 @@ export class SlotSettlementHandler {
             }
         }
 
-        this.slotBoardStore.winningItems = winningLines;
+        this.slotBoardStore.winningItemsOnLines = winningLines;
         const highlightSpecialSymbols = [];
         if (bonus.count > 0) {
             highlightSpecialSymbols.push(SpecialSymbol.BONUS);
