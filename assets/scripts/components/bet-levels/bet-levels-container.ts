@@ -79,6 +79,7 @@ export default class BetLevelsContainer extends ObserverComponent {
 
     protected onHidden() {
         this.node.active = false;
+        ComponentUtils.setOpacityNode(this.node, 0);
     }
 
     protected onShow() {
