@@ -50,12 +50,10 @@ export class TopWinnersHandler {
     }
 
     protected receivedBigWinningWinners(data: WinnersData) {
-        console.log("receivedBigWinningWinners", data);
         this.topWinnersStore.data = this.convertDataWinners(data);
     }
 
     protected receivedJackpotWinners(data: WinnersData) {
-        console.log("receivedJackpotWinners", data);
         this.topWinnersStore.data = this.convertDataWinners(data);
     }
 

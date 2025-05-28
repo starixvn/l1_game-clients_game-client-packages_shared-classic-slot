@@ -15,7 +15,6 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     protected timeoutStartAutoSpin: NodeJS.Timeout;
 
     handle() {
-        console.log("------------------- handle");
         this.callBet();
     }
 
@@ -24,7 +23,6 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
             return;
         }
 
-        console.log("------------------- callBet ", this.slotBoardStore.slotState);
         this.resetOnNewSpin();
         this.slotBoardStore.slotState = SlotState.BET;
         this.slotBoardStore.bottomMessageState = SlotNotification.SPINNING;

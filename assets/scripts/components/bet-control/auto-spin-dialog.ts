@@ -63,7 +63,6 @@ export default class AutoSpinDialog extends ObserverComponent {
     onChoiceClick(event: Event) {
         AudioUtils.playClick();
         this.tempSelectedValue = +event.target.name;
-        console.log("onChoiceClick", this.tempSelectedValue);
     }
 
     onCloseClick() {

@@ -22,7 +22,6 @@ export class SlotBetResponseHandler {
     }
 
     handleSlotBetResponse(data: { endBet: number; freeSpin: boolean }) {
-        console.log("handleSlotBetResponse", data);
         const { endBet, freeSpin } = data;
         this.stopProcessingBetAndClearInterval();
         if (endBet !== -1 && !freeSpin) {
