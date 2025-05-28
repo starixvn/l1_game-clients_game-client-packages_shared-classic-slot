@@ -53,16 +53,20 @@ export default class LineViewContainer extends ObserverComponent {
             let lastPayline = -1;
             this.showWinningLinesTween = tween(this)
                 .delay(delayTime)
-                .call(() => this.hideAllLines())
+                .call(() => {
+                    this.hideAllLines();
+                    this.slotBoard.hideWinningEffect();
+                })
                 .repeatForever(
                     tween()
                         .call(() => {
                             if (lastPayline !== -1) {
                                 this.showLine(lastPayline, false);
                             }
-
                             const line = winningLines[index];
                             this.showLine(line.payline + 1, true);
+                            this.slotBoard.hideWinningEffect();
+                            this.slotBoard.showWinningEffectOnLine(line);
                             lastPayline = line.payline + 1;
 
                             index++;

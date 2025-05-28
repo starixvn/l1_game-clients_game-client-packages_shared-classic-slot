@@ -1,11 +1,11 @@
-import { _decorator, AudioSource, Component, instantiate, Node, Prefab, v3, Vec2, Vec3 } from "cc";
+import { _decorator, Component, instantiate, Node, Prefab, v3, Vec2, Vec3 } from "cc";
 
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
-import { paylines } from "../../definitions";
+import { LineData, paylines } from "../../definitions";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReel from "./slot-reel";
@@ -27,9 +27,6 @@ export default class SlotBoard extends Component {
 
     @property(Node)
     itemLocationMap: Node = null;
-
-    @property({ type: AudioSource })
-    soundSources: AudioSource[] = [];
 
     @property(PreviewOddsPopup)
     previewPopup: PreviewOddsPopup = null;
@@ -115,12 +112,8 @@ export default class SlotBoard extends Component {
         this.reels.forEach((reel, index) => reel.setReelData(columns[index]));
     }
 
-    protected playSpinningAudio(turbo: boolean) {
-        if (this.soundSources.length > 0) {
-            const sound = turbo ? SlotGameSound.SPINNING_TURBO : SlotGameSound.SPINNING_NORMAL;
-            //TODO: play sfx
-            // AudioManager.getInstance().playSFX(this.soundSources[sound].clip);
-        }
+    showWinningEffectOnLine(line: LineData) {
+        this.showWinningEffect(line.positions, +line.symbol);
     }
 
     showWinningEffect(positions: number[], symbol: number) {
@@ -163,7 +156,6 @@ export default class SlotBoard extends Component {
     async spin(duration: number, turbo: boolean) {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
-        this.playSpinningAudio(turbo);
         const columns = this.convertDataToColumns(this.data);
         for (let i = 0; i < this.reels.length; i++) {
             const reel = this.reels[i];
