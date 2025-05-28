@@ -213,7 +213,7 @@ export class SlotSettlementHandler {
                 this.slotBoardStore.receivedFreeSpins = { freeSpins, duration: this.slotDurationStore.freespinDuration };
             })
             .delay(this.slotDurationStore.freespinDuration)
-            .call(() => (this.betControlStore.freeSpinCount = freeSpins.count));
+            .call(() => this.betControlStore.syncFreeSpinCount());
     }
 
     createTweenShowBigWin(betWin: number, bigWin: boolean) {
@@ -272,18 +272,29 @@ export class SlotSettlementHandler {
     }
 
     protected checkSpinNextRound() {
-        if (this.betControlStore.freeSpinCount > 0) {
-            this.slotBetHandler.callBet();
-        } else {
-            if (this.betControlStore.autoSpinEnabled) {
-                this.slotBetHandler.actionAutoSpin();
-            } else {
-                if (this.betControlStore.triggerAutoSpin) {
-                    this.timeoutNextSpin = setTimeout(() => {
-                        this.slotBetHandler.callBet();
-                    }, 1000);
-                }
-            }
+        if (this.betControlStore.freeSpinEnabled) {
+            this.scheduleNextSpin(() => {
+                this.betControlStore.decreaseFreeSpinCount();
+                this.slotBetHandler.callBet();
+            });
+            return;
         }
+
+        this.betControlStore.clearFreeSpins();
+        if (this.betControlStore.autoSpinEnabled) {
+            this.scheduleNextSpin(() => this.slotBetHandler.actionAutoSpin());
+            return;
+        }
+
+        if (this.betControlStore.triggerAutoSpin) {
+            this.scheduleNextSpin(() => this.slotBetHandler.callBet());
+        }
+    }
+
+    protected scheduleNextSpin(action: () => void) {
+        const delayDuration = 1000;
+        this.timeoutNextSpin = setTimeout(() => {
+            action();
+        }, delayDuration);
     }
 }

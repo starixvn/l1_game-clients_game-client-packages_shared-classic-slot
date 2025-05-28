@@ -58,7 +58,8 @@ export class BetControlStore {
     autoSpinSelectedValue = 10;
     readonly autoSpinOptions = [10, 30, 50, 80, 100, 200, 500, 1000];
 
-    freeSpinCount = 0;
+    freeSpinCount = -1;
+    freeSpinCountDisplay = -1;
     get freeSpinEnabled() {
         return this.freeSpinCount > 0;
     }
@@ -116,6 +117,14 @@ export class BetControlStore {
         this.freeSpinCount = totalFreeSpins;
     }
 
+    syncFreeSpinCount() {
+        this.freeSpinCountDisplay = this.freeSpinCount;
+    }
+
+    decreaseFreeSpinCount() {
+        this.freeSpinCountDisplay--;
+    }
+
     setTurbo(turbo: boolean) {
         this.turboEnabled = turbo;
     }
@@ -127,7 +136,7 @@ export class BetControlStore {
     }
 
     decreaseAutoSpinCount() {
-        if (this.autoSpinCount === 0) {
+        if (this.autoSpinCount <= 0) {
             return false;
         }
         this.autoSpinCount--;
@@ -145,6 +154,7 @@ export class BetControlStore {
     }
 
     clearFreeSpins() {
-        this.freeSpinCount = 0;
+        this.freeSpinCount = -1;
+        this.freeSpinCountDisplay = -1;
     }
 }

@@ -73,12 +73,6 @@ export class SlotGameBottomMessage extends ObserverComponent {
             case SlotNotification.SETTLED:
                 this.handleMessageSettled();
                 break;
-            // case SlotNotification.AUTO_SPIN:
-            //     this.showAutoSpinCount(this.autoSpinCount);
-            //     break;
-            // case SlotNotification.FREESPINS:
-            //     this.showFreeSpinCount(this.freeSpinCount);
-            //     break;
             default:
                 break;
         }
@@ -106,9 +100,10 @@ export class SlotGameBottomMessage extends ObserverComponent {
         return random(1, 3);
     }
 
-    @render(BetControlStore, (store) => store.freeSpinCount)
-    setFreeSpinsCount(freeSpinCount: number) {
-        this.freeSpinCount = freeSpinCount;
+    @render(BetControlStore, (store) => store.freeSpinCountDisplay)
+    setFreeSpinsCount(freeSpinCountDisplay: number) {
+        this.freeSpinCount = freeSpinCountDisplay;
+        this.freeSpinEnabled = freeSpinCountDisplay > -1;
         this.updateMessage();
     }
 
@@ -121,12 +116,6 @@ export class SlotGameBottomMessage extends ObserverComponent {
     @render(BetControlStore, (store) => store.autoSpinEnabled)
     renderAutoSpinEnabled(autoSpinEnabled: boolean) {
         this.autoSpinEnabled = autoSpinEnabled;
-        this.updateMessage();
-    }
-
-    @render(BetControlStore, (store) => store.freeSpinEnabled)
-    renderFreeSpinEnabled(freeSpinEnabled: boolean) {
-        this.freeSpinEnabled = freeSpinEnabled;
         this.updateMessage();
     }
 }
