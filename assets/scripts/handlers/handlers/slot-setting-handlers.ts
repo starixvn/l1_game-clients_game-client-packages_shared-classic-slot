@@ -14,7 +14,7 @@ interface IGameUserSetting {
 }
 
 @injectable()
-export class CascadingSlotSettingHandlers {
+export class SlotSettingHandlers {
     @inject(gc.GameUserSettings.GameUserSettingStore) protected readonly gameUserSettingStore: gc.GameUserSettings.GameUserSettingStore;
     @inject(BetControlStore) protected readonly betControlStore: BetControlStore;
     constructor() {
@@ -23,17 +23,21 @@ export class CascadingSlotSettingHandlers {
             mobx.reaction(
                 () => this.gameUserSettingStore.tempStorage,
                 (trigger) => {
-                    switch (trigger?.action) {
-                        case GameUserSettingAction.Save:
-                            this.saveTempStorage();
-                            break;
-                        case GameUserSettingAction.Load:
-                            this.loadTempStorage();
-                            break;
-                    }
+                    this.reactionTempStorage(trigger);
                 }
             );
         }, 0);
+    }
+
+    reactionTempStorage(trigger: gc.GameUserSettings.GameUserSettingTrigger) {
+        switch (trigger?.action) {
+            case GameUserSettingAction.Save:
+                this.saveTempStorage();
+                break;
+            case GameUserSettingAction.Load:
+                this.loadTempStorage();
+                break;
+        }
     }
 
     loadTempStorage() {

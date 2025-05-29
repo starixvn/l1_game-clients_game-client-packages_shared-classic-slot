@@ -22,8 +22,16 @@ export class SlotBetResponseHandler {
     }
 
     handleSlotBetResponse(data: { endBet: number; freeSpin: boolean }) {
-        const { endBet, freeSpin } = data;
+        if (!data) {
+            return;
+        }
         this.stopProcessingBetAndClearInterval();
+
+        const { endBet, freeSpin } = data;
+        if (endBet === undefined || freeSpin === undefined) {
+            return;
+        }
+
         if (endBet !== -1 && !freeSpin) {
             this.betStore.lastReceivedBet = { value: endBet, isAnimated: true };
         }
