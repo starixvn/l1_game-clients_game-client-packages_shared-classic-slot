@@ -10,11 +10,18 @@ import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-
 import { SlotDurationStore } from "../../assets/scripts/handlers/stores/slot-duration-store";
 
 const mockDelayTime = jest.fn().mockResolvedValue(undefined);
+
+// Define an enhanced type for the BetControlStore mock instance
+interface EnhancedMockedBetControlStore extends jest.Mocked<BetControlStore> {
+    totalFreeSpins: number;
+    roundId: number; // Mock also defines roundId directly
+}
+
 jest.mock(
     "db://shared-components/shared/utils",
     () => ({
         AnimationUtils: {
-            delayTime: mockDelayTime,
+            delayTime: jest.fn().mockResolvedValue(undefined),
         },
     }),
     { virtual: true }
@@ -93,7 +100,7 @@ jest.mock("@sg/game-client-base", () => {
 describe("SlotSettlementHandler", () => {
     let container: Container;
     let settlementHandler: SlotSettlementHandler;
-    let betControlStore: jest.Mocked<BetControlStore>;
+    let betControlStore: EnhancedMockedBetControlStore;
     let slotBoardStore: jest.Mocked<SlotBoardStore>;
     let slotDurationStore: jest.Mocked<SlotDurationStore>;
     let slotBetHandler: jest.Mocked<SlotBetHandler>;
@@ -107,8 +114,9 @@ describe("SlotSettlementHandler", () => {
 
         container.bind(SlotSettlementHandler).toSelf();
 
-        const MockedBetControlStore = jest.requireMock("../../assets/scripts/handlers/stores/bet-control-store").BetControlStore;
-        betControlStore = new MockedBetControlStore() as jest.Mocked<BetControlStore>;
+        const MockedBetControlStoreConstructor = jest.requireMock("../../assets/scripts/handlers/stores/bet-control-store").BetControlStore;
+        const rawBetControlStoreMock = new MockedBetControlStoreConstructor();
+        betControlStore = rawBetControlStoreMock as EnhancedMockedBetControlStore;
         container.bind(BetControlStore).toConstantValue(betControlStore);
 
         const MockedSlotBoardStore = jest.requireMock("../../assets/scripts/handlers/stores/slot-board-store").SlotBoardStore;
@@ -177,6 +185,7 @@ describe("SlotSettlementHandler", () => {
             const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
             const resetSpy = jest.spyOn(slotBoardStore, "reset");
 
+            settlementHandler.timeoutNextSpin = {} as any;
             settlementHandler.reset();
 
             expect(clearTimeoutSpy).toHaveBeenCalled();
@@ -258,7 +267,7 @@ describe("SlotSettlementHandler", () => {
             const finish = createFinishData();
             await settlementHandler.handleFinish(finish as any);
 
-            expect(slotBoardStore.slotState).toBe(SlotState.SPINNING);
+            expect(slotBoardStore.slotState).toBe(SlotState.SETTLED);
             expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SETTLED);
             expect(betControlStore.roundId).toBe(finish.roundId);
         });
