@@ -143,25 +143,10 @@ export class SlotSettlementHandler {
 
         this.betControlStore.roundId = roundId;
 
-        if (bonus.count > 0) {
-            await AnimationUtils.delayTime(this.slotDurationStore.showTotalBonusAmountDuration);
-        } else {
-            if (jackpot) {
-                await AnimationUtils.delayTime(this.slotDurationStore.showJackpotWinningAmountDuration);
-            } else {
-                await this.spin(result);
-            }
-        }
+        await this.spinOrAwait(bonus, jackpot, result);
 
         this.slotBoardStore.winningItemsOnLines = winningLines;
-        const highlightSpecialSymbols = [];
-        if (bonus.count > 0) {
-            highlightSpecialSymbols.push(SpecialSymbol.BONUS);
-        }
-        if (newFreeSpinCount > 0) {
-            highlightSpecialSymbols.push(SpecialSymbol.FREESPIN);
-        }
-        this.slotBoardStore.highlightSpecialSymbols = highlightSpecialSymbols;
+        this.handleWinningSpecialSymbols(bonus, newFreeSpinCount);
 
         this.betControlStore.setTotalFreeSpins(totalOfFreeSpins);
         const isSpecialCases = bigWin || newFreeSpinCount > 0 || betByFreeSpin || this.betControlStore.autoSpinEnabled;
@@ -172,6 +157,10 @@ export class SlotSettlementHandler {
             this.slotBoardStore.winningBet = betWin;
         }
 
+        this.handleSettleTween(bigWin, newFreeSpinCount, betWin, jackpot, winningLines, freeSpins);
+    }
+
+    protected handleSettleTween(bigWin: any, newFreeSpinCount: any, betWin: any, jackpot: any, winningLines: any, freeSpins: any) {
         const bigWinOrGotFreeSpin = bigWin || newFreeSpinCount > 0;
         if (!bigWinOrGotFreeSpin) {
             this.slotBoardStore.bottomMessageState = SlotNotification.SETTLED;
@@ -204,6 +193,29 @@ export class SlotSettlementHandler {
                 this.checkSpinNextRound();
             })
             .start();
+    }
+
+    private handleWinningSpecialSymbols(bonus: any, newFreeSpinCount: any) {
+        const highlightSpecialSymbols = [];
+        if (bonus.count > 0) {
+            highlightSpecialSymbols.push(SpecialSymbol.BONUS);
+        }
+        if (newFreeSpinCount > 0) {
+            highlightSpecialSymbols.push(SpecialSymbol.FREESPIN);
+        }
+        this.slotBoardStore.highlightSpecialSymbols = highlightSpecialSymbols;
+    }
+
+    protected async spinOrAwait(bonus: any, jackpot: any, result: any) {
+        if (bonus.count > 0) {
+            await AnimationUtils.delayTime(this.slotDurationStore.showTotalBonusAmountDuration);
+        } else {
+            if (jackpot) {
+                await AnimationUtils.delayTime(this.slotDurationStore.showJackpotWinningAmountDuration);
+            } else {
+                await this.spin(result);
+            }
+        }
     }
 
     createTweenShowFreeSpins(freeSpins: any) {

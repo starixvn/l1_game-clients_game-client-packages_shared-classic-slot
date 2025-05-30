@@ -11,10 +11,10 @@ enum TopWinnerEvent {
 
 @injectable()
 export class TopWinnersHandler {
-    @inject(TopWinnersStore) private topWinnersStore: TopWinnersStore;
-    @inject(gc.Connection.ConnectionStore) private connectionStore: gc.Connection.ConnectionStore;
+    @inject(TopWinnersStore) protected readonly topWinnersStore: TopWinnersStore;
+    @inject(gc.Connection.ConnectionStore) protected readonly connectionStore: gc.Connection.ConnectionStore;
 
-    @inject(gc.Player.MainPlayerStore) private mainPlayerStore: gc.Player.MainPlayerStore;
+    @inject(gc.Player.MainPlayerStore) protected readonly mainPlayerStore: gc.Player.MainPlayerStore;
     eventHandleList = [
         {
             name: TopWinnerType.BigWinningWinners,
