@@ -6,8 +6,8 @@ const { injectable, inject } = inversify;
 
 @injectable()
 export class SlotConfigsHandler {
-    @inject(BetControlStore) private betControlStore: BetControlStore;
-    @inject(SlotBoardStore) private slotBoardStore: SlotBoardStore;
+    @inject(BetControlStore) protected readonly betControlStore: BetControlStore;
+    @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
 
     eventHandleList = [
         {

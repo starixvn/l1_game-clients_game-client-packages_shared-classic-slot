@@ -4,8 +4,8 @@ import { JackpotPool, JackpotPoolStore } from "../stores/jackpot-pool-store";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotJackpotPoolsHandler {
-    @inject(JackpotPoolStore) private jackpotPoolStore: JackpotPoolStore;
-    @inject(gc.Player.MainPlayerStore) private readonly mainPlayerStore: gc.Player.MainPlayerStore;
+    @inject(JackpotPoolStore) protected readonly jackpotPoolStore: JackpotPoolStore;
+    @inject(gc.Player.MainPlayerStore) protected readonly mainPlayerStore: gc.Player.MainPlayerStore;
 
     eventHandleList = [
         {

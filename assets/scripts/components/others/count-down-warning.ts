@@ -66,7 +66,6 @@ export default class CountDownWarning extends Component {
     }
 
     setTime(time: number) {
-        // const num = String(time).padStart(2, "0");
         this.time.setTime(time);
     }
 }

@@ -12,14 +12,14 @@ import { SlotErrorHandler } from "./slot-error-handler";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotSettlementHandler {
-    @inject(BetControlStore) private betControlStore: BetControlStore;
-    @inject(SlotBoardStore) private slotBoardStore: SlotBoardStore;
-    @inject(SlotDurationStore) private slotDurationStore: SlotDurationStore;
-    @inject(gc.Connection.ConnectionStore) private connectionStore: gc.Connection.ConnectionStore;
-    @inject(SlotBetHandler) private slotBetHandler: SlotBetHandler;
-    @inject(gc.Bet.BetStore) private readonly betStore: gc.Bet.BetStore;
-    @inject(gc.Error.ErrorStore) private readonly errorStore: gc.Error.ErrorStore;
-    @inject(SlotErrorHandler) private readonly slotErrorHandler: SlotErrorHandler;
+    @inject(BetControlStore) protected readonly betControlStore: BetControlStore;
+    @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
+    @inject(SlotDurationStore) protected readonly slotDurationStore: SlotDurationStore;
+    @inject(gc.Connection.ConnectionStore) protected readonly connectionStore: gc.Connection.ConnectionStore;
+    @inject(SlotBetHandler) protected readonly slotBetHandler: SlotBetHandler;
+    @inject(gc.Bet.BetStore) protected readonly betStore: gc.Bet.BetStore;
+    @inject(gc.Error.ErrorStore) protected readonly errorStore: gc.Error.ErrorStore;
+    @inject(SlotErrorHandler) protected readonly slotErrorHandler: SlotErrorHandler;
 
     eventHandleList = [
         {

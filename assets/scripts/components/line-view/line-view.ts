@@ -117,7 +117,7 @@ export default class LineView extends Component {
             }
             lastNode = node;
 
-            node.angle = angle; // this.calculateAngle(start, end);
+            node.angle = angle;
             node.position = v3(start);
             ComponentUtils.setNodeTransform(node, { width });
         }

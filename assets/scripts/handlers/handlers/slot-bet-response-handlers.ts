@@ -1,11 +1,9 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
-import { BetControlStore } from "../stores/bet-control-store";
 const { injectable, inject } = inversify;
 
 @injectable()
 export class SlotBetResponseHandler {
-    @inject(BetControlStore) private betControlStore: BetControlStore;
     @inject(gc.Bet.BetStore) protected readonly betStore: gc.Bet.BetStore;
     @inject(gc.Connection.ConnectionHandlers.RetryGameHandler)
     protected readonly retryGameHandler: gc.Connection.ConnectionHandlers.RetryGameHandler;

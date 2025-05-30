@@ -54,7 +54,7 @@ export default class SlotGameTopWinner extends ObserverComponent {
         const { winners } = data;
 
         this.content.destroyAllChildren();
-        winners.map((winner, index) => {
+        winners.forEach((winner, index) => {
             const node = instantiate(this.itemPrefab);
 
             this.content.addChild(node);

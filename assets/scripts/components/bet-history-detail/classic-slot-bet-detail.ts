@@ -65,12 +65,10 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         const { paylines, settlementResult, bet } = data;
         let order = 1;
         const winningLines = [];
-        const winningArray = [];
 
         settlementResult.winningPaylines.forEach((winingLine) => {
             if (paylines.includes(winingLine.payline)) {
                 winningLines.push(winingLine);
-                winningArray.push(winingLine.payline);
             }
         });
 

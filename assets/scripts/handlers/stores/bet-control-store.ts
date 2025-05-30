@@ -20,7 +20,6 @@ export class BetControlStore {
     constructor() {
         mobx.makeAutoObservable(this);
         setTimeout(() => {
-            this.onLoadStorage();
             mobx.reaction(
                 () => this.gameConfigStore.chips,
                 (chips) => {
@@ -145,12 +144,6 @@ export class BetControlStore {
 
     cancelAutoSpin() {
         this.autoSpinEnabled = false;
-    }
-
-    onLoadStorage() {
-        const data = gc.StorageManager.get(gc.localStorageKeys.gameUserSetting);
-        if (data) {
-        }
     }
 
     clearFreeSpins() {

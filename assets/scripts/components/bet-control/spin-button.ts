@@ -20,7 +20,7 @@ enum SpineAnimationTrack {
 }
 
 @ccclass
-export default class StandardSlotSpinButton extends ObserverComponent {
+export default class SpinButton extends ObserverComponent {
     @property(sp.Skeleton)
     spine: sp.Skeleton = null;
 

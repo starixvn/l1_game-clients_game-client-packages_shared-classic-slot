@@ -7,8 +7,8 @@ const { injectable, inject } = inversify;
 
 @injectable()
 export class SlotBetHandler extends gc.Bet.BetHandler {
-    @inject(BetControlStore) private betControlStore: BetControlStore;
-    @inject(SlotBoardStore) private slotBoardStore: SlotBoardStore;
+    @inject(BetControlStore) protected betControlStore: BetControlStore;
+    @inject(SlotBoardStore) protected slotBoardStore: SlotBoardStore;
 
     protected timeoutHolding: NodeJS.Timeout;
     protected readonly HOLDING_THRESHOLD = 1000;
