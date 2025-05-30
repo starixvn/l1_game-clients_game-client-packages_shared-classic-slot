@@ -1,32 +1,25 @@
+/// <reference types="jest" />
 import gc from "@sg/game-client-base";
 import { Container } from "inversify";
 import "reflect-metadata";
 import { TopWinnersHandler } from "../../assets/scripts/handlers/handlers/top-winners-handlers";
-import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
-import { TopWinnersStore, TopWinnerType, Winner, WinnersData } from "../../assets/scripts/handlers/stores/top-winners-store";
+import { TopWinnersStore, TopWinnerType, Winner } from "../../assets/scripts/handlers/stores/top-winners-store";
+import * as classicSlotUtils from "../../assets/scripts/utils/classic-slot-utils";
 
-// Mock stores
-jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
-    BetControlStore: jest.fn().mockImplementation(() => ({})),
-}));
-
-const mockSetType = jest.fn();
+// Mock dependencies
 jest.mock("../../assets/scripts/handlers/stores/top-winners-store", () => {
-    const actualTopWinnersStore = jest.requireActual("../../assets/scripts/handlers/stores/top-winners-store");
     return {
-        TopWinnersStore: jest.fn().mockImplementation(function (this: any) {
-            this.type = actualTopWinnersStore.TopWinnerType.BigWinningWinners;
-            this.data = { winners: [], page: 1, pageSize: 10, total: 0 };
-            this.setType = mockSetType.mockImplementation((newType) => {
-                this.type = newType;
-            });
-            return this;
-        }),
-        TopWinnerType: actualTopWinnersStore.TopWinnerType,
+        TopWinnersStore: jest.fn().mockImplementation(() => ({
+            type: TopWinnerType.BigWinningWinners,
+            data: null,
+        })),
+        TopWinnerType: {
+            BigWinningWinners: "getBigWinningWinners",
+            JackpotWinners: "getJackpotWinners",
+        },
     };
 });
 
-// Mock gc components
 jest.mock("@sg/game-client-base", () => {
     const actualGc = jest.requireActual("@sg/game-client-base");
     return {
@@ -44,59 +37,60 @@ jest.mock("@sg/game-client-base", () => {
             MainPlayerStore: jest.fn().mockImplementation(() => ({
                 currency: "USD",
                 multiplier: 1,
-                name: "player1",
+                name: "TestPlayer",
             })),
         },
         DateTimeUtils: {
             ...actualGc.DateTimeUtils,
-            getStringDateByTime: jest.fn().mockReturnValue("2024-03-20"),
+            getStringDateByTime: jest.fn((time) => new Date(time).toISOString()),
         },
         FormatUtils: {
             ...actualGc.FormatUtils,
-            numberWithCommas: jest.fn().mockImplementation((num) => num.toString()),
+            numberWithCommas: jest.fn((num) => String(num)),
         },
     };
 });
 
+jest.mock("../../assets/scripts/utils/classic-slot-utils", () => ({
+    formatNamePool: jest.fn((name) => name),
+}));
+
 describe("TopWinnersHandler", () => {
     let container: Container;
     let topWinnersHandler: TopWinnersHandler;
-    let betControlStore: jest.Mocked<BetControlStore>;
-    let topWinnersStore: jest.Mocked<TopWinnersStore>;
-    let connectionStore: jest.Mocked<gc.Connection.ConnectionStore>;
-    let mainPlayerStore: jest.Mocked<gc.Player.MainPlayerStore>;
+    let mockTopWinnersStore: jest.Mocked<TopWinnersStore>;
+    let mockConnectionStore: jest.Mocked<gc.Connection.ConnectionStore>;
+    let mockMainPlayerStore: jest.Mocked<gc.Player.MainPlayerStore>;
+    let mockFormatNamePool: jest.MockedFunction<typeof classicSlotUtils.formatNamePool>;
 
     beforeEach(() => {
-        mockSetType.mockClear();
-        (gc.DateTimeUtils.getStringDateByTime as jest.Mock).mockClear();
-        (gc.FormatUtils.numberWithCommas as jest.Mock).mockClear();
-
         container = new Container();
 
+        // Bind mocks and class under test
+        mockTopWinnersStore = new (jest.requireMock(
+            "../../assets/scripts/handlers/stores/top-winners-store"
+        ).TopWinnersStore)() as jest.Mocked<TopWinnersStore>;
+        mockConnectionStore = new (jest.requireMock(
+            "@sg/game-client-base"
+        ).Connection.ConnectionStore)() as jest.Mocked<gc.Connection.ConnectionStore>;
+        mockMainPlayerStore = new (jest.requireMock(
+            "@sg/game-client-base"
+        ).Player.MainPlayerStore)() as jest.Mocked<gc.Player.MainPlayerStore>;
+        mockFormatNamePool = classicSlotUtils.formatNamePool as jest.MockedFunction<typeof classicSlotUtils.formatNamePool>;
+
+        container.bind(TopWinnersStore).toConstantValue(mockTopWinnersStore);
+        container.bind(gc.Connection.ConnectionStore).toConstantValue(mockConnectionStore);
+        container.bind(gc.Player.MainPlayerStore).toConstantValue(mockMainPlayerStore);
         container.bind(TopWinnersHandler).toSelf();
-        container
-            .bind(BetControlStore)
-            .toConstantValue(new (jest.requireMock("../../assets/scripts/handlers/stores/bet-control-store").BetControlStore)());
-
-        const MockedTopWinnersStore = jest.requireMock("../../assets/scripts/handlers/stores/top-winners-store").TopWinnersStore;
-        topWinnersStore = new MockedTopWinnersStore() as jest.Mocked<TopWinnersStore>;
-        container.bind(TopWinnersStore).toConstantValue(topWinnersStore);
-
-        container
-            .bind(gc.Connection.ConnectionStore)
-            .toConstantValue(new (jest.requireMock("@sg/game-client-base").Connection.ConnectionStore)());
-        container.bind(gc.Player.MainPlayerStore).toConstantValue(new (jest.requireMock("@sg/game-client-base").Player.MainPlayerStore)());
 
         topWinnersHandler = container.get(TopWinnersHandler);
-        betControlStore = container.get(BetControlStore) as jest.Mocked<BetControlStore>;
-        connectionStore = container.get(gc.Connection.ConnectionStore) as jest.Mocked<gc.Connection.ConnectionStore>;
-        mainPlayerStore = container.get(gc.Player.MainPlayerStore) as jest.Mocked<gc.Player.MainPlayerStore>;
 
+        // Assign store instances manually as they are private properties
+        // This is sometimes necessary if the constructor or other methods initialize them.
         Object.assign(topWinnersHandler, {
-            betControlStore,
-            topWinnersStore,
-            connectionStore,
-            mainPlayerStore,
+            topWinnersStore: mockTopWinnersStore,
+            connectionStore: mockConnectionStore,
+            mainPlayerStore: mockMainPlayerStore,
         });
     });
 
@@ -104,154 +98,397 @@ describe("TopWinnersHandler", () => {
         jest.clearAllMocks();
     });
 
+    it("should be defined", () => {
+        expect(topWinnersHandler).toBeDefined();
+    });
+
+    describe("constructor", () => {
+        it("should initialize with a setTimeout", () => {
+            jest.useFakeTimers();
+            const setTimeoutSpy = jest.spyOn(global, "setTimeout");
+            new TopWinnersHandler(); // Intentionally create a new instance to test constructor
+            expect(setTimeoutSpy).toHaveBeenCalledTimes(1);
+            expect(setTimeoutSpy).toHaveBeenCalledWith(expect.any(Function), 0);
+            jest.clearAllTimers();
+        });
+    });
+
     describe("eventHandleList", () => {
-        it("should have correct event handlers configured", () => {
-            expect(topWinnersHandler.eventHandleList).toHaveLength(2);
-            expect(topWinnersHandler.eventHandleList[0].name).toBe(TopWinnerType.BigWinningWinners);
-            expect(topWinnersHandler.eventHandleList[1].name).toBe(TopWinnerType.JackpotWinners);
+        it("should have correct event handlers defined", () => {
+            const eventList = topWinnersHandler.eventHandleList;
+            expect(eventList).toHaveLength(2);
+            expect(eventList[0].name).toBe(TopWinnerType.BigWinningWinners);
+            expect(eventList[0].handle).toBeInstanceOf(Function); // Will be bound instance method
+            expect(eventList[1].name).toBe(TopWinnerType.JackpotWinners);
+            expect(eventList[1].handle).toBeInstanceOf(Function); // Will be bound instance method
         });
     });
 
     describe("getData", () => {
-        it("should emit getBigWinningWinners event when type is BigWinningWinners", () => {
-            topWinnersStore.type = TopWinnerType.BigWinningWinners;
+        it("should emit 'getBigWinningWinners' event when type is BigWinningWinners", () => {
+            mockTopWinnersStore.type = TopWinnerType.BigWinningWinners;
             topWinnersHandler.getData(1);
-            expect(connectionStore.connection.emit).toHaveBeenCalledWith("getBigWinningWinners", { page: 1 });
+            expect(mockConnectionStore.connection.emit).toHaveBeenCalledWith("getBigWinningWinners", { page: 1 });
         });
 
-        it("should emit getJackpotWinners event when type is JackpotWinners", () => {
-            topWinnersStore.type = TopWinnerType.JackpotWinners;
-            topWinnersHandler.getData(1);
-            expect(connectionStore.connection.emit).toHaveBeenCalledWith("getJackpotWinners", { page: 1 });
+        it("should emit 'getJackpotWinners' event when type is JackpotWinners", () => {
+            mockTopWinnersStore.type = TopWinnerType.JackpotWinners;
+            topWinnersHandler.getData(2);
+            expect(mockConnectionStore.connection.emit).toHaveBeenCalledWith("getJackpotWinners", { page: 2 });
         });
     });
 
     describe("swapType", () => {
-        it("should swap from BigWinningWinners to JackpotWinners", () => {
-            topWinnersStore.type = TopWinnerType.BigWinningWinners;
+        it("should swap type from BigWinningWinners to JackpotWinners and call getData", () => {
+            mockTopWinnersStore.type = TopWinnerType.BigWinningWinners;
+            const getDataSpy = jest.spyOn(topWinnersHandler, "getData");
+
             topWinnersHandler.swapType();
-            expect(mockSetType).toHaveBeenCalledWith(TopWinnerType.JackpotWinners);
-            expect(topWinnersStore.type).toBe(TopWinnerType.JackpotWinners);
-            expect(connectionStore.connection.emit).toHaveBeenCalledWith("getJackpotWinners", { page: 1 });
+
+            expect(mockTopWinnersStore.type).toBe(TopWinnerType.JackpotWinners);
+            expect(getDataSpy).toHaveBeenCalledWith(1);
         });
 
-        it("should swap from JackpotWinners to BigWinningWinners", () => {
-            topWinnersStore.type = TopWinnerType.JackpotWinners;
+        it("should swap type from JackpotWinners to BigWinningWinners and call getData", () => {
+            mockTopWinnersStore.type = TopWinnerType.JackpotWinners;
+            const getDataSpy = jest.spyOn(topWinnersHandler, "getData");
+
             topWinnersHandler.swapType();
-            expect(mockSetType).toHaveBeenCalledWith(TopWinnerType.BigWinningWinners);
-            expect(topWinnersStore.type).toBe(TopWinnerType.BigWinningWinners);
-            expect(connectionStore.connection.emit).toHaveBeenCalledWith("getBigWinningWinners", { page: 1 });
+
+            expect(mockTopWinnersStore.type).toBe(TopWinnerType.BigWinningWinners);
+            expect(getDataSpy).toHaveBeenCalledWith(1);
         });
     });
 
-    describe("receivedBigWinningWinners and receivedJackpotWinners", () => {
-        const mockWinnerInput = {
-            name: "testPlayer",
-            time: 1710892800000 as number | string,
-            baseWinningAmount: 1000,
-            winningAmount: 1000,
-            rate: 1,
-            exchangeRateCode: { USD: 1 },
-            exchangeRateId: 1,
-            amountString: "",
-        };
-
-        const getMockWinnersData = (): WinnersData => ({
-            page: 1,
-            pageSize: 10,
-            total: 1,
-            winners: [JSON.parse(JSON.stringify(mockWinnerInput)) as Winner],
-        });
-
-        it("should process big winning winners data correctly", () => {
-            const testData = getMockWinnersData();
-            // @ts-ignore
-            topWinnersHandler.receivedBigWinningWinners(testData);
-            expect(topWinnersStore.data.winners[0].name).toBe("t***yer");
-            expect(topWinnersStore.data.winners[0].time).toBe("2024-03-20");
-            expect(topWinnersStore.data.winners[0].highlight).toBe(false);
-        });
-
-        it("should process jackpot winners data correctly", () => {
-            const testData = getMockWinnersData();
-            // @ts-ignore
-            topWinnersHandler.receivedJackpotWinners(testData);
-            expect(topWinnersStore.data.winners[0].name).toBe("t***yer");
-            expect(topWinnersStore.data.winners[0].time).toBe("2024-03-20");
-            expect(topWinnersStore.data.winners[0].highlight).toBe(false);
+    // More tests will be added here
+    describe("receivedBigWinningWinners", () => {
+        it("should update topWinnersStore.data with converted winners data", () => {
+            const mockData: any = {
+                winners: [
+                    {
+                        name: "Player1",
+                        time: Date.now(),
+                        baseWinningAmount: 100,
+                        winningAmount: 100,
+                        rate: 1,
+                        exchangeRateCode: { USD: 1 },
+                    },
+                ],
+                page: 1,
+                pageSize: 10,
+                total: 1,
+            };
+            // @ts-ignore - testing protected method
+            topWinnersHandler.receivedBigWinningWinners(mockData);
+            expect(mockTopWinnersStore.data).toBeDefined();
+            expect(mockTopWinnersStore.data?.winners[0].name).toBe("p***er1"); // Corrected suffix
+            expect(mockTopWinnersStore.data?.page).toBe(1);
         });
     });
 
-    describe("convertWinner", () => {
-        const createWinnerInput = (overrides = {}): Winner =>
-            ({
-                name: "testPlayer",
-                time: 1710892800000,
-                baseWinningAmount: 1000,
-                winningAmount: 1000,
+    describe("receivedJackpotWinners", () => {
+        it("should update topWinnersStore.data with converted winners data", () => {
+            const mockData: any = {
+                winners: [
+                    {
+                        name: "Player2",
+                        time: Date.now(),
+                        baseWinningAmount: 200,
+                        winningAmount: 200,
+                        rate: 1,
+                        exchangeRateCode: { USD: 1 },
+                    },
+                ],
+                page: 1,
+                pageSize: 10,
+                total: 1,
+            };
+            // @ts-ignore - testing protected method
+            topWinnersHandler.receivedJackpotWinners(mockData);
+            expect(mockTopWinnersStore.data).toBeDefined();
+            expect(mockTopWinnersStore.data?.winners[0].name).toBe("p***er2"); // Corrected suffix
+            expect(mockTopWinnersStore.data?.page).toBe(1);
+        });
+    });
+
+    describe("convertDataWinners", () => {
+        it("should convert winners data correctly", () => {
+            const winner1 = {
+                name: "PlayerLongName",
+                time: Date.now(),
+                baseWinningAmount: 100,
+                winningAmount: 100,
                 rate: 1,
                 exchangeRateCode: { USD: 1 },
-                totalAmount: 2000,
-                baseTotalAmount: 2000,
-                exchangeRateId: 1,
-                amountString: "",
-                ...overrides,
-            } as Winner);
-
-        it("should convert regular winner correctly", () => {
-            const winnerInput = createWinnerInput();
-            // @ts-ignore
-            const convertedWinner = topWinnersHandler.convertWinner(winnerInput) as Winner;
-
-            expect(convertedWinner.name).toBe("t***yer");
-            expect(convertedWinner.time).toBe("2024-03-20");
-            expect(convertedWinner.highlight).toBe(false);
-            expect(convertedWinner.amountString).toBe("2000");
-            expect(convertedWinner.winningAmount).toBe(1000);
-        });
-
-        it("should handle jackpot pool winner correctly", () => {
-            const winnerInput = createWinnerInput({ pool: "grand" });
-            // @ts-ignore
-            const convertedWinner = topWinnersHandler.convertWinner(winnerInput) as Winner;
-            expect(convertedWinner.time).toBe("2024-03-20");
-            expect(convertedWinner.amountString).toBe("Grand");
-        });
-
-        it("should handle free spin winner correctly", () => {
-            const winnerInput = createWinnerInput({ freeSpin: true });
-            // @ts-ignore
-            const convertedWinner = topWinnersHandler.convertWinner(winnerInput) as Winner;
-            expect(convertedWinner.time).toBe("2024-03-20");
-            expect(convertedWinner.amountString).toBe("Free Spin");
-        });
-
-        it("should highlight current player's name", () => {
-            const winnerInput = createWinnerInput({ name: "player1" });
-            // @ts-ignore
-            const convertedWinner = topWinnersHandler.convertWinner(winnerInput) as Winner;
-            expect(convertedWinner.time).toBe("2024-03-20");
-            expect(convertedWinner.name).toBe("player1");
-            expect(convertedWinner.highlight).toBe(true);
+            };
+            const winner2 = {
+                name: "TestPlayer",
+                time: Date.now(),
+                baseWinningAmount: 150,
+                winningAmount: 150,
+                rate: 1,
+                exchangeRateCode: { USD: 1 },
+                pool: "mega",
+            }; // Current player
+            const mockData: any = {
+                winners: [winner1, winner2],
+                page: 1,
+                pageSize: 10,
+                total: 2,
+            };
+            // @ts-ignore - testing protected method
+            const result = topWinnersHandler.convertDataWinners(mockData);
+            expect(result.winners).toHaveLength(2);
+            expect(result.winners[0].name).toBe("p***ame"); // Changed to lowercase
+            expect(result.winners[0].highlight).toBe(false);
+            expect(result.winners[1].name).toBe("TestPlayer"); // Current player name not shortened
+            expect(result.winners[1].highlight).toBe(true);
+            expect(result.winners[1].amountString).toBe("mega"); // Pool name used as amount string
+            expect(mockFormatNamePool).toHaveBeenCalledWith("mega");
         });
     });
 
     describe("getValueByExchangeRateCode", () => {
-        it("should calculate correct value with exchange rate", () => {
-            const value = 1000;
-            const exchangeRateCode = { USD: 2 };
-            // @ts-ignore
-            const result = topWinnersHandler.getValueByExchangeRateCode(value, exchangeRateCode);
-            expect(result).toBe(500);
+        beforeEach(() => {
+            mockMainPlayerStore.currency = "USD";
+            mockMainPlayerStore.multiplier = 1;
         });
 
-        it("should use default rate when currency not found", () => {
-            mainPlayerStore.currency = "EUR";
-            const value = 1000;
-            const exchangeRateCode = { USD: 2 };
-            // @ts-ignore
-            const result = topWinnersHandler.getValueByExchangeRateCode(value, exchangeRateCode);
-            expect(result).toBe(1000);
+        it("should return value divided by currency rate and multiplier", () => {
+            const exchangeRateCode = { USD: 1, EUR: 0.8 };
+            // @ts-ignore - testing protected method
+            let result = topWinnersHandler.getValueByExchangeRateCode(100, exchangeRateCode);
+            expect(result).toBe(100);
+
+            mockMainPlayerStore.currency = "EUR";
+            // @ts-ignore - testing protected method
+            result = topWinnersHandler.getValueByExchangeRateCode(80, exchangeRateCode);
+            expect(result).toBe(100); // 80 / 0.8
+        });
+
+        it("should use rate 1 if currency not in exchangeRateCode", () => {
+            const exchangeRateCode = { EUR: 0.8 };
+            mockMainPlayerStore.currency = "JPY"; // JPY not in codes
+            // @ts-ignore - testing protected method
+            const result = topWinnersHandler.getValueByExchangeRateCode(100, exchangeRateCode);
+            expect(result).toBe(100); // 100 / 1 (default rate)
+        });
+
+        it("should handle multiplier correctly", () => {
+            mockMainPlayerStore.multiplier = 10;
+            const exchangeRateCode = { USD: 1 };
+            // @ts-ignore - testing protected method
+            const result = topWinnersHandler.getValueByExchangeRateCode(1000, exchangeRateCode);
+            expect(result).toBe(100); // 1000 / (10 * 1)
+        });
+    });
+
+    describe("formatNamePool", () => {
+        it("should capitalize the first letter of the pool name", () => {
+            // @ts-ignore - testing protected method
+            const result = topWinnersHandler.formatNamePool("mega");
+            expect(result).toBe("Mega");
+            // @ts-ignore - testing protected method
+            const result2 = topWinnersHandler.formatNamePool("grand");
+            expect(result2).toBe("Grand");
+        });
+    });
+
+    describe("convertWinner", () => {
+        const now = Date.now();
+        // This mockWinner is for type conformance if needed, but we'll pass a modified one to the function.
+        const mockWinnerTyped: Winner = {
+            name: "TestWinner",
+            time: new Date(now).toISOString(), // Ensure it's a string to match Winner type
+            winningAmount: 1000,
+            baseWinningAmount: 1000, // Property from actual Winner type
+            rate: 1, // Property from actual Winner type
+            exchangeRateCode: { USD: 1, EUR: 0.9 },
+            exchangeRateId: 1, // Added missing required property
+            amountString: "", // Explicitly add required property from Winner
+            // Removed id, currency, gameId, tableId as they are not in Winner interface
+        };
+
+        beforeEach(() => {
+            mockMainPlayerStore.name = "TestPlayer";
+            mockMainPlayerStore.currency = "USD";
+            mockMainPlayerStore.multiplier = 1;
+            (gc.DateTimeUtils.getStringDateByTime as jest.Mock).mockImplementation((timeNum) => new Date(timeNum).toLocaleDateString());
+            (gc.FormatUtils.numberWithCommas as jest.Mock).mockImplementation((val) => String(val));
+        });
+
+        it("should convert winner data correctly for non-current player", () => {
+            const winnerToConvert = {
+                name: "TestWinner",
+                time: now, // Pass number here, as gc.DateTimeUtils.getStringDateByTime likely expects it
+                winningAmount: 1000,
+                baseWinningAmount: 1000,
+                rate: 1,
+                exchangeRateCode: { USD: 1 },
+                baseTotalAmount: 1000,
+                totalAmount: 1000,
+
+                // other necessary fields that convertWinner might access before setting them
+            } as any; // Use 'as any' to bypass strict typing for the input to the function being tested
+
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerToConvert);
+
+            expect(winnerToConvert.name).toBe("t***ner"); // Changed to lowercase
+            expect(winnerToConvert.time).toBe(new Date(now).toLocaleDateString());
+            expect(winnerToConvert.highlight).toBe(false);
+            expect(winnerToConvert.amountString).toBe("1000");
+            expect(winnerToConvert.winningAmount).toBe(1000);
+            expect(gc.DateTimeUtils.getStringDateByTime).toHaveBeenCalledWith(now);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1000, 2);
+        });
+
+        it("should highlight and not shorten name for current player", () => {
+            const winnerToConvert = {
+                name: "TestPlayer",
+                time: now,
+                winningAmount: 100,
+                baseWinningAmount: 100,
+                rate: 1,
+                exchangeRateCode: { USD: 1 },
+            } as any;
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerToConvert);
+
+            expect(winnerToConvert.name).toBe("TestPlayer");
+            expect(winnerToConvert.highlight).toBe(true);
+        });
+
+        it("should use pool name for amountString if pool exists", () => {
+            const winnerToConvert = {
+                name: "APoolPlayer",
+                time: now,
+                winningAmount: 100,
+                pool: "jackpot",
+                exchangeRateCode: { USD: 1 },
+                rate: 1,
+            } as any;
+            mockFormatNamePool.mockReturnValueOnce("JackpotFormatted");
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerToConvert);
+            expect(winnerToConvert.amountString).toBe("JackpotFormatted");
+            expect(mockFormatNamePool).toHaveBeenCalledWith("jackpot");
+        });
+
+        it("should use 'Free Spin' for amountString if freeSpin is true and no pool", () => {
+            const winnerToConvert = {
+                name: "FreeSpinner",
+                time: now,
+                winningAmount: 50,
+                freeSpin: true,
+                exchangeRateCode: { USD: 1 },
+                rate: 1,
+            } as any;
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerToConvert);
+            expect(winnerToConvert.amountString).toBe("Free Spin");
+        });
+
+        it("should use baseTotalAmount for amountString if available and no pool/freespin", () => {
+            const winnerToConvert = {
+                name: "BaseTotal",
+                time: now,
+                baseTotalAmount: 1200,
+                totalAmount: 1000,
+                exchangeRateCode: { USD: 1 },
+                rate: 1,
+            } as any;
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerToConvert);
+            expect(winnerToConvert.amountString).toBe("1200");
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1200, 2);
+        });
+
+        it("should use totalAmount * rate for amountString if baseTotalAmount is undefined and no pool/freespin", () => {
+            const winnerToConvert = {
+                name: "TotalRate",
+                time: now,
+                totalAmount: 1000,
+                rate: 1.5,
+                baseTotalAmount: undefined,
+                exchangeRateCode: { USD: 1 },
+            } as any;
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerToConvert);
+            expect(winnerToConvert.amountString).toBe("1500"); // 1000 * 1.5
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1500, 2);
+        });
+
+        it("should calculate winningAmount based on pool or baseWinningAmount/winningAmount*rate", () => {
+            const winnerPool = {
+                name: "PoolWin",
+                pool: "mini",
+                winningAmount: 500,
+                time: now,
+                exchangeRateCode: { USD: 1 },
+                rate: 1,
+            } as any;
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerPool);
+            expect(winnerPool.winningAmount).toBe(500);
+
+            const winnerBase = {
+                name: "BaseWin",
+                baseWinningAmount: 700,
+                winningAmount: 600,
+                rate: 1,
+                time: now,
+                exchangeRateCode: { USD: 1 },
+            } as any;
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerBase);
+            expect(winnerBase.winningAmount).toBe(700);
+
+            const winnerRate = {
+                name: "RateWin",
+                winningAmount: 300,
+                rate: 2,
+                baseWinningAmount: undefined,
+                time: now,
+                exchangeRateCode: { USD: 1 },
+            } as any;
+            // @ts-ignore - testing protected method
+            topWinnersHandler.convertWinner(winnerRate);
+            expect(winnerRate.winningAmount).toBe(600); // 300 * 2
+        });
+    });
+
+    describe("shortenName", () => {
+        it("should shorten name to prefix***suffix format", () => {
+            // @ts-ignore - testing protected method
+            const result = topWinnersHandler.shortenName("PlayerTooLong");
+            expect(result).toBe("p***ong");
+            // @ts-ignore - testing protected method
+            const result2 = topWinnersHandler.shortenName("short");
+            expect(result2).toBe("s***ort");
+            // @ts-ignore - testing protected method
+            const result3 = topWinnersHandler.shortenName("tiny");
+            expect(result3).toBe("t***iny"); // Suffix takes precedence if name < 4 chars
+        });
+    });
+
+    describe("handleShortenName", () => {
+        it("should shorten name if it is not the current player's name", () => {
+            mockMainPlayerStore.name = "CurrentPlayer";
+            const shortenSpy = jest.spyOn(topWinnersHandler as any, "shortenName");
+            // @ts-ignore - testing protected method
+            const result = topWinnersHandler.handleShortenName("OtherPlayer");
+            expect(shortenSpy).toHaveBeenCalledWith("OtherPlayer");
+            expect(result).toBe("o***yer");
+        });
+
+        it("should not shorten name if it is the current player's name", () => {
+            mockMainPlayerStore.name = "CurrentPlayer";
+            const shortenSpy = jest.spyOn(topWinnersHandler as any, "shortenName");
+            // @ts-ignore - testing protected method
+            const result = topWinnersHandler.handleShortenName("CurrentPlayer");
+            expect(shortenSpy).not.toHaveBeenCalled();
+            expect(result).toBe("CurrentPlayer");
         });
     });
 });

@@ -1,7 +1,6 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
 import { formatNamePool } from "../../utils/classic-slot-utils";
-import { BetControlStore } from "../stores/bet-control-store";
 import { TopWinnersStore, TopWinnerType, Winner, WinnersData } from "../stores/top-winners-store";
 const { injectable, inject } = inversify;
 
@@ -12,7 +11,6 @@ enum TopWinnerEvent {
 
 @injectable()
 export class TopWinnersHandler {
-    @inject(BetControlStore) private betControlStore: BetControlStore;
     @inject(TopWinnersStore) private topWinnersStore: TopWinnersStore;
     @inject(gc.Connection.ConnectionStore) private connectionStore: gc.Connection.ConnectionStore;
 

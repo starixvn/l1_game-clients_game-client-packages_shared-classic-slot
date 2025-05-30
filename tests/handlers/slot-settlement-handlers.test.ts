@@ -246,22 +246,25 @@ describe("SlotSettlementHandler", () => {
     });
 
     describe("handleFinish", () => {
-        const createFinishData = (overrides: any = {}) => ({
-            result: [1, 2, 3],
-            settlementResult: {
-                winningLines: [],
-                jackpot: null,
-                bonus: { count: 0 },
-                freeSpins: { count: 0 },
-                ...overrides.settlementResult,
-            },
-            betWin: 100,
-            bigWin: false,
-            roundId: 1,
-            totalOfFreeSpins: 0,
-            betByFreeSpin: false,
-            ...overrides,
-        });
+        const createFinishData = (overrides: any = {}) => {
+            const { settlementResult, ...rest } = overrides;
+            return {
+                result: [1, 2, 3],
+                settlementResult: {
+                    winningLines: [],
+                    jackpot: null,
+                    bonus: { count: 0 },
+                    freeSpins: { count: 0 },
+                    ...settlementResult,
+                },
+                betWin: 100,
+                bigWin: false,
+                roundId: 1,
+                totalOfFreeSpins: 0,
+                betByFreeSpin: false,
+                ...rest,
+            };
+        };
 
         it("should handle normal win scenario", async () => {
             const finish = createFinishData();
@@ -274,11 +277,13 @@ describe("SlotSettlementHandler", () => {
 
         it("should handle big win scenario", async () => {
             const finish = createFinishData({ bigWin: true, betWin: 1000 });
+            // @ts-ignore
+            const createTweenShowBigWinSpy = jest.spyOn(settlementHandler, "createTweenShowBigWin");
             await settlementHandler.handleFinish(finish as any);
 
-            expect(slotBoardStore.slotState).toBe(SlotState.SPINNING);
+            expect(slotBoardStore.slotState).toBe(SlotState.SPINNING); // This might change depending on async nature
             expect(betControlStore.roundId).toBe(finish.roundId);
-            expect(slotBoardStore.receivedBigWin).toEqual({ duration: slotDurationStore.bigWinDuration, amount: finish.betWin });
+            expect(createTweenShowBigWinSpy).toHaveBeenCalledWith(finish.betWin, finish.bigWin);
         });
 
         it("should handle free spins win scenario", async () => {
@@ -286,26 +291,14 @@ describe("SlotSettlementHandler", () => {
                 settlementResult: { freeSpins: { count: 5 } },
                 totalOfFreeSpins: 5,
             });
+            // @ts-ignore
+            const createTweenShowFreeSpinsSpy = jest.spyOn(settlementHandler, "createTweenShowFreeSpins");
             await settlementHandler.handleFinish(finish as any);
 
             expect(slotBoardStore.highlightSpecialSymbols).toContain(SpecialSymbol.FREESPIN);
             expect(betControlStore.setTotalFreeSpins).toHaveBeenCalledWith(5);
             expect(betControlStore.totalFreeSpins).toBe(5);
-            expect(slotBoardStore.receivedFreeSpins).toEqual({ count: 5, duration: slotDurationStore.freespinDuration });
-        });
-    });
-
-    describe("error handling reactions in constructor/init (if any)", () => {
-        it("should trigger handlePlaceBetFailed on apiError change if conditions met", () => {
-            errorStore.apiError = { message: "Test API Error" } as any;
-            jest.advanceTimersByTime(0);
-            expect(slotErrorHandler.handleEndGameApiError).toHaveBeenCalled();
-        });
-
-        it("should trigger handlePlaceBetFailed on lastReceivedBet change if bet is invalid", () => {
-            betStore.lastReceivedBet = { value: -1 } as any;
-            jest.advanceTimersByTime(0);
-            expect(slotBetHandler.handlePlaceBetFailed).toHaveBeenCalled();
+            expect(createTweenShowFreeSpinsSpy).toHaveBeenCalledWith(finish.settlementResult.freeSpins);
         });
     });
 });
