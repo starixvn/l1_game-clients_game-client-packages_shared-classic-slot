@@ -84,14 +84,6 @@ describe("TopWinnersHandler", () => {
         container.bind(TopWinnersHandler).toSelf();
 
         topWinnersHandler = container.get(TopWinnersHandler);
-
-        // Assign store instances manually as they are private properties
-        // This is sometimes necessary if the constructor or other methods initialize them.
-        Object.assign(topWinnersHandler, {
-            topWinnersStore: mockTopWinnersStore,
-            connectionStore: mockConnectionStore,
-            mainPlayerStore: mockMainPlayerStore,
-        });
     });
 
     afterEach(() => {

@@ -52,12 +52,6 @@ describe("SlotJackpotPoolsHandler", () => {
         jackpotPoolStore = container.get(JackpotPoolStore) as jest.Mocked<JackpotPoolStore>;
         mainPlayerStore = container.get(gc.Player.MainPlayerStore) as jest.Mocked<gc.Player.MainPlayerStore>;
 
-        // Assign store references to handler
-        Object.assign(jackpotPoolsHandler, {
-            jackpotPoolStore,
-            mainPlayerStore,
-        });
-
         // Reset mocks before each test if needed, for example:
         // (gc.NumberUtils.getValueByCurrency as jest.Mock).mockClear();
         // jackpotPoolStore.jackpotPools = {}; // Reset state if necessary

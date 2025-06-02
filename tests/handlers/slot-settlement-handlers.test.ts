@@ -233,17 +233,6 @@ describe("SlotSettlementHandler", () => {
 
         settlementHandler = container.get(SlotSettlementHandler);
 
-        Object.assign(settlementHandler, {
-            betControlStore,
-            slotBoardStore,
-            slotDurationStore,
-            slotBetHandler,
-            slotErrorHandler,
-            connectionStore,
-            betStore,
-            errorStore,
-        });
-
         jest.useFakeTimers();
         jest.requireMock("db://shared-components/shared/utils").AnimationUtils.delayTime.mockClear();
         slotBoardStore.reset.mockClear();

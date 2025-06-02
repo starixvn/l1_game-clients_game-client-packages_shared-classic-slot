@@ -2,14 +2,8 @@ import gc from "@sg/game-client-base";
 import { Container } from "inversify";
 import "reflect-metadata";
 import { SlotBetResponseHandler } from "../../assets/scripts/handlers/handlers/slot-bet-response-handlers";
-import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
 
-// Mock BetControlStore
-jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
-    BetControlStore: jest.fn().mockImplementation(() => ({})), // Add properties if needed by the handler
-}));
-
-// Mock gc components (BetStore, RetryGameHandler)
+// Mock gc components
 jest.mock("@sg/game-client-base", () => {
     const actualGc = jest.requireActual("@sg/game-client-base");
     return {
@@ -35,45 +29,30 @@ jest.mock("@sg/game-client-base", () => {
 
 describe("SlotBetResponseHandler", () => {
     let container: Container;
-    let betResponseHandler: SlotBetResponseHandler;
-    let betControlStore: jest.Mocked<BetControlStore>;
-    let betStore: jest.Mocked<gc.Bet.BetStore>;
-    let retryGameHandler: jest.Mocked<gc.Connection.ConnectionHandlers.RetryGameHandler>;
+    let slotBetResponseHandler: SlotBetResponseHandler;
+    let mockBetStore: jest.Mocked<gc.Bet.BetStore>;
+    let mockRetryGameHandler: jest.Mocked<gc.Connection.ConnectionHandlers.RetryGameHandler>;
 
     beforeEach(() => {
         container = new Container();
 
-        // Bind dependencies
-        container.bind(SlotBetResponseHandler).toSelf();
-        // Use toConstantValue for mocked stores/handlers
-        container
-            .bind(BetControlStore)
-            .toConstantValue(new (jest.requireMock("../../assets/scripts/handlers/stores/bet-control-store").BetControlStore)());
+        // Create mock instances
         const MockedBetStore = jest.requireMock("@sg/game-client-base").Bet.BetStore;
-        betStore = new MockedBetStore();
-        container.bind(gc.Bet.BetStore).toConstantValue(betStore);
+        mockBetStore = new MockedBetStore();
 
         const MockedRetryGameHandler = jest.requireMock("@sg/game-client-base").Connection.ConnectionHandlers.RetryGameHandler;
-        retryGameHandler = new MockedRetryGameHandler();
-        container.bind(gc.Connection.ConnectionHandlers.RetryGameHandler).toConstantValue(retryGameHandler);
+        mockRetryGameHandler = new MockedRetryGameHandler();
 
-        // Get instances
-        betResponseHandler = container.get(SlotBetResponseHandler);
-        betControlStore = container.get(BetControlStore) as jest.Mocked<BetControlStore>;
-        // betStore and retryGameHandler are already instantiated and typed correctly above
+        // Bind dependencies
+        container.bind(SlotBetResponseHandler).toSelf();
+        container.bind(gc.Bet.BetStore).toConstantValue(mockBetStore);
+        container.bind(gc.Connection.ConnectionHandlers.RetryGameHandler).toConstantValue(mockRetryGameHandler);
 
-        // Assign mocked dependencies to the handler instance if they are injected as properties
-        // This step is crucial if the handler directly accesses properties of these dependencies.
-        // If dependencies are only used via method calls on instances obtained from the container, this might not be strictly necessary
-        // but it's safer to ensure the handler uses the exact mocked instances we control in the test.
-        Object.assign(betResponseHandler, {
-            betControlStore, // Assuming it's injected or assigned
-            betStore, // Assuming it's injected or assigned
-            retryGameHandler, // Assuming it's injected or assigned
-        });
+        // Get instance
+        slotBetResponseHandler = container.get(SlotBetResponseHandler);
 
-        // Clear mocks that might be called in constructor or globally before each test
-        retryGameHandler.clearInterval.mockClear();
+        // Clear mock call counts that might be invoked during setup
+        mockRetryGameHandler.clearInterval.mockClear();
     });
 
     afterEach(() => {
@@ -81,85 +60,165 @@ describe("SlotBetResponseHandler", () => {
     });
 
     describe("eventHandleList", () => {
-        it("should have correct event handler configured", () => {
-            expect(betResponseHandler.eventHandleList).toHaveLength(1);
-            expect(betResponseHandler.eventHandleList[0].name).toBe("endBet,freeSpin");
+        it("should have correct event handlers configured", () => {
+            expect(slotBetResponseHandler.eventHandleList).toHaveLength(1);
+            expect(slotBetResponseHandler.eventHandleList[0].name).toBe("endBet,freeSpin");
+            expect(slotBetResponseHandler.eventHandleList[0].handle).toBe(slotBetResponseHandler.handleSlotBetResponse);
         });
     });
 
     describe("stopProcessingBetAndClearInterval", () => {
-        it("should stop processing bet and clear interval", () => {
-            betStore.isProcessingBet = true; // Set initial state on the mock
+        it("should stop processing bet and clear retry interval", () => {
+            // Arrange
+            mockBetStore.isProcessingBet = true;
 
-            // @ts-ignore because it's a protected method
-            betResponseHandler.stopProcessingBetAndClearInterval();
+            // Act
+            slotBetResponseHandler.stopProcessingBetAndClearInterval();
 
-            expect(betStore.isProcessingBet).toBe(false);
-            expect(retryGameHandler.clearInterval).toHaveBeenCalled();
+            // Assert
+            expect(mockBetStore.isProcessingBet).toBe(false);
+            expect(mockRetryGameHandler.clearInterval).toHaveBeenCalled();
         });
     });
 
     describe("handleSlotBetResponse", () => {
-        it("should update last received bet when endBet is valid and not free spin", () => {
-            const response = {
-                endBet: 100,
-                freeSpin: false,
-            };
-            betStore.isProcessingBet = true; // Ensure processing is true initially
-            betStore.lastReceivedBet = null; // Reset for the test
+        it("should return early when data is null", () => {
+            // Arrange
+            const stopProcessingSpy = jest.spyOn(slotBetResponseHandler, "stopProcessingBetAndClearInterval");
 
-            betResponseHandler.handleSlotBetResponse(response);
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(null as any);
 
-            expect(betStore.lastReceivedBet).toEqual({
-                value: 100,
+            // Assert
+            expect(stopProcessingSpy).not.toHaveBeenCalled();
+        });
+
+        it("should return early when data is undefined", () => {
+            // Arrange
+            const stopProcessingSpy = jest.spyOn(slotBetResponseHandler, "stopProcessingBetAndClearInterval");
+
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(undefined as any);
+
+            // Assert
+            expect(stopProcessingSpy).not.toHaveBeenCalled();
+        });
+
+        it("should stop processing and clear interval when data is valid", () => {
+            // Arrange
+            const data = { endBet: 100, freeSpin: false };
+            const stopProcessingSpy = jest.spyOn(slotBetResponseHandler, "stopProcessingBetAndClearInterval");
+
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
+
+            // Assert
+            expect(stopProcessingSpy).toHaveBeenCalled();
+        });
+
+        it("should return early when endBet is undefined", () => {
+            // Arrange
+            const data = { endBet: undefined as any, freeSpin: false };
+            mockBetStore.lastReceivedBet = null;
+
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
+
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toBeNull();
+        });
+
+        it("should return early when freeSpin is undefined", () => {
+            // Arrange
+            const data = { endBet: 100, freeSpin: undefined as any };
+            mockBetStore.lastReceivedBet = null;
+
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
+
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toBeNull();
+        });
+
+        it("should set lastReceivedBet when endBet is not -1 and freeSpin is false", () => {
+            // Arrange
+            const data = { endBet: 250, freeSpin: false };
+            mockBetStore.lastReceivedBet = null;
+
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
+
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toEqual({
+                value: 250,
                 isAnimated: true,
             });
-            expect(betStore.isProcessingBet).toBe(false);
-            expect(retryGameHandler.clearInterval).toHaveBeenCalled();
         });
 
-        it("should not update last received bet when endBet is -1", () => {
-            const response = {
-                endBet: -1,
-                freeSpin: false,
-            };
-            betStore.isProcessingBet = true;
-            const initialLastReceivedBet = { value: 50, isAnimated: false };
-            betStore.lastReceivedBet = initialLastReceivedBet;
+        it("should not set lastReceivedBet when endBet is -1", () => {
+            // Arrange
+            const data = { endBet: -1, freeSpin: false };
+            mockBetStore.lastReceivedBet = null;
 
-            betResponseHandler.handleSlotBetResponse(response);
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
 
-            expect(betStore.lastReceivedBet).toBe(initialLastReceivedBet); // Should remain unchanged
-            expect(betStore.isProcessingBet).toBe(false);
-            expect(retryGameHandler.clearInterval).toHaveBeenCalled();
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toBeNull();
         });
 
-        it("should not update last received bet when it is a free spin", () => {
-            const response = {
-                endBet: 100,
-                freeSpin: true,
-            };
-            betStore.isProcessingBet = true;
-            const initialLastReceivedBet = { value: 50, isAnimated: false };
-            betStore.lastReceivedBet = initialLastReceivedBet;
+        it("should not set lastReceivedBet when freeSpin is true", () => {
+            // Arrange
+            const data = { endBet: 100, freeSpin: true };
+            mockBetStore.lastReceivedBet = null;
 
-            betResponseHandler.handleSlotBetResponse(response);
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
 
-            expect(betStore.lastReceivedBet).toBe(initialLastReceivedBet);
-            expect(betStore.isProcessingBet).toBe(false);
-            expect(retryGameHandler.clearInterval).toHaveBeenCalled();
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toBeNull();
         });
 
-        it("should handle undefined response gracefully", () => {
-            betStore.isProcessingBet = true;
-            const initialLastReceivedBet = { value: 50, isAnimated: false };
-            betStore.lastReceivedBet = initialLastReceivedBet;
+        it("should not set lastReceivedBet when endBet is -1 and freeSpin is true", () => {
+            // Arrange
+            const data = { endBet: -1, freeSpin: true };
+            mockBetStore.lastReceivedBet = null;
 
-            betResponseHandler.handleSlotBetResponse({} as any);
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
 
-            expect(betStore.lastReceivedBet).toBe(initialLastReceivedBet);
-            expect(betStore.isProcessingBet).toBe(false);
-            expect(retryGameHandler.clearInterval).toHaveBeenCalled();
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toBeNull();
+        });
+
+        it("should handle zero endBet value correctly when freeSpin is false", () => {
+            // Arrange
+            const data = { endBet: 0, freeSpin: false };
+            mockBetStore.lastReceivedBet = null;
+
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
+
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toEqual({
+                value: 0,
+                isAnimated: true,
+            });
+        });
+
+        it("should handle large endBet value correctly when freeSpin is false", () => {
+            // Arrange
+            const data = { endBet: 999999, freeSpin: false };
+            mockBetStore.lastReceivedBet = null;
+
+            // Act
+            slotBetResponseHandler.handleSlotBetResponse(data);
+
+            // Assert
+            expect(mockBetStore.lastReceivedBet).toEqual({
+                value: 999999,
+                isAnimated: true,
+            });
         });
     });
 });

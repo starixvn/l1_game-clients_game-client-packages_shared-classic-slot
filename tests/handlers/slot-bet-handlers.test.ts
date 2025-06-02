@@ -1,263 +1,214 @@
-// should be the first import
-import "reflect-metadata";
-// rest
 import gc from "@sg/game-client-base";
 import { Container } from "inversify";
-import { SLOT_BET_CHOICES, SLOT_LINES, SlotNotification, SlotState } from "../../assets/scripts/definitions";
+import "reflect-metadata";
+import { SLOT_BET_CHOICES, SlotNotification, SlotState } from "../../assets/scripts/definitions";
 import { SlotBetHandler } from "../../assets/scripts/handlers/handlers/slot-bet-handlers";
 import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
 
-// Mock the parent class methods (external dependency)
-jest.mock("@sg/game-client-base", () => ({
-    ...jest.requireActual("@sg/game-client-base"),
-    Bet: {
-        ...jest.requireActual("@sg/game-client-base").Bet,
-        BetHandler: jest.fn().mockImplementation(() => ({
-            createBetData: jest.fn().mockReturnValue({}),
-            handleBetData: jest.fn(),
-            showWarningProcessingBet: jest.fn(),
-            showNoticePlaceBetFailure: jest.fn(),
-            openAutoSpinDialog: jest.fn(),
-            cancelAutoSpin: jest.fn(),
-        })),
-    },
+// Mock BetControlStore
+jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
+    BetControlStore: jest.fn().mockImplementation(function (this: any) {
+        this.stake = 100;
+        this._totalBet = 2500;
+        Object.defineProperty(this, "totalBet", {
+            get() {
+                return this._totalBet;
+            },
+            set(value) {
+                this._totalBet = value;
+            },
+        });
+        this.triggerAutoSpin = false;
+        this.autoSpinEnabled = false;
+        this.autoSpinCount = 0;
+        this.autoSpinSelectedValue = 10;
+        this.autoSpinDialogOpenEvent = null;
+        this.showLineSelection = null;
+        this._freeSpinEnabled = false;
+        Object.defineProperty(this, "freeSpinEnabled", {
+            get() {
+                return this._freeSpinEnabled;
+            },
+            set(value) {
+                this._freeSpinEnabled = value;
+            },
+        });
+        this.acceptAutoSpinValue = jest.fn();
+        this.decreaseAutoSpinCount = jest.fn();
+        this.cancelAutoSpin = jest.fn();
+        this.clearFreeSpins = jest.fn();
+        return this;
+    }),
 }));
 
-// Mock SlotBetHandler
-const actualSlotBetHandler = jest.requireActual("../../assets/scripts/handlers/handlers/slot-bet-handlers").SlotBetHandler;
+// Mock SlotBoardStore
+jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
+    SlotBoardStore: jest.fn().mockImplementation(function (this: any) {
+        this._isReadyBet = true;
+        Object.defineProperty(this, "isReadyBet", {
+            get() {
+                return this._isReadyBet;
+            },
+            set(value) {
+                this._isReadyBet = value;
+            },
+        });
+        this.slotState = SlotState.READY;
+        this.bottomMessageState = SlotNotification.READY;
+        this.forceStopSettle = null;
+        this.resetOnNewSpin = jest.fn();
+        this.reset = jest.fn();
+        return this;
+    }),
+}));
 
-jest.mock("../../assets/scripts/handlers/handlers/slot-bet-handlers", () => {
+// Mock gc.Bet.BetHandler parent class and BetStore
+jest.mock("@sg/game-client-base", () => {
+    const actualGc = jest.requireActual("@sg/game-client-base");
     return {
-        SlotBetHandler: jest.fn().mockImplementation(function () {
-            const instance = {
-                // Keep all real implementations from the actual SlotBetHandler
-                handle: actualSlotBetHandler.prototype.handle,
-                callBet: actualSlotBetHandler.prototype.callBet,
-                callTriggerAction: actualSlotBetHandler.prototype.callTriggerAction,
-                clearTriggerAction: actualSlotBetHandler.prototype.clearTriggerAction,
-                isValidBet: actualSlotBetHandler.prototype.isValidBet,
-                confirmAutoSpin: actualSlotBetHandler.prototype.confirmAutoSpin,
-                actionAutoSpin: actualSlotBetHandler.prototype.actionAutoSpin,
-                handleClickAutoSpin: actualSlotBetHandler.prototype.handleClickAutoSpin,
-                handlePlaceBetFailed: actualSlotBetHandler.prototype.handlePlaceBetFailed,
-                // Only mock methods that are from parent class or external
-                resetOnNewSpin: jest.fn(),
-                openAutoSpinDialog: jest.fn(),
-                showLineSelection: jest.fn(),
-                showWarningProcessingBet: jest.fn(),
-                showNoticePlaceBetFailure: jest.fn(),
-                handleBetData: jest.fn(),
-                createBetData: jest.fn().mockReturnValue({}),
-                cancelAutoSpin: jest.fn(),
-                // Add necessary store references and bind them to the instance
-                betStore: null, // Will be set in beforeEach
-                betControlStore: null,
-                slotBoardStore: null,
-            };
-
-            // Bind all methods to the instance to preserve 'this' context
-            Object.getOwnPropertyNames(actualSlotBetHandler.prototype).forEach((key) => {
-                if (typeof instance[key] === "function") {
-                    instance[key] = instance[key].bind(instance);
-                }
-            });
-
-            return instance;
-        }),
-    };
-});
-
-// Mock BetControlStore (external dependency)
-jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => {
-    return {
-        BetControlStore: jest.fn().mockImplementation(() => ({
-            betLevels: [],
-            stake: 0,
-            roundId: -1,
-            get totalBet() {
-                return this.stake * SLOT_LINES;
-            },
-            interactableBet: true,
-            stakeSelectorShow: false,
-            stakeSelectorDisabled: false,
-            showLineSelection: null,
-            triggerAutoSpin: false,
-            autoSpinCount: 0,
-            autoSpinEnabled: false,
-            autoSpinDialogOpenEvent: null,
-            autoSpinSelectedValue: 10,
-            autoSpinOptions: [10, 30, 50, 80, 100, 200, 500, 1000],
-            freeSpinCount: -1,
-            freeSpinCountDisplay: -1,
-            turboEnabled: false,
-            get freeSpinEnabled() {
-                return this.freeSpinCount > 0;
-            },
-            setStake: jest.fn(),
-            quickChangeStake: jest.fn(),
-            setStakeSelectorShow: jest.fn(),
-            setBetLevels: jest.fn(),
-            setTotalFreeSpins: jest.fn(),
-            acceptAutoSpinValue: jest.fn(),
-            decreaseAutoSpinCount: jest.fn(),
-            clearFreeSpins: jest.fn(),
-        })),
-    };
-});
-
-// Mock SlotBoardStore (external dependency)
-jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => {
-    return {
-        SlotBoardStore: jest.fn().mockImplementation(() => ({
-            slotState: SlotState.NOT_READY,
-            bottomMessageState: SlotNotification.READY,
-            spinResult: { result: [], duration: 0, turbo: false },
-            receivedBonus: null,
-            receivedJackpot: null,
-            receivedFreeSpins: null,
-            receivedBigWin: null,
-            winningJackpot: null,
-            bonusChest: null,
-            winningItemsOnLines: [],
-            winningLines: [],
-            highlightSpecialSymbols: [],
-            forceStopSettle: null,
-            winningBet: 0,
-            get isReadyBet() {
-                return this.slotState === SlotState.READY || this.slotState === SlotState.SETTLED;
-            },
-            reset() {
-                this.receivedBonus = null;
-                this.receivedJackpot = null;
-                this.receivedFreeSpins = null;
-                this.receivedBigWin = null;
-                this.highlightSpecialSymbols = [];
-                this.winningJackpot = null;
-                this.bonusChest = null;
-                this.slotState = SlotState.READY;
-            },
-            resetOnNewSpin() {
-                this.winningItemsOnLines = [];
-                this.winningLines = [];
-            },
-        })),
+        ...actualGc,
+        Bet: {
+            ...actualGc.Bet,
+            BetHandler: jest.fn().mockImplementation(function (this: any) {
+                this.createBetData = jest.fn().mockReturnValue({});
+                this.handleBetData = jest.fn();
+                this.showWarningProcessingBet = jest.fn();
+                this.showNoticePlaceBetFailure = jest.fn();
+                return this;
+            }),
+            BetStore: jest.fn().mockImplementation(function (this: any) {
+                this.isProcessingBet = false;
+                this._availableBalance = 10000;
+                Object.defineProperty(this, "availableBalance", {
+                    get() {
+                        return this._availableBalance;
+                    },
+                    set(value) {
+                        this._availableBalance = value;
+                    },
+                });
+                return this;
+            }),
+        },
     };
 });
 
 describe("SlotBetHandler", () => {
     let container: Container;
     let slotBetHandler: SlotBetHandler;
-    let betControlStore: BetControlStore;
-    let slotBoardStore: SlotBoardStore;
-    let mockBetStore: jest.Mocked<gc.Bet.BetStore>;
-    let mockBalance: number;
+    let betControlStore: jest.Mocked<BetControlStore>;
+    let slotBoardStore: jest.Mocked<SlotBoardStore>;
+    let betStore: jest.Mocked<gc.Bet.BetStore>;
 
     beforeEach(() => {
+        jest.useFakeTimers();
+
         container = new Container();
 
-        mockBalance = 1000;
-        // Create mock BetStore
-        mockBetStore = {
-            isProcessingBet: false,
-            get availableBalance() {
-                return mockBalance;
-            },
-            set availableBalance(value: number) {
-                mockBalance = value;
-            },
-        } as any;
-
-        // Create mock dependencies for SlotBoardStore
-        const mockRoundTimeStore = {} as gc.Rounds.RoundTimeStore;
-        const mockRoundStore = {} as gc.Rounds.RoundStore;
-        const mockGameConfigStore = {} as gc.GameConfigs.GameConfigStore;
-        const mockMainPlayerStore = {} as gc.Player.MainPlayerStore;
-        const mockGameUserSettingHandler = {} as gc.GameUserSettings.GameUserSettingHandler;
-
-        // Bind mock dependencies
-        container.bind(gc.Rounds.RoundTimeStore).toConstantValue(mockRoundTimeStore);
-        container.bind(gc.Rounds.RoundStore).toConstantValue(mockRoundStore);
-        container.bind(gc.GameConfigs.GameConfigStore).toConstantValue(mockGameConfigStore);
-        container.bind(gc.Player.MainPlayerStore).toConstantValue(mockMainPlayerStore);
-        container.bind(gc.GameUserSettings.GameUserSettingHandler).toConstantValue(mockGameUserSettingHandler);
-
+        // Bind the class under test
         container.bind(SlotBetHandler).toSelf();
-        container.bind(BetControlStore).toSelf();
-        container.bind(SlotBoardStore).toSelf();
-        container.bind(gc.Bet.BetStore).toConstantValue(mockBetStore);
 
+        // Bind mocked dependencies
+        const mockBetControlStoreInstance = new (jest.requireMock(
+            "../../assets/scripts/handlers/stores/bet-control-store"
+        ).BetControlStore)();
+        container.bind(BetControlStore).toConstantValue(mockBetControlStoreInstance);
+
+        const mockSlotBoardStoreInstance = new (jest.requireMock("../../assets/scripts/handlers/stores/slot-board-store").SlotBoardStore)();
+        container.bind(SlotBoardStore).toConstantValue(mockSlotBoardStoreInstance);
+
+        const MockedBetStore = jest.requireMock("@sg/game-client-base").Bet.BetStore;
+        const mockBetStoreInstance = new MockedBetStore();
+        container.bind(gc.Bet.BetStore).toConstantValue(mockBetStoreInstance);
+
+        // Get instances
         slotBetHandler = container.get(SlotBetHandler);
-        betControlStore = container.get(BetControlStore);
-        slotBoardStore = container.get(SlotBoardStore);
+        betControlStore = container.get(BetControlStore) as jest.Mocked<BetControlStore>;
+        slotBoardStore = container.get(SlotBoardStore) as jest.Mocked<SlotBoardStore>;
+        betStore = container.get(gc.Bet.BetStore) as jest.Mocked<gc.Bet.BetStore>;
 
-        // Assign store references to handler and ensure betStore is the same instance
+        // Assign betStore to slotBetHandler for proper inheritance from BetHandler
         Object.assign(slotBetHandler, {
-            betControlStore,
-            slotBoardStore,
-            betStore: mockBetStore, // Use the same mockBetStore instance
+            betStore: betStore,
         });
-
-        // Mock necessary methods and properties
-        jest.useFakeTimers();
     });
 
     afterEach(() => {
-        jest.clearAllTimers();
         jest.clearAllMocks();
+        jest.clearAllTimers();
     });
 
     describe("handle", () => {
-        it("should call callBet method", () => {
+        it("should call callBet when handle is executed", () => {
             const callBetSpy = jest.spyOn(slotBetHandler, "callBet");
+
             slotBetHandler.handle();
-            expect(callBetSpy).toHaveBeenCalled();
+
+            expect(callBetSpy).toHaveBeenCalledTimes(1);
         });
     });
 
     describe("callBet", () => {
-        it("should not proceed if board is not ready for bet", () => {
-            slotBoardStore.slotState = SlotState.NOT_READY;
-            const handleBetDataSpy = jest.spyOn(slotBetHandler, "handleBetData");
+        it("should not proceed when board is not ready for bet", () => {
+            (slotBoardStore as any)._isReadyBet = false;
+            const resetOnNewSpinSpy = jest.spyOn(slotBetHandler, "resetOnNewSpin");
 
             slotBetHandler.callBet();
 
-            expect(handleBetDataSpy).not.toHaveBeenCalled();
+            expect(resetOnNewSpinSpy).not.toHaveBeenCalled();
+            expect(slotBoardStore.slotState).not.toBe(SlotState.BET);
         });
 
-        it("should set correct states and call handleBetData when board is ready", () => {
-            slotBoardStore.slotState = SlotState.READY;
-            betControlStore.stake = 100;
+        it("should execute full bet flow when board is ready", () => {
+            (slotBoardStore as any)._isReadyBet = true;
+            betControlStore.stake = 50;
+            const resetOnNewSpinSpy = jest.spyOn(slotBetHandler, "resetOnNewSpin");
+            const createBetDataSpy = jest.spyOn(slotBetHandler, "createBetData");
             const handleBetDataSpy = jest.spyOn(slotBetHandler, "handleBetData");
+
+            const mockBetData = { baseAmount: 100 };
+            createBetDataSpy.mockReturnValue(mockBetData);
 
             slotBetHandler.callBet();
 
+            expect(resetOnNewSpinSpy).toHaveBeenCalledTimes(1);
             expect(slotBoardStore.slotState).toBe(SlotState.BET);
             expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SPINNING);
-            expect(handleBetDataSpy).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    amount: 100,
-                    betChoice: SLOT_BET_CHOICES,
-                })
-            );
+            expect(createBetDataSpy).toHaveBeenCalledWith({});
+            expect(handleBetDataSpy).toHaveBeenCalledWith({
+                ...mockBetData,
+                amount: 50,
+                betChoice: SLOT_BET_CHOICES,
+            });
+        });
+    });
+
+    describe("resetOnNewSpin", () => {
+        it("should reset force stop settle and call slot board store reset", () => {
+            slotBetHandler.resetOnNewSpin();
+
+            expect(slotBoardStore.forceStopSettle).toEqual({});
+            expect(slotBoardStore.resetOnNewSpin).toHaveBeenCalledTimes(1);
         });
     });
 
     describe("callTriggerAction", () => {
-        it("should call bet and set trigger after threshold when auto spin is not enabled", () => {
+        it("should call bet and set timeout when triggerAutoSpin is false", () => {
             betControlStore.triggerAutoSpin = false;
             const callBetSpy = jest.spyOn(slotBetHandler, "callBet");
 
             slotBetHandler.callTriggerAction();
 
-            expect(callBetSpy).toHaveBeenCalled();
-            expect(betControlStore.triggerAutoSpin).toBe(false);
+            expect(callBetSpy).toHaveBeenCalledTimes(1);
+            expect(slotBetHandler["timeoutHolding"]).toBeDefined();
 
+            // Advance timer to trigger setTimeout
             jest.advanceTimersByTime(1000);
             expect(betControlStore.triggerAutoSpin).toBe(true);
         });
 
-        it("should not call bet when auto spin is already enabled", () => {
+        it("should not execute when triggerAutoSpin is already true", () => {
             betControlStore.triggerAutoSpin = true;
             const callBetSpy = jest.spyOn(slotBetHandler, "callBet");
 
@@ -268,43 +219,69 @@ describe("SlotBetHandler", () => {
     });
 
     describe("clearTriggerAction", () => {
-        it("should clear auto spin trigger and timeout", () => {
+        it("should clear triggerAutoSpin and timeout", () => {
             betControlStore.triggerAutoSpin = true;
-            slotBetHandler.callTriggerAction();
+            slotBetHandler["timeoutHolding"] = setTimeout(() => {}, 1000) as any;
+            const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
 
             slotBetHandler.clearTriggerAction();
 
+            expect(betControlStore.triggerAutoSpin).toBe(false);
+            expect(clearTimeoutSpy).toHaveBeenCalled();
+        });
+
+        it("should handle when timeout is not set", () => {
+            betControlStore.triggerAutoSpin = true;
+            slotBetHandler["timeoutHolding"] = undefined;
+
+            // Should not throw error
+            expect(() => slotBetHandler.clearTriggerAction()).not.toThrow();
             expect(betControlStore.triggerAutoSpin).toBe(false);
         });
     });
 
     describe("isValidBet", () => {
         it("should return false when bet is processing", () => {
-            mockBetStore.isProcessingBet = true;
-            const showWarningSpy = jest.spyOn(slotBetHandler, "showWarningProcessingBet");
+            betStore.isProcessingBet = true;
+            const showWarningProcessingBetSpy = jest.spyOn(slotBetHandler, "showWarningProcessingBet");
 
             const result = slotBetHandler.isValidBet(100);
 
             expect(result).toBe(false);
-            expect(showWarningSpy).toHaveBeenCalled();
+            expect(showWarningProcessingBetSpy).toHaveBeenCalledTimes(1);
         });
 
-        it("should return false when total bet exceeds available balance", () => {
-            mockBetStore.isProcessingBet = false;
-            mockBalance = 50;
-            betControlStore.stake = 20; // This will make totalBet = stake * SLOT_LINES
-            betControlStore.freeSpinCount = -1; // This will make freeSpinEnabled = false
+        it("should return false when insufficient balance for regular bet", () => {
+            betStore.isProcessingBet = false;
+            (betControlStore as any)._freeSpinEnabled = false;
+            (betControlStore as any)._totalBet = 15000;
+            (betStore as any)._availableBalance = 10000;
+            const showNoticePlaceBetFailureSpy = jest.spyOn(slotBetHandler, "showNoticePlaceBetFailure");
+            const handlePlaceBetFailedSpy = jest.spyOn(slotBetHandler, "handlePlaceBetFailed");
 
             const result = slotBetHandler.isValidBet(100);
 
             expect(result).toBe(false);
+            expect(showNoticePlaceBetFailureSpy).toHaveBeenCalledTimes(1);
+            expect(handlePlaceBetFailedSpy).toHaveBeenCalledTimes(1);
         });
 
-        it("should return true for valid bet conditions", () => {
-            mockBetStore.isProcessingBet = false;
-            mockBalance = 200;
-            betControlStore.stake = 1; // This will make totalBet = stake * SLOT_LINES
-            betControlStore.freeSpinCount = -1; // This will make freeSpinEnabled = false
+        it("should return true when balance is sufficient", () => {
+            betStore.isProcessingBet = false;
+            (betControlStore as any)._freeSpinEnabled = false;
+            (betControlStore as any)._totalBet = 5000;
+            (betStore as any)._availableBalance = 10000;
+
+            const result = slotBetHandler.isValidBet(100);
+
+            expect(result).toBe(true);
+        });
+
+        it("should return true for free spin bet regardless of balance", () => {
+            betStore.isProcessingBet = false;
+            (betControlStore as any)._freeSpinEnabled = true;
+            (betControlStore as any)._totalBet = 15000;
+            (betStore as any)._availableBalance = 10000;
 
             const result = slotBetHandler.isValidBet(100);
 
@@ -312,35 +289,119 @@ describe("SlotBetHandler", () => {
         });
     });
 
-    describe("auto spin functionality", () => {
-        it("should confirm auto spin and start after delay", () => {
+    describe("confirmAutoSpin", () => {
+        it("should accept auto spin value and set timeout for action", () => {
+            const autoSpinValue = 50;
             const actionAutoSpinSpy = jest.spyOn(slotBetHandler, "actionAutoSpin");
 
-            slotBetHandler.confirmAutoSpin(5);
+            slotBetHandler.confirmAutoSpin(autoSpinValue);
 
-            expect(betControlStore.acceptAutoSpinValue).toHaveBeenCalledWith(5);
+            expect(betControlStore.acceptAutoSpinValue).toHaveBeenCalledWith(autoSpinValue);
+            expect(slotBetHandler["timeoutStartAutoSpin"]).toBeDefined();
+
+            // Advance timer to trigger setTimeout
             jest.advanceTimersByTime(300);
-            expect(actionAutoSpinSpy).toHaveBeenCalled();
+            expect(actionAutoSpinSpy).toHaveBeenCalledTimes(1);
         });
+    });
 
-        it("should handle auto spin action correctly", () => {
-            jest.spyOn(betControlStore, "decreaseAutoSpinCount").mockReturnValue(true);
+    describe("actionAutoSpin", () => {
+        it("should call bet when auto spin count decrease is successful", () => {
+            betControlStore.decreaseAutoSpinCount.mockReturnValue(true);
             const callBetSpy = jest.spyOn(slotBetHandler, "callBet");
 
             slotBetHandler.actionAutoSpin();
 
-            expect(callBetSpy).toHaveBeenCalled();
+            expect(betControlStore.decreaseAutoSpinCount).toHaveBeenCalledTimes(1);
+            expect(callBetSpy).toHaveBeenCalledTimes(1);
         });
 
-        it("should cancel auto spin when count reaches zero", () => {
-            jest.spyOn(betControlStore, "decreaseAutoSpinCount").mockReturnValue(false);
+        it("should cancel auto spin and open dialog when count decrease fails", () => {
+            betControlStore.decreaseAutoSpinCount.mockReturnValue(false);
             const cancelAutoSpinSpy = jest.spyOn(slotBetHandler, "cancelAutoSpin");
-            const openDialogSpy = jest.spyOn(slotBetHandler, "openAutoSpinDialog");
+            const openAutoSpinDialogSpy = jest.spyOn(slotBetHandler, "openAutoSpinDialog");
 
             slotBetHandler.actionAutoSpin();
 
-            expect(cancelAutoSpinSpy).toHaveBeenCalled();
-            expect(openDialogSpy).toHaveBeenCalled();
+            expect(betControlStore.decreaseAutoSpinCount).toHaveBeenCalledTimes(1);
+            expect(cancelAutoSpinSpy).toHaveBeenCalledTimes(1);
+            expect(openAutoSpinDialogSpy).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("handleClickAutoSpin", () => {
+        it("should cancel auto spin when auto spin is enabled", () => {
+            betControlStore.autoSpinEnabled = true;
+            const cancelAutoSpinSpy = jest.spyOn(slotBetHandler, "cancelAutoSpin");
+
+            slotBetHandler.handleClickAutoSpin();
+
+            expect(cancelAutoSpinSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("should open auto spin dialog when auto spin is disabled", () => {
+            betControlStore.autoSpinEnabled = false;
+            const openAutoSpinDialogSpy = jest.spyOn(slotBetHandler, "openAutoSpinDialog");
+
+            slotBetHandler.handleClickAutoSpin();
+
+            expect(openAutoSpinDialogSpy).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("cancelAutoSpin", () => {
+        it("should clear timeout and cancel auto spin in store", () => {
+            slotBetHandler["timeoutStartAutoSpin"] = setTimeout(() => {}, 1000) as any;
+            const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
+
+            slotBetHandler.cancelAutoSpin();
+
+            expect(clearTimeoutSpy).toHaveBeenCalled();
+            expect(betControlStore.cancelAutoSpin).toHaveBeenCalledTimes(1);
+        });
+
+        it("should handle when timeout is not set", () => {
+            slotBetHandler["timeoutStartAutoSpin"] = undefined;
+
+            // Should not throw error
+            expect(() => slotBetHandler.cancelAutoSpin()).not.toThrow();
+            expect(betControlStore.cancelAutoSpin).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("openAutoSpinDialog", () => {
+        it("should set auto spin dialog open event", () => {
+            slotBetHandler.openAutoSpinDialog();
+
+            expect(betControlStore.autoSpinDialogOpenEvent).toEqual({});
+        });
+    });
+
+    describe("showLineSelection", () => {
+        it("should set show line selection event", () => {
+            slotBetHandler.showLineSelection();
+
+            expect(betControlStore.showLineSelection).toEqual({});
+        });
+    });
+
+    describe("handlePlaceBetFailed", () => {
+        it("should cancel auto spin, clear trigger action, reset board and clear free spins", () => {
+            const cancelAutoSpinSpy = jest.spyOn(slotBetHandler, "cancelAutoSpin");
+            const clearTriggerActionSpy = jest.spyOn(slotBetHandler, "clearTriggerAction");
+
+            slotBetHandler.handlePlaceBetFailed();
+
+            expect(cancelAutoSpinSpy).toHaveBeenCalledTimes(1);
+            expect(clearTriggerActionSpy).toHaveBeenCalledTimes(1);
+            expect(slotBoardStore.reset).toHaveBeenCalledTimes(1);
+            expect(betControlStore.clearFreeSpins).toHaveBeenCalledTimes(1);
+        });
+    });
+
+    describe("HOLDING_THRESHOLD", () => {
+        it("should have correct holding threshold value", () => {
+            expect(slotBetHandler["HOLDING_THRESHOLD"]).toBe(1000);
         });
     });
 });

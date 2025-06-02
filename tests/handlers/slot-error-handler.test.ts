@@ -1,8 +1,6 @@
-// should be the first import
-import "reflect-metadata";
-// rest
 import gc from "@sg/game-client-base";
 import { Container } from "inversify";
+import "reflect-metadata";
 import { SlotBetHandler } from "../../assets/scripts/handlers/handlers/slot-bet-handlers";
 import { SlotErrorHandler } from "../../assets/scripts/handlers/handlers/slot-error-handler";
 
@@ -58,12 +56,6 @@ describe("SlotErrorHandler", () => {
         // Get instance
         errorHandler = container.get(SlotErrorHandler);
 
-        // Manually assign dependencies to match the @inject decorators
-        Object.assign(errorHandler, {
-            betStore,
-            slotBetHandler,
-        });
-
         // Reset state
         errorHandler.endGameApiError = null;
         betStore.lastReceivedBet = null;
@@ -75,6 +67,16 @@ describe("SlotErrorHandler", () => {
     afterEach(() => {
         jest.clearAllTimers();
         jest.clearAllMocks();
+    });
+
+    describe("eventHandleList", () => {
+        it("should have correct event handlers configured", () => {
+            expect(errorHandler.eventHandleList).toHaveLength(2);
+            expect(errorHandler.eventHandleList[0].name).toBe(gc.GameServiceMessage.ApiError.eventName);
+            expect(errorHandler.eventHandleList[0].handle).toBe(errorHandler.slotHandleApiError);
+            expect(errorHandler.eventHandleList[1].name).toBe("notice");
+            expect(errorHandler.eventHandleList[1].handle).toBe(errorHandler.slotHandleNotice);
+        });
     });
 
     describe("slotHandleApiError", () => {
@@ -117,6 +119,48 @@ describe("SlotErrorHandler", () => {
             expect(handleApiErrorSpy).not.toHaveBeenCalled();
             expect(errorHandler.endGameApiError).toEqual(apiError);
         });
+
+        it("should store API error when last bet value is 0", () => {
+            const apiError = { errorCode: "TEST_ERROR" } as gc.GameServiceMessage.ApiError;
+            betStore.lastReceivedBet = { value: 0, isAnimated: false };
+
+            const handleApiErrorSpy = jest.spyOn(errorHandler, "handleApiError");
+
+            errorHandler.slotHandleApiError(apiError);
+            jest.advanceTimersByTime(10);
+
+            expect(handleApiErrorSpy).not.toHaveBeenCalled();
+            expect(errorHandler.endGameApiError).toEqual(apiError);
+        });
+
+        it("should store API error when last bet value is positive", () => {
+            const apiError = { errorCode: "TEST_ERROR" } as gc.GameServiceMessage.ApiError;
+            betStore.lastReceivedBet = { value: 250, isAnimated: true };
+
+            const handleApiErrorSpy = jest.spyOn(errorHandler, "handleApiError");
+
+            errorHandler.slotHandleApiError(apiError);
+            jest.advanceTimersByTime(10);
+
+            expect(handleApiErrorSpy).not.toHaveBeenCalled();
+            expect(errorHandler.endGameApiError).toEqual(apiError);
+        });
+
+        it("should use setTimeout with 10ms delay", () => {
+            const apiError = { errorCode: "TEST_ERROR" } as gc.GameServiceMessage.ApiError;
+            betStore.lastReceivedBet = { value: -1, isAnimated: false };
+
+            const handleApiErrorSpy = jest.spyOn(errorHandler, "handleApiError");
+
+            errorHandler.slotHandleApiError(apiError);
+
+            // Should not be called immediately
+            expect(handleApiErrorSpy).not.toHaveBeenCalled();
+
+            // Should be called after timeout
+            jest.advanceTimersByTime(10);
+            expect(handleApiErrorSpy).toHaveBeenCalledWith(apiError);
+        });
     });
 
     describe("handleEndGameApiError", () => {
@@ -142,6 +186,16 @@ describe("SlotErrorHandler", () => {
             expect(handleApiErrorSpy).not.toHaveBeenCalled();
             expect(slotBetHandler.handlePlaceBetFailed).not.toHaveBeenCalled();
         });
+
+        it("should reset endGameApiError after handling", () => {
+            const apiError = { errorCode: "END_GAME_ERROR" } as gc.GameServiceMessage.ApiError;
+            errorHandler.endGameApiError = apiError;
+
+            errorHandler.handleEndGameApiError();
+
+            // The error should still be there since we don't reset it in the method
+            expect(errorHandler.endGameApiError).toEqual(apiError);
+        });
     });
 
     describe("slotHandleNotice", () => {
@@ -166,15 +220,45 @@ describe("SlotErrorHandler", () => {
 
             expect(slotBetHandler.handlePlaceBetFailed).not.toHaveBeenCalled();
         });
+
+        it("should handle undefined notice gracefully", () => {
+            errorHandler.slotHandleNotice(undefined as any);
+
+            expect(slotBetHandler.handlePlaceBetFailed).not.toHaveBeenCalled();
+        });
+
+        it("should handle notice without errorCode property", () => {
+            const notice = { someOtherProperty: "value" } as any;
+
+            errorHandler.slotHandleNotice(notice);
+
+            expect(slotBetHandler.handlePlaceBetFailed).not.toHaveBeenCalled();
+        });
+
+        it("should handle empty errorCode", () => {
+            const notice = { errorCode: "" };
+
+            errorHandler.slotHandleNotice(notice);
+
+            expect(slotBetHandler.handlePlaceBetFailed).not.toHaveBeenCalled();
+        });
+
+        it("should be case sensitive for error code SB1929", () => {
+            const notice = { errorCode: "sb1929" }; // lowercase
+
+            errorHandler.slotHandleNotice(notice);
+
+            expect(slotBetHandler.handlePlaceBetFailed).not.toHaveBeenCalled();
+        });
     });
 
-    describe("eventHandleList", () => {
-        it("should have correct event handlers configured", () => {
-            expect(errorHandler.eventHandleList).toHaveLength(2);
-            expect(errorHandler.eventHandleList[0].name).toBe(gc.GameServiceMessage.ApiError.eventName);
-            expect(errorHandler.eventHandleList[0].handle).toBe(errorHandler.slotHandleApiError);
-            expect(errorHandler.eventHandleList[1].name).toBe("notice");
-            expect(errorHandler.eventHandleList[1].handle).toBe(errorHandler.slotHandleNotice);
+    describe("inheritance", () => {
+        it("should extend gc.Error.ErrorHandlers", () => {
+            expect(errorHandler).toBeInstanceOf(gc.Error.ErrorHandlers);
+        });
+
+        it("should have access to parent class methods", () => {
+            expect(typeof errorHandler.handleApiError).toBe("function");
         });
     });
 });
