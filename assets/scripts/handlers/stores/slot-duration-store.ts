@@ -19,11 +19,10 @@ export class SlotDurationStore {
     @inject(gc.GameUserSettings.GameUserSettingHandler)
     protected readonly gameUserSettingHandler: gc.GameUserSettings.GameUserSettingHandler;
 
-    @inject(BetControlStore) protected readonly betControlStore: BetControlStore;
+    @inject(BetControlStore) protected readonly betControlStore: BetControlStore = null!;
 
     constructor() {
         mobx.makeAutoObservable(this);
-        setTimeout(() => {}, 0);
     }
 
     config = new StandardSlotGameConfigs();
