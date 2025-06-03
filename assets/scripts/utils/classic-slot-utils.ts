@@ -1,5 +1,4 @@
 import { Asset, EventTarget, sp, SpriteAtlas, tween } from "cc";
-import RawTwoDigitsTimer from "db://shared-components/game/game-timer/scripts/raw-two-digits-timer";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 
@@ -123,9 +122,9 @@ export const loadWinningSymbolAnimation = async () => {
     }
 };
 
-export const initTimer = (timer: RawTwoDigitsTimer, duration: number, hideTimer: () => void) => {
+export const initTimer = (timer: { setTime: (value: number) => void }, duration: number, hideTimer: () => void) => {
     let count = 0;
-    return tween(timer.node)
+    return tween({})
         .repeat(
             duration,
             tween()
