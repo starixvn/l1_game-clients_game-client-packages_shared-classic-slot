@@ -40,7 +40,13 @@ export default class AutoSpinDialog extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.autoSpinOptions)
     setOptions(options: number[]) {
+        if (options.length === 0) {
+            return;
+        }
         this.choicesContainer.children.forEach((child, index) => {
+            if (index >= options.length) {
+                return;
+            }
             const value = options[index];
             child.name = value.toString();
             const label = child.getComponentInChildren(Label);

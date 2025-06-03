@@ -10,6 +10,7 @@ import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
 import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
+import { SymbolPreviewType } from "./others/symbol-preview";
 import SlotBoard from "./slot-board/slot-board";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
@@ -98,7 +99,7 @@ export default class ClassicSlot extends GameComponent {
             colorList: [colorConfig.previewOddsSymbolNumberColor, colorConfig.previewOddsWinValueColor],
             borderColor: colorConfig.previewOddsBorderColor,
             jackpotEnabled: this.jackpotEnabled,
-        };
+        } as SymbolPreviewType;
         this.slotBoard.showPreviewPopup(info, isInfoOnLeft, worldPosition);
     }
 
