@@ -1,11 +1,43 @@
-import "reflect-metadata";
-
-import { Node, Prefab } from "cc";
+import { Node, Prefab, instantiate } from "cc";
 import { Container } from "inversify";
+import "reflect-metadata";
 import EffectContainer from "../../assets/scripts/components/effect-container";
 import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
 
-// Mock AudioIds
+// Mock game client base
+jest.mock("@sg/game-client-base", () => ({
+    FormatUtils: {
+        numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
+    },
+    Audios: {
+        AudioHandler: class MockAudioHandler {},
+    },
+    Translator: {
+        getLanguageId: jest.fn().mockReturnValue("en"),
+    },
+    Shared: {
+        utils: {
+            StorageManager: {
+                setPrefixKey: jest.fn(),
+            },
+        },
+    },
+    Rounds: {
+        RoundTimeStore: class MockRoundTimeStore {},
+        RoundStore: class MockRoundStore {},
+    },
+    GameConfigs: {
+        GameConfigStore: class MockGameConfigStore {},
+    },
+    Player: {
+        MainPlayerStore: class MockMainPlayerStore {},
+    },
+    GameUserSettings: {
+        GameUserSettingHandler: class MockGameUserSettingHandler {},
+    },
+}));
+
+// Mock AudioIds and AudioUtils
 jest.mock("db://assets/game/audios/AudioIds", () => ({
     AudioIds: {
         FREESPIN: "freespin",
@@ -17,20 +49,32 @@ jest.mock("db://assets/game/audios/AudioIds", () => ({
     },
 }));
 
-// Mock AudioUtils
 jest.mock("db://shared-components/game/audios/utils", () => ({
     AudioUtils: {
         playSFX: jest.fn(),
     },
 }));
 
-// Mock ObserverComponent
+// Mock ObserverComponent with ALL lifecycle methods
 jest.mock("db://shared-components/shared/common-components/observer-component/scripts/observer-component", () => ({
     ObserverComponent: class MockObserverComponent {
-        node = new (require("cc").Node)();
         onLoad() {}
         onDestroy() {}
+        start() {}
+        update() {}
+        node = new Node();
     },
+}));
+
+// Mock Observer
+jest.mock("observer", () => ({
+    __esModule: true,
+    default: {
+        handle: jest.fn(() => () => {}),
+        render: jest.fn(() => () => {}),
+    },
+    handle: jest.fn(() => () => {}),
+    render: jest.fn(() => () => {}),
 }));
 
 // Mock stores
@@ -40,323 +84,416 @@ jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
         receivedBigWin: null,
         receivedJackpot: null,
         receivedBonus: null,
+        reset: jest.fn(),
+        resetOnNewSpin: jest.fn(),
     })),
 }));
 
-// Mock BonusDialog
+// Mock component dependencies
 jest.mock("../../assets/scripts/components/bonus/bonus-dialog", () => ({
+    __esModule: true,
     default: class MockBonusDialog {
         initBonusItems = jest.fn();
         setBonusCount = jest.fn();
-        onBonusFinished = null;
+        onBonusFinished = jest.fn();
     },
 }));
 
-// Mock CallbackAnimation
 jest.mock("../../assets/scripts/components/callback-animation/callback-animation", () => ({
+    __esModule: true,
     default: class MockCallbackAnimation {
         setDuration = jest.fn();
-        onFinishedCallback = null;
-        autoDestroyNode = true;
         play = jest.fn();
+        onFinishedCallback = jest.fn();
+        autoDestroyNode = true;
     },
 }));
 
-// Mock BigWinAnimation
 jest.mock("../../assets/scripts/components/others/big-win-animation", () => ({
+    __esModule: true,
     default: class MockBigWinAnimation {
         setAmount = jest.fn();
     },
 }));
 
-// Mock JackpotGame
 jest.mock("../../assets/scripts/components/others/jackpot-game", () => ({
+    __esModule: true,
     default: class MockJackpotGame {
         prizes = 0;
         initJackpotItems = jest.fn();
-        onJackpotGameFinished = null;
+        onJackpotGameFinished = jest.fn();
     },
 }));
 
+// Mock cc instantiate
+jest.mock("cc", () => {
+    const originalCc = jest.requireActual("cc");
+    return {
+        ...originalCc,
+        instantiate: jest.fn().mockImplementation(() => {
+            const node = new originalCc.Node();
+            node.getComponent = jest.fn();
+            node.destroy = jest.fn();
+            return node;
+        }),
+    };
+});
+
 describe("EffectContainer", () => {
     let container: Container;
-    let component: EffectContainer;
+    let effectContainer: EffectContainer;
     let mockSlotBoardStore: jest.Mocked<SlotBoardStore>;
-    let mockEffectNode: Node;
-    let mockTransitionEffect: Node;
-    let mockCallbackAnimation: any;
-    let mockBigWinAnimation: any;
-    let mockBonusDialog: any;
-    let mockJackpotGame: any;
+    let mockInstantiate: jest.MockedFunction<typeof instantiate>;
+    let mockAudioUtils: any;
 
     beforeEach(() => {
         container = new Container();
 
-        // Create mock store
-        const MockedSlotBoardStore = jest.requireMock("../../assets/scripts/handlers/stores/slot-board-store").SlotBoardStore;
-        mockSlotBoardStore = new MockedSlotBoardStore() as jest.Mocked<SlotBoardStore>;
+        // Create mock store instance
+        const MockSlotBoardStoreClass = jest.requireMock("../../assets/scripts/handlers/stores/slot-board-store").SlotBoardStore;
+        mockSlotBoardStore = new MockSlotBoardStoreClass() as jest.Mocked<SlotBoardStore>;
 
-        // Create mock nodes and components
-        const { instantiate, Node } = jest.requireMock("cc");
-        const MockCallbackAnimation = jest.requireMock("../../assets/scripts/components/callback-animation/callback-animation").default;
-        const MockBigWinAnimation = jest.requireMock("../../assets/scripts/components/others/big-win-animation").default;
-        const MockBonusDialog = jest.requireMock("../../assets/scripts/components/bonus/bonus-dialog").default;
-        const MockJackpotGame = jest.requireMock("../../assets/scripts/components/others/jackpot-game").default;
-
-        mockEffectNode = new Node();
-        mockTransitionEffect = new Node();
-        mockCallbackAnimation = new MockCallbackAnimation();
-        mockBigWinAnimation = new MockBigWinAnimation();
-        mockBonusDialog = new MockBonusDialog();
-        mockJackpotGame = new MockJackpotGame();
-
-        // Setup instantiate mock
-        instantiate.mockReturnValue(mockEffectNode);
-
-        // Setup getComponent mocks
-        (mockEffectNode.getComponent as jest.Mock).mockImplementation((type) => {
-            if (type === MockCallbackAnimation) return mockCallbackAnimation;
-            if (type === MockBigWinAnimation) return mockBigWinAnimation;
-            if (type === MockBonusDialog) return mockBonusDialog;
-            if (type === MockJackpotGame) return mockJackpotGame;
-            return null;
-        });
-
-        // Bind to container
+        // Bind dependencies to container
         container.bind(SlotBoardStore).toConstantValue(mockSlotBoardStore);
+        container.bind(EffectContainer).toSelf();
 
-        // Create component instance
-        component = new EffectContainer();
-        component.node = new Node("test-node");
+        // Get instances from container
+        effectContainer = container.get(EffectContainer);
 
-        // Set up prefab properties
-        (component as any).effectFreeSpin = {} as Prefab;
-        (component as any).effectBigWin = {} as Prefab;
-        (component as any).effectJackpot = {} as Prefab;
-        (component as any).effectBonus = {} as Prefab;
-        (component as any).effectTransitionPrefab = {} as Prefab;
-        (component as any).jackpotGamePrefab = {} as Prefab;
-        (component as any).bonusDialogPrefab = {} as Prefab;
+        // Set up component properties
+        effectContainer.node = new Node();
+        effectContainer.node.addChild = jest.fn();
 
-        // Add missing methods
-        component.getComponent = jest.fn();
+        // Set up prefab properties using type assertion to access protected properties
+        (effectContainer as any).effectTransitionPrefab = new Prefab();
+        (effectContainer as any).effectJackpot = new Prefab();
+        (effectContainer as any).effectBonus = new Prefab();
+        (effectContainer as any).effectFreeSpin = new Prefab();
+        (effectContainer as any).effectBigWin = new Prefab();
+        (effectContainer as any).jackpotGamePrefab = new Prefab();
+        (effectContainer as any).bonusDialogPrefab = new Prefab();
+
+        // Get mocked functions
+        mockInstantiate = instantiate as jest.MockedFunction<typeof instantiate>;
+        mockAudioUtils = jest.requireMock("db://shared-components/game/audios/utils").AudioUtils;
+
+        // Clear all mocks
+        jest.clearAllMocks();
     });
 
     afterEach(() => {
         jest.clearAllMocks();
-        jest.clearAllTimers();
     });
 
     describe("receivedFreeSpins", () => {
-        it("should return early when receivedFreeSpins is null", async () => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
-            const { instantiate } = jest.requireMock("cc");
+        it("should return early if receivedFreeSpins is null", async () => {
+            await effectContainer.receivedFreeSpins(null);
 
-            await component.receivedFreeSpins(null);
-
-            expect(AudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(instantiate).not.toHaveBeenCalled();
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
         });
 
-        it("should play free spin effect when receivedFreeSpins is provided", async () => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
-            const { AudioIds } = jest.requireMock("db://assets/game/audios/AudioIds");
-            const { instantiate } = jest.requireMock("cc");
-            const showEffectSpy = jest.spyOn(component, "showEffect").mockResolvedValue();
+        it("should return early if receivedFreeSpins is undefined", async () => {
+            await effectContainer.receivedFreeSpins(undefined);
 
-            const freeSpinData = { freeSpins: {}, duration: 2000 };
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
+        });
 
-            await component.receivedFreeSpins(freeSpinData);
+        it("should play freespin effect when receivedFreeSpins is provided", async () => {
+            const receivedFreeSpins = { freeSpins: {}, duration: 2000 };
 
-            expect(AudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.FREESPIN);
-            expect(instantiate).toHaveBeenCalledWith((component as any).effectFreeSpin);
-            expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(2000);
-            expect(showEffectSpy).toHaveBeenCalledWith(mockEffectNode);
+            const mockEffect = new Node();
+            const mockAnimation = {
+                setDuration: jest.fn(),
+                onFinishedCallback: jest.fn(),
+                play: jest.fn(),
+            };
+            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
+            mockInstantiate.mockReturnValue(mockEffect);
+
+            // Mock showEffect to resolve immediately
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
+
+            await effectContainer.receivedFreeSpins(receivedFreeSpins);
+
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("freespin");
+            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectFreeSpin);
+            expect(mockAnimation.setDuration).toHaveBeenCalledWith(2000);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
         });
     });
 
     describe("receivedBigWin", () => {
-        it("should return early when receivedBigWin is null", async () => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
-            const { instantiate } = jest.requireMock("cc");
+        it("should return early if receivedBigWin is null", async () => {
+            await effectContainer.receivedBigWin(null);
 
-            await component.receivedBigWin(null);
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
+        });
 
-            expect(AudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(instantiate).not.toHaveBeenCalled();
+        it("should return early if receivedBigWin is undefined", async () => {
+            await effectContainer.receivedBigWin(undefined);
+
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
         });
 
         it("should play big win effect when receivedBigWin is provided", async () => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
-            const { AudioIds } = jest.requireMock("db://assets/game/audios/AudioIds");
-            const { instantiate } = jest.requireMock("cc");
-            const showEffectSpy = jest.spyOn(component, "showEffect").mockResolvedValue();
-
-            const bigWinData = {
+            const receivedBigWin = {
                 bigWin: {},
                 duration: 3000,
                 showBigWinValue: 1500,
                 delayShowBigWinValue: 500,
-                amount: 10000,
+                amount: 1000,
             };
 
-            await component.receivedBigWin(bigWinData);
+            const mockEffect = new Node();
+            const mockCallbackAnimation = {
+                setDuration: jest.fn(),
+                onFinishedCallback: jest.fn(),
+                play: jest.fn(),
+            };
+            const mockBigWinAnimation = {
+                setAmount: jest.fn(),
+            };
 
-            expect(AudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.BIG_WIN);
-            expect(instantiate).toHaveBeenCalledWith((component as any).effectBigWin);
+            mockEffect.getComponent = jest.fn().mockReturnValueOnce(mockCallbackAnimation).mockReturnValueOnce(mockBigWinAnimation);
+            mockInstantiate.mockReturnValue(mockEffect);
+
+            // Mock showEffect to resolve immediately
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
+
+            await effectContainer.receivedBigWin(receivedBigWin);
+
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("big_win");
+            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectBigWin);
             expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(3000);
             expect(mockBigWinAnimation.setAmount).toHaveBeenCalledWith({
-                amount: 10000,
+                amount: 1000,
                 duration: 1500,
                 delayTime: 500,
             });
-            expect(showEffectSpy).toHaveBeenCalledWith(mockEffectNode);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
         });
     });
 
     describe("receivedJackpot", () => {
-        it("should return early when receivedJackpot is null", async () => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
+        it("should return early if receivedJackpot is null", async () => {
+            await effectContainer.receivedJackpot(null);
 
-            await component.receivedJackpot(null);
-
-            expect(AudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
         });
 
-        it("should play jackpot effect and show jackpot game", async () => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
-            const { AudioIds } = jest.requireMock("db://assets/game/audios/AudioIds");
-            const { instantiate } = jest.requireMock("cc");
-            const playEffectTransitionSpy = jest.spyOn(component as any, "playEffectTransition").mockResolvedValue(mockTransitionEffect);
-            const showEffectSpy = jest.spyOn(component, "showEffect").mockResolvedValue(undefined);
-            const showJackpotGameSpy = jest.spyOn(component as any, "showJackpotGame").mockResolvedValue(undefined);
+        it("should return early if receivedJackpot is undefined", async () => {
+            await effectContainer.receivedJackpot(undefined);
 
-            const jackpotData = {
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
+        });
+
+        it("should play jackpot effect with transition and jackpot game", async () => {
+            const receivedJackpot = {
                 jackpot: { prizes: 5000 },
                 duration: 4000,
             };
 
-            await component.receivedJackpot(jackpotData);
+            const mockTransition = new Node();
+            mockTransition.destroy = jest.fn();
 
-            expect(AudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.JACKPOT_HIT);
-            expect(playEffectTransitionSpy).toHaveBeenCalled();
-            expect(instantiate).toHaveBeenCalledWith((component as any).effectJackpot);
-            expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(4000);
-            expect(showEffectSpy).toHaveBeenCalledWith(mockEffectNode);
-            expect(mockTransitionEffect.destroy).toHaveBeenCalled();
-            expect(showJackpotGameSpy).toHaveBeenCalledWith(5000);
+            const mockEffect = new Node();
+            const mockAnimation = {
+                setDuration: jest.fn(),
+                onFinishedCallback: jest.fn(),
+                play: jest.fn(),
+            };
+            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
+            mockInstantiate.mockReturnValue(mockEffect);
+
+            // Mock methods using type assertion for protected method
+            jest.spyOn(effectContainer as any, "playEffectTransition").mockResolvedValue(mockTransition);
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
+            jest.spyOn(effectContainer as any, "showJackpotGame").mockResolvedValue(undefined);
+
+            await effectContainer.receivedJackpot(receivedJackpot);
+
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("jackpot_hit");
+            expect((effectContainer as any).playEffectTransition).toHaveBeenCalled();
+            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectJackpot);
+            expect(mockAnimation.setDuration).toHaveBeenCalledWith(4000);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
+            expect(mockTransition.destroy).toHaveBeenCalled();
+            expect((effectContainer as any).showJackpotGame).toHaveBeenCalledWith(5000);
         });
     });
 
     describe("receivedBonus", () => {
-        it("should return resolved promise when receivedBonus is null", async () => {
-            const result = await component.receivedBonus(null);
+        it("should return resolved promise if receivedBonus is null", async () => {
+            const result = await effectContainer.receivedBonus(null);
 
             expect(result).toBeUndefined();
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
         });
 
-        it("should play bonus effect and show bonus dialog", (done) => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
-            const { AudioIds } = jest.requireMock("db://assets/game/audios/AudioIds");
-            const { instantiate } = jest.requireMock("cc");
-            const showEffectSpy = jest.spyOn(component, "showEffect").mockResolvedValue();
-            const showBonusDialogSpy = jest.spyOn(component, "showBonusDialog").mockImplementation((bonus, callback) => {
-                callback();
-            });
+        it("should return resolved promise if receivedBonus is undefined", async () => {
+            const result = await effectContainer.receivedBonus(undefined);
 
-            const bonusData = {
-                bonus: { count: 3 },
+            expect(result).toBeUndefined();
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
+            expect(mockInstantiate).not.toHaveBeenCalled();
+        });
+
+        it("should play bonus effect and show bonus dialog", async () => {
+            const receivedBonus = {
+                bonus: { value: 1000 },
                 duration: 2500,
             };
 
-            component.receivedBonus(bonusData).then(() => {
-                expect(AudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.BONUS);
-                expect(instantiate).toHaveBeenCalledWith((component as any).effectBonus);
-                expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(2500);
-                expect(showEffectSpy).toHaveBeenCalledWith(mockEffectNode);
-                expect(AudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.BONUS_POPUP);
-                expect(showBonusDialogSpy).toHaveBeenCalled();
-                done();
+            const mockEffect = new Node();
+            const mockAnimation = {
+                setDuration: jest.fn(),
+                onFinishedCallback: jest.fn(),
+                play: jest.fn(),
+            };
+            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
+            mockInstantiate.mockReturnValue(mockEffect);
+
+            // Mock showEffect to resolve immediately
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
+            jest.spyOn(effectContainer, "showBonusDialog").mockImplementation((bonus, callback) => {
+                setTimeout(callback, 0); // Simulate async callback
             });
+
+            const result = effectContainer.receivedBonus(receivedBonus);
+
+            // Wait a tick for the async operations
+            await new Promise((resolve) => setTimeout(resolve, 0));
+
+            expect(mockAudioUtils.playSFX).toHaveBeenNthCalledWith(1, "bonus");
+            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectBonus);
+            expect(mockAnimation.setDuration).toHaveBeenCalledWith(2500);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
+
+            // Wait for the bonus effect to complete
+            await result;
+
+            expect(mockAudioUtils.playSFX).toHaveBeenNthCalledWith(2, "bonus_popup");
+            expect(effectContainer.showBonusDialog).toHaveBeenCalledWith({ value: 1000 }, expect.any(Function));
         });
     });
 
     describe("showJackpotGame", () => {
-        it("should create and setup jackpot game", () => {
-            const { instantiate } = jest.requireMock("cc");
-            const prizes = 7500;
+        it("should create jackpot game node and set up dialog", async () => {
+            const prizes = 2500;
+            const mockNode = new Node();
+            const mockDialog = {
+                prizes: 0,
+                initJackpotItems: jest.fn(),
+                onJackpotGameFinished: jest.fn(),
+            };
 
-            const promise = (component as any).showJackpotGame(prizes);
+            mockNode.getComponent = jest.fn().mockReturnValue(mockDialog);
+            mockInstantiate.mockReturnValue(mockNode);
 
-            expect(instantiate).toHaveBeenCalledWith((component as any).jackpotGamePrefab);
-            expect(component.node.addChild).toHaveBeenCalledWith(mockEffectNode);
-            expect(mockJackpotGame.prizes).toBe(prizes);
-            expect(mockJackpotGame.initJackpotItems).toHaveBeenCalled();
-            expect(typeof mockJackpotGame.onJackpotGameFinished).toBe("function");
+            // Execute in background since it returns a promise that resolves via callback
+            const promise = (effectContainer as any).showJackpotGame(prizes);
 
-            // Test promise resolution
-            mockJackpotGame.onJackpotGameFinished();
-            expect(promise).resolves.toBeUndefined();
+            // Trigger the callback to resolve the promise
+            setTimeout(() => {
+                mockDialog.onJackpotGameFinished();
+            }, 0);
+
+            await promise;
+
+            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).jackpotGamePrefab);
+            expect(effectContainer.node.addChild).toHaveBeenCalledWith(mockNode);
+            expect(mockDialog.prizes).toBe(2500);
+            expect(mockDialog.initJackpotItems).toHaveBeenCalled();
         });
     });
 
     describe("showBonusDialog", () => {
-        it("should create and setup bonus dialog", () => {
-            const { instantiate } = jest.requireMock("cc");
-            const bonus = { count: 5 };
-            const onBonusFinished = jest.fn();
+        it("should create bonus dialog node and set up dialog", () => {
+            const bonus = { value: 1500 };
+            const mockCallback = jest.fn();
+            const mockNode = new Node();
+            const mockDialog = {
+                initBonusItems: jest.fn(),
+                setBonusCount: jest.fn(),
+                onBonusFinished: jest.fn(),
+            };
 
-            component.showBonusDialog(bonus, onBonusFinished);
+            mockNode.getComponent = jest.fn().mockReturnValue(mockDialog);
+            mockInstantiate.mockReturnValue(mockNode);
 
-            expect(instantiate).toHaveBeenCalledWith((component as any).bonusDialogPrefab);
-            expect(component.node.addChild).toHaveBeenCalledWith(mockEffectNode);
-            expect(mockBonusDialog.initBonusItems).toHaveBeenCalled();
-            expect(mockBonusDialog.setBonusCount).toHaveBeenCalledWith(bonus);
-            expect(mockBonusDialog.onBonusFinished).toBe(onBonusFinished);
+            effectContainer.showBonusDialog(bonus, mockCallback);
+
+            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).bonusDialogPrefab);
+            expect(effectContainer.node.addChild).toHaveBeenCalledWith(mockNode);
+            expect(mockDialog.initBonusItems).toHaveBeenCalled();
+            expect(mockDialog.setBonusCount).toHaveBeenCalledWith(bonus);
+            expect(mockDialog.onBonusFinished).toBe(mockCallback);
         });
     });
 
     describe("playEffectTransition", () => {
-        it("should return null when effectTransitionPrefab is not set", async () => {
-            (component as any).effectTransitionPrefab = null;
+        it("should return null if effectTransitionPrefab is not set", async () => {
+            (effectContainer as any).effectTransitionPrefab = null;
 
-            const result = await (component as any).playEffectTransition();
+            const result = await (effectContainer as any).playEffectTransition();
 
             expect(result).toBeNull();
+            expect(mockInstantiate).not.toHaveBeenCalled();
+            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
         });
 
         it("should play transition effect and return effect node", async () => {
-            const { AudioUtils } = jest.requireMock("db://shared-components/game/audios/utils");
-            const { AudioIds } = jest.requireMock("db://assets/game/audios/AudioIds");
-            const { instantiate } = jest.requireMock("cc");
-            const showEffectSpy = jest.spyOn(component, "showEffect").mockResolvedValue();
+            const mockEffect = new Node();
+            const mockAnimation = {
+                autoDestroyNode: true,
+                onFinishedCallback: jest.fn(),
+                play: jest.fn(),
+            };
+            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
+            mockInstantiate.mockReturnValue(mockEffect);
 
-            const result = await (component as any).playEffectTransition();
+            // Mock showEffect to resolve immediately
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
 
-            expect(instantiate).toHaveBeenCalledWith((component as any).effectTransitionPrefab);
-            expect(mockCallbackAnimation.autoDestroyNode).toBe(false);
-            expect(AudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.TRANSITION);
-            expect(showEffectSpy).toHaveBeenCalledWith(mockEffectNode);
-            expect(result).toBe(mockEffectNode);
+            const result = await (effectContainer as any).playEffectTransition();
+
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("transition");
+            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectTransitionPrefab);
+            expect(mockAnimation.autoDestroyNode).toBe(false);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
+            expect(result).toBe(mockEffect);
         });
     });
 
     describe("showEffect", () => {
-        it("should add effect to node and setup animation callback", (done) => {
-            const { Node } = jest.requireMock("cc");
-            const effectNode = new Node();
+        it("should add effect to node and play animation", async () => {
+            const mockEffect = new Node();
+            const mockAnimation = {
+                onFinishedCallback: jest.fn(),
+                play: jest.fn(),
+            };
+            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
 
-            const promise = component.showEffect(effectNode);
+            // Execute showEffect and trigger the callback
+            const promise = effectContainer.showEffect(mockEffect);
 
-            expect(component.node.addChild).toHaveBeenCalledWith(effectNode);
-            expect(mockCallbackAnimation.play).toHaveBeenCalled();
-            expect(typeof mockCallbackAnimation.onFinishedCallback).toBe("function");
+            // Trigger the animation callback to resolve the promise
+            setTimeout(() => {
+                mockAnimation.onFinishedCallback();
+            }, 0);
 
-            // Test promise resolution
-            mockCallbackAnimation.onFinishedCallback();
-            promise.then(() => {
-                done();
-            });
+            await promise;
+
+            expect(effectContainer.node.addChild).toHaveBeenCalledWith(mockEffect);
+            expect(mockEffect.getComponent).toHaveBeenCalled();
+            expect(mockAnimation.play).toHaveBeenCalled();
         });
     });
 });
