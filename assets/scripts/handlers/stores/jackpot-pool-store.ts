@@ -17,5 +17,6 @@ export class JackpotPoolStore {
         mobx.makeAutoObservable(this);
     }
 
+    jackpotEnabled = false;
     jackpotPools: Record<string, JackpotPool> = {};
 }

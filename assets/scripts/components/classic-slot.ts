@@ -7,6 +7,7 @@ import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
 import { LineData } from "../definitions";
 import { BetControlStore } from "../handlers/stores/bet-control-store";
+import { JackpotPoolStore } from "../handlers/stores/jackpot-pool-store";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
 import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
@@ -101,6 +102,11 @@ export default class ClassicSlot extends GameComponent {
             jackpotEnabled: this.jackpotEnabled,
         } as SymbolPreviewType;
         this.slotBoard.showPreviewPopup(info, isInfoOnLeft, worldPosition);
+    }
+
+    @render(JackpotPoolStore, (store) => store.jackpotEnabled)
+    renderJackpotEnabled(jackpotEnabled: boolean) {
+        this.jackpotEnabled = jackpotEnabled;
     }
 
     @render(gc.GameConfigs.GameConfigStore, (store) => store.odds)

@@ -31,6 +31,7 @@ export class SlotJackpotPoolsHandler {
             data[pool.pool] = pool;
         });
 
+        this.jackpotPoolStore.jackpotEnabled = jackpotPools.length > 0;
         this.jackpotPoolStore.jackpotPools = data;
     }
 }

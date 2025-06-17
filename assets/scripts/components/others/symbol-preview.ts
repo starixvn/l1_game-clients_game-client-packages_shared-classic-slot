@@ -1,5 +1,5 @@
 import { _decorator, Component, Label, Node, sp, Sprite } from "cc";
-import { ComponentUtils } from "db://shared-components/shared/utils";
+import { AppUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import { SpecialSymbol } from "../../definitions";
 import { globalEmitter, InternalEvents, resourceCaches } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
@@ -92,10 +92,8 @@ export default class SymbolPreview extends Component {
                 symbolName = "bonus";
                 break;
             case SpecialSymbol.JACKPOT:
-                //TODO: fix
-                // const locale = getLocale();
-                // symbolName = locale === "vi-VN" ? "jackpot.vi-VN" : "jackpot";
-                symbolName = "jackpot";
+                const locale = AppUtils.getLocale();
+                symbolName = locale === "vi-VN" ? "jackpot.vi-VN" : "jackpot";
                 break;
         }
 
