@@ -175,25 +175,6 @@ describe("ClassicSlot", () => {
         jest.clearAllTimers();
     });
 
-    describe("onLoad", () => {
-        it("should call super.onLoad and initialize slot board after caches", async () => {
-            const superOnLoadSpy = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(component)), "onLoad");
-            const initSharedCachesSpy = jest.spyOn(component, "initSharedCaches").mockResolvedValue();
-            const initSlotBoardSpy = jest.spyOn(component, "initSlotBoard").mockImplementation();
-
-            await component.onLoad();
-
-            expect(superOnLoadSpy).toHaveBeenCalled();
-            expect(initSharedCachesSpy).toHaveBeenCalled();
-
-            // Wait for promise to resolve
-            await new Promise((resolve) => setTimeout(resolve, 0));
-            expect(initSlotBoardSpy).toHaveBeenCalled();
-
-            superOnLoadSpy.mockRestore();
-        });
-    });
-
     describe("initSharedCaches", () => {
         it("should initialize slot game configs and load resources", async () => {
             const initSlotGameConfigsSpy = jest.spyOn(component as any, "initSlotGameConfigs").mockImplementation();
@@ -206,7 +187,7 @@ describe("ClassicSlot", () => {
             expect(initSlotGameConfigsSpy).toHaveBeenCalled();
             expect(resourceCaches.gameAtlas).toBe(mockGameAtlas);
             expect(resourceCaches.sharedSlotAtlas).toBe(mockSharedSlotAtlas);
-            expect(loadSlotSymbols).toHaveBeenCalledWith(true);
+            expect(loadSlotSymbols).toHaveBeenCalledWith(component.jackpotEnabled);
             expect(loadWinningSymbolAnimation).toHaveBeenCalled();
         });
     });
@@ -356,6 +337,26 @@ describe("ClassicSlot", () => {
 
             expect(AudioUtils.playClick).not.toHaveBeenCalled();
             expect(mockSlotBoard.showPreviewPopup).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("renderJackpotEnabled", () => {
+        it("should set jackpotEnabled property", () => {
+            component.renderJackpotEnabled({ enabled: true });
+            expect(component.jackpotEnabled).toBe(true);
+        });
+
+        it("should initialize slot board after caches", async () => {
+            const initSharedCachesSpy = jest.spyOn(component, "initSharedCaches").mockResolvedValue();
+            const initSlotBoardSpy = jest.spyOn(component, "initSlotBoard").mockImplementation();
+
+            component.renderJackpotEnabled({ enabled: true });
+
+            expect(initSharedCachesSpy).toHaveBeenCalled();
+
+            // Wait for promise to resolve
+            await new Promise((resolve) => setTimeout(resolve, 0));
+            expect(initSlotBoardSpy).toHaveBeenCalled();
         });
     });
 
