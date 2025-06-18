@@ -36,18 +36,24 @@ export default class ClassicSlot extends GameComponent {
         return !!result;
     }
 
-    onLoad() {
-        super.onLoad();
+    @render(JackpotPoolStore, (store) => store.jackpotEnabled, { fireImmediately: false })
+    renderJackpotEnabled(jackpotEnabled: { enabled: boolean }) {
+        this.jackpotEnabled = jackpotEnabled?.enabled;
         this.initSharedCaches().then(() => {
             this.initSlotBoard();
         });
+    }
+
+    @render(gc.GameConfigs.GameConfigStore, (store) => store.odds)
+    renderGameOdd(odds) {
+        this.gameConfigOdds = odds;
     }
 
     async initSharedCaches() {
         this.initSlotGameConfigs();
         resourceCaches.gameAtlas = this.gameAtlas;
         resourceCaches.sharedSlotAtlas = this.sharedSlotAtlas;
-        await loadSlotSymbols(true);
+        await loadSlotSymbols(this.jackpotEnabled);
         await loadWinningSymbolAnimation();
     }
 
@@ -102,16 +108,6 @@ export default class ClassicSlot extends GameComponent {
             jackpotEnabled: this.jackpotEnabled,
         } as SymbolPreviewType;
         this.slotBoard.showPreviewPopup(info, isInfoOnLeft, worldPosition);
-    }
-
-    @render(JackpotPoolStore, (store) => store.jackpotEnabled)
-    renderJackpotEnabled(jackpotEnabled: boolean) {
-        this.jackpotEnabled = jackpotEnabled;
-    }
-
-    @render(gc.GameConfigs.GameConfigStore, (store) => store.odds)
-    renderGameOdd(odds) {
-        this.gameConfigOdds = odds;
     }
 
     @render(SlotBoardStore, (store) => store.spinResult)

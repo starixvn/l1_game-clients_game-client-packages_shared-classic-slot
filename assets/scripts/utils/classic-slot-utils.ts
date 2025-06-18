@@ -1,6 +1,8 @@
 import { Asset, EventTarget, sp, SpriteAtlas, tween } from "cc";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
+import { AppUtils } from "db://shared-components/shared/utils";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
+import { SpecialSymbol } from "../definitions";
 
 interface ResourceCaches {
     slotSymbols?: any;
@@ -96,19 +98,24 @@ export const loadSlotSymbols = async (jackpotEnabled: boolean) => {
             continue;
         }
         const symbolInfo = {};
-        symbolInfo["symbol"] = await addSymbolCache(index);
+        symbolInfo["symbol"] = await addSymbolCache(index, jackpotEnabled);
         symbolInfo["isJackpot"] = jackpotEnabled && index === slotGameConfigs.jackpotSymbolIndex;
         prefabCache[index] = symbolInfo;
     }
     resourceCaches.slotSymbols = prefabCache;
 };
 
-const addSymbolCache = (index: number) => {
-    const path = getSymbolName(index);
+const addSymbolCache = (index: number, jackpotEnabled: boolean) => {
+    const path = getSymbolName(index, jackpotEnabled);
     return bundleManager.loadResourcesAsset<sp.SkeletonData>(path, sp.SkeletonData);
 };
 
-const getSymbolName = (index) => {
+const getSymbolName = (index: number, jackpotEnabled: boolean) => {
+    if (index === SpecialSymbol.JACKPOT && jackpotEnabled) {
+        const locale = AppUtils.getLocale();
+        const language = locale === "vi-VN" ? `.${locale}` : "";
+        return `spines/symbols/symbol-${index}.jackpot${language}`;
+    }
     return `spines/symbols/symbol-${index}`;
 };
 
