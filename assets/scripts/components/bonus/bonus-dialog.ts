@@ -10,7 +10,7 @@ import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
 import { SlotSettlementHandler } from "../../handlers/handlers/slot-settlement-handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
-import { initTimer } from "../../utils/classic-slot-utils";
+import { initTimer, resourceCaches } from "../../utils/classic-slot-utils";
 import BonusItem from "./bonus-item";
 const { handle, render } = Observer;
 const { ccclass, property } = _decorator;
@@ -134,6 +134,7 @@ export default class BonusDialog extends ObserverComponent {
     setBonusCount(count: number) {
         this.totalBonus = count;
         this.updateBonusCount();
+        this.updateBonusCountItemTextColor(resourceCaches.colorJson.bonusCountItemTextColor);
     }
 
     updateBonusCountItemTextColor(color: string) {

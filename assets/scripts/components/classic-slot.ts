@@ -10,7 +10,7 @@ import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { JackpotPoolStore } from "../handlers/stores/jackpot-pool-store";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
-import { loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
+import { ColorJson, loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
 import { SymbolPreviewType } from "./others/symbol-preview";
 import SlotBoard from "./slot-board/slot-board";
 const { ccclass, property } = _decorator;
@@ -36,10 +36,15 @@ export default class ClassicSlot extends GameComponent {
         return !!result;
     }
 
+    onLoad() {
+        this.initSharedCaches();
+        super.onLoad();
+    }
+
     @render(JackpotPoolStore, (store) => store.jackpotEnabled, { fireImmediately: false })
     renderJackpotEnabled(jackpotEnabled: { enabled: boolean }) {
         this.jackpotEnabled = jackpotEnabled?.enabled;
-        this.initSharedCaches().then(() => {
+        this.loadSymbols().then(() => {
             this.initSlotBoard();
         });
     }
@@ -49,10 +54,14 @@ export default class ClassicSlot extends GameComponent {
         this.gameConfigOdds = odds;
     }
 
-    async initSharedCaches() {
+    initSharedCaches() {
         this.initSlotGameConfigs();
         resourceCaches.gameAtlas = this.gameAtlas;
         resourceCaches.sharedSlotAtlas = this.sharedSlotAtlas;
+        resourceCaches.colorJson = this.colorJson.json as ColorJson;
+    }
+
+    async loadSymbols() {
         await loadSlotSymbols(this.jackpotEnabled);
         await loadWinningSymbolAnimation();
     }
@@ -98,7 +107,7 @@ export default class ClassicSlot extends GameComponent {
         AudioUtils.playClick();
         const symbolCache = resourceCaches.slotSymbols;
         const spine = symbolCache[symbol.index].symbol;
-        const colorConfig = this.colorJson.json;
+        const colorConfig = resourceCaches.colorJson;
         const info = {
             symbol,
             spine,

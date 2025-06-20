@@ -210,10 +210,6 @@
     "msgRichText": {
       "__id__": 5
     },
-    "colorInfo": {
-      "__uuid__": "798b7e22-55e9-471e-bd0a-8993d2c7b46c",
-      "__expectedType__": "cc.JsonAsset"
-    },
     "_id": ""
   },
   {
@@ -229,6 +225,7 @@
       "__id__": 0
     },
     "fileId": "8cjyMqtvdAVqyinF8APiXu",
+    "instance": null,
     "targetOverrides": null
   }
 ]

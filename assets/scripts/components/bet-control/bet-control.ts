@@ -2,11 +2,13 @@ import gc from "@sg/game-client-base";
 import { _decorator, Button, Label, sp, Toggle, Tween } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
+import { ChangeNodeColor } from "db://shared-components/shared/common-components/change-node-color";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
+import { ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
 import { BetControlStore, SlotBetHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
-import { floatToNumber } from "../../utils/classic-slot-utils";
+import { floatToNumber, resourceCaches } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
 
@@ -37,6 +39,28 @@ export default class BetControl extends ObserverComponent {
     btnDecreaseStake: Button = null;
 
     tweenFloatNumber: Tween = null;
+
+    onLoad() {
+        this.updateColor();
+        super.onLoad();
+    }
+
+    updateColor() {
+        const { bottomAreaTextColor, bottomAreaNumberColor, bottomAreaButtonBorderColor, bottomAreaWinAmountColor } =
+            resourceCaches.colorJson;
+
+        this.getComponentsInChildren(ChangeNodeColor).forEach((comp) => {
+            const labelComp = comp.getComponent(Label);
+            if (labelComp) {
+                const isLocalizedLabel = comp.node.getComponent("LocalizedLabel");
+                comp.updateColor(isLocalizedLabel ? bottomAreaTextColor : bottomAreaNumberColor);
+            } else {
+                comp.updateColor(bottomAreaButtonBorderColor);
+            }
+        });
+
+        ComponentUtils.setNodeColor(this.lblTotalWin.node, bottomAreaWinAmountColor);
+    }
 
     @render(BetControlStore, (store) => store.totalBet)
     renderTotalBet(totalBet: number) {

@@ -4,11 +4,25 @@ import { AppUtils } from "db://shared-components/shared/utils";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { SpecialSymbol } from "../definitions";
 
+export interface ColorJson {
+    bottomAreaTextColor: string;
+    bottomAreaNumberColor: string;
+    bottomAreaButtonBorderColor: string;
+    bottomAreaWinAmountColor: string;
+    previewOddsBorderColor: string;
+    previewOddsSymbolNumberColor: string;
+    previewOddsWinValueColor: string;
+    noticeTextColor: string;
+    noticeHighlightTextColor: string;
+    bonusCountItemTextColor: string;
+}
+
 interface ResourceCaches {
     slotSymbols?: any;
     slotWinningAnimation?: any;
     gameAtlas?: SpriteAtlas;
     sharedSlotAtlas?: SpriteAtlas;
+    colorJson?: ColorJson;
 }
 export const resourceCaches: ResourceCaches = {};
 

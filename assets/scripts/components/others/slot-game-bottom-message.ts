@@ -1,11 +1,12 @@
 import gc from "@sg/game-client-base";
-import { _decorator, Color, JsonAsset, RichText, sys } from "cc";
+import { _decorator, Color, RichText, sys } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { random } from "lodash-es";
 import Observer from "observer";
 import { SlotNotification } from "../../definitions";
 import { BetControlStore } from "../../handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
+import { resourceCaches } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { observer, render, handle } = Observer;
 
@@ -14,20 +15,17 @@ export class SlotGameBottomMessage extends ObserverComponent {
     @property(RichText)
     msgRichText: RichText = null;
 
-    @property(JsonAsset)
-    colorInfo: JsonAsset = null;
     highlightColor: string;
     private isTurboMode = false;
-    private colorConfig: any;
     private state = "";
     private autoSpinCount = 0;
     private freeSpinCount = 0;
     private autoSpinEnabled = false;
     private freeSpinEnabled = false;
     onLoad() {
-        this.colorConfig = this.colorInfo.json;
-        this.highlightColor = this.colorConfig.noticeHighlightTextColor;
-        this.msgRichText.fontColor = new Color().fromHEX(this.colorConfig.noticeTextColor);
+        const { noticeHighlightTextColor, noticeTextColor } = resourceCaches.colorJson;
+        this.highlightColor = noticeHighlightTextColor;
+        this.msgRichText.fontColor = new Color().fromHEX(noticeTextColor);
         super.onLoad();
     }
 
