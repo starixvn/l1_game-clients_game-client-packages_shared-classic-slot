@@ -95,6 +95,7 @@ export default class ClassicSlot extends GameComponent {
     initSlotBoard() {
         this.slotBoard.initReels();
         this.slotBoard.previewPopup.onSymbolPreview = this.onSymbolPreview.bind(this);
+        this.slotBoard.setItemWinningEffect();
     }
 
     onSymbolPreview(symbol, worldPosition: Vec3, isInfoOnLeft: boolean) {

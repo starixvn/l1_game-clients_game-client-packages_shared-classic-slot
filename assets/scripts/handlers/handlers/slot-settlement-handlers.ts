@@ -171,8 +171,8 @@ export class SlotSettlementHandler {
             betWin > 0 && !bigWin ? this.slotDurationStore.winningDuration : this.slotDurationStore.noWinningDuration;
 
         const sequenceTweens = [];
-        sequenceTweens.push(tween().delay(showResultBoardDuration));
         sequenceTweens.push(tween().call(() => this.showWinningLines(betWin, bigWin, jackpot, winningLines)));
+        sequenceTweens.push(tween().delay(showResultBoardDuration));
         if (bigWin) {
             sequenceTweens.push(this.createTweenShowBigWin(betWin, bigWin));
         }
@@ -249,8 +249,7 @@ export class SlotSettlementHandler {
             })
             .delay(delayToUpdateWinningBet)
             .call(() => (this.slotBoardStore.winningBet = betWin))
-            .delay(delayToEndBigWin)
-            .start();
+            .delay(delayToEndBigWin);
     }
 
     protected showWinningLines(betWin: number, bigWin: boolean, jackpot: any, winningLines: LineData[]) {
