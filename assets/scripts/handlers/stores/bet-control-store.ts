@@ -16,6 +16,7 @@ export class BetControlStore {
 
     @inject(gc.GameUserSettings.GameUserSettingHandler)
     protected readonly gameUserSettingHandler: gc.GameUserSettings.GameUserSettingHandler;
+    @inject(gc.Notices.NoticeStore) protected readonly noticeStore: gc.Notices.NoticeStore;
 
     constructor() {
         mobx.makeAutoObservable(this);
@@ -126,6 +127,11 @@ export class BetControlStore {
     }
 
     setTurbo(turbo: boolean) {
+        if (this.turboEnabled !== turbo) {
+            const msg = turbo ? gc.Translator.gameTranslate("enable_turbo_mode") : gc.Translator.gameTranslate("disable_turbo_mode");
+            this.noticeStore.addWarning(msg);
+        }
+
         this.turboEnabled = turbo;
     }
 
