@@ -43,8 +43,6 @@ export class BetControlStore {
         return this.stake * SLOT_LINES;
     }
 
-    interactableBet = false;
-
     stakeSelectorShow = false;
     stakeSelectorDisabled = false;
 

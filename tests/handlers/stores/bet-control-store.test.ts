@@ -129,7 +129,6 @@ describe("BetControlStore", () => {
             expect(freshStore.betLevels).toEqual([]); // Before reaction
             expect(freshStore.stake).toBe(0); // Before reaction sets it based on betLevels
             expect(freshStore.roundId).toBe(-1);
-            expect(freshStore.interactableBet).toBe(false);
             expect(freshStore.stakeSelectorShow).toBe(false);
             expect(freshStore.stakeSelectorDisabled).toBe(false);
             expect(freshStore.showLineSelection).toBeNull();

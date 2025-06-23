@@ -32,6 +32,7 @@ export default class ClassicSlot extends GameComponent {
 
     gameConfigOdds: any;
     jackpotEnabled = false;
+    isReadyBet = false;
 
     override isValidResult(result: gc.GameServiceMessage.TResult, settlementResult: gc.GameServiceMessage.TSettlementResult) {
         return !!result;
@@ -120,10 +121,7 @@ export default class ClassicSlot extends GameComponent {
     }
 
     onSymbolPreview(symbol, worldPosition: Vec3, isInfoOnLeft: boolean) {
-        if (
-            !this.gameConfigOdds
-            // || !this.isFinishedRound
-        ) {
+        if (!this.gameConfigOdds || !this.isReadyBet) {
             return;
         }
         AudioUtils.playClick();
@@ -139,6 +137,11 @@ export default class ClassicSlot extends GameComponent {
             jackpotEnabled: this.jackpotEnabled,
         } as SymbolPreviewType;
         this.slotBoard.showPreviewPopup(info, isInfoOnLeft, worldPosition);
+    }
+
+    @render(SlotBoardStore, (store) => store.isReadyBet)
+    renderCascadingState(isReadyBet: boolean) {
+        this.isReadyBet = isReadyBet;
     }
 
     @render(SlotBoardStore, (store) => store.spinResult)

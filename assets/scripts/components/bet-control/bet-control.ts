@@ -38,6 +38,12 @@ export default class BetControl extends ObserverComponent {
     @property(Button)
     btnDecreaseStake: Button = null;
 
+    @property(Button)
+    btnShowStakeSelector: Button = null;
+
+    @property(Button)
+    btnOpenAutoSpin: Button = null;
+
     tweenFloatNumber: Tween = null;
 
     onLoad() {
@@ -163,5 +169,15 @@ export default class BetControl extends ObserverComponent {
     @handle(SlotBetHandler, (handler) => handler.showLineSelection())
     showLineSelection() {
         AudioUtils.playClick();
+    }
+
+    @render(SlotBoardStore, (store) => store.isReadyBet)
+    renderCascadingState(isReadyBet: boolean) {
+        this.btnShowStakeSelector.interactable = isReadyBet;
+    }
+
+    @render(SlotBoardStore, (store) => store.preventOpenAutoSpin)
+    renderPreventOpenAutoSpin(preventOpenAutoSpin: boolean) {
+        this.btnOpenAutoSpin.interactable = !preventOpenAutoSpin;
     }
 }

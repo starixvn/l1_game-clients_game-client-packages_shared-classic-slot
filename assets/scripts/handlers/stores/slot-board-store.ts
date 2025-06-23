@@ -4,6 +4,7 @@ const { injectable, inject } = inversify;
 
 import gc from "@sg/game-client-base";
 import { LineData, SlotNotification, SlotState } from "../../definitions";
+import { BetControlStore } from "./bet-control-store";
 
 @injectable()
 export class SlotBoardStore {
@@ -16,6 +17,8 @@ export class SlotBoardStore {
 
     @inject(gc.GameUserSettings.GameUserSettingHandler)
     protected readonly gameUserSettingHandler: gc.GameUserSettings.GameUserSettingHandler;
+
+    @inject(BetControlStore) protected readonly betControlStore: BetControlStore;
 
     constructor() {
         mobx.makeAutoObservable(this);
@@ -46,6 +49,10 @@ export class SlotBoardStore {
 
     get isReadyBet() {
         return this.slotState === SlotState.READY || this.slotState === SlotState.SETTLED;
+    }
+
+    get preventOpenAutoSpin() {
+        return !this.isReadyBet && !this.betControlStore.autoSpinEnabled;
     }
 
     bottomMessageState = SlotNotification.READY;
