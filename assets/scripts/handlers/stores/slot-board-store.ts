@@ -22,7 +22,12 @@ export class SlotBoardStore {
         setTimeout(() => {}, 0);
     }
 
-    spinResult: { result: number[]; duration: number; turbo: boolean } = { result: [], duration: 0, turbo: false };
+    spinResult: { result: number[]; duration: number; turbo: boolean; onComplete: () => void } = {
+        result: [],
+        duration: 0,
+        turbo: false,
+        onComplete: () => {},
+    };
 
     receivedBonus = null;
     receivedJackpot = null;

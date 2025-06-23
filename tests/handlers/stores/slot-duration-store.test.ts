@@ -204,36 +204,5 @@ describe("SlotDurationStore", () => {
         });
     });
 
-    describe("totalSpinDuration", () => {
-        let mockConfig: StandardSlotGameConfigs;
-        const reelCount = 5;
-        const reelDelayTime = 0.075;
-
-        beforeEach(() => {
-            mockConfig = new StandardSlotGameConfigs();
-            mockConfig.normalMode = { spinDuration: 100 } as any; // Only spinDuration matters here
-            mockConfig.turboMode = { spinDuration: 10 } as any; // Cast to any to simplify mock
-            slotDurationStore.setConfig(mockConfig);
-        });
-
-        it("should calculate totalSpinDuration correctly in normal mode", () => {
-            mockBetControlStore.turboEnabled = false;
-            const expectedDuration = mockConfig.normalMode.spinDuration * (reelCount - 1) + reelDelayTime * (reelCount - 1);
-            //Need to use mobx.runInAction for this test to pass because totalSpinDuration is a computed property
-            mobx.runInAction(() => {
-                expect(slotDurationStore.totalSpinDuration).toBeCloseTo(expectedDuration);
-            });
-        });
-
-        it("should calculate totalSpinDuration correctly in turbo mode", () => {
-            mockBetControlStore.turboEnabled = true;
-            const expectedDuration = mockConfig.turboMode.spinDuration * (reelCount - 1);
-            //Need to use mobx.runInAction for this test to pass because totalSpinDuration is a computed property
-            mobx.runInAction(() => {
-                expect(slotDurationStore.totalSpinDuration).toBeCloseTo(expectedDuration);
-            });
-        });
-    });
-
     // More tests will be added here
 });

@@ -127,13 +127,15 @@ export class SlotSettlementHandler {
     }
 
     protected async spin(result: number[]) {
-        this.slotBoardStore.slotState = SlotState.SPINNING;
-        this.slotBoardStore.spinResult = {
-            result,
-            duration: this.slotDurationStore.spinDuration,
-            turbo: this.betControlStore.turboEnabled,
-        };
-        await AnimationUtils.delayTime(this.slotDurationStore.totalSpinDuration);
+        return new Promise<void>((resolve) => {
+            this.slotBoardStore.slotState = SlotState.SPINNING;
+            this.slotBoardStore.spinResult = {
+                result,
+                duration: this.slotDurationStore.spinDuration,
+                turbo: this.betControlStore.turboEnabled,
+                onComplete: resolve,
+            };
+        });
     }
 
     async handleFinish(finish: any) {
