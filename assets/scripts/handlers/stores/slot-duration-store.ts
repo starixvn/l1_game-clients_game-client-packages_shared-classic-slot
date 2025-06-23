@@ -32,7 +32,7 @@ export class SlotDurationStore {
     }
 
     get configDuration() {
-        return this.betControlStore.turboEnabled ? this.config.turboMode : this.config.normalMode;
+        return this.betControlStore.turboEnabledOnSpin ? this.config.turboMode : this.config.normalMode;
     }
 
     get spinDuration() {

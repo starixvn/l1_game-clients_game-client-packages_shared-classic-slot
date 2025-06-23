@@ -62,6 +62,9 @@ export class BetControlStore {
     }
 
     turboEnabled = false;
+    get turboEnabledOnSpin() {
+        return this.turboEnabled || this.triggerAutoSpin;
+    }
 
     get stakeIndex() {
         return this.betLevels.indexOf(this.stake);

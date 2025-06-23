@@ -132,7 +132,7 @@ export class SlotSettlementHandler {
             this.slotBoardStore.spinResult = {
                 result,
                 duration: this.slotDurationStore.spinDuration,
-                turbo: this.betControlStore.turboEnabled,
+                turbo: this.betControlStore.turboEnabledOnSpin,
                 onComplete: resolve,
             };
         });
