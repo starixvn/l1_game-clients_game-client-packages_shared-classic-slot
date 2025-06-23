@@ -2,6 +2,7 @@ import gc from "@sg/game-client-base";
 import { _decorator, JsonAsset, SpriteAtlas, Vec3 } from "cc";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
+import _ from "lodash";
 import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
@@ -92,10 +93,30 @@ export default class ClassicSlot extends GameComponent {
         // override to not use round id from round store
     }
 
+    protected generateRandomBoardData() {
+        const samples = [
+            [8, 9, 6, 1, 3, 1, 7, 2, 0, 6, 4, 5, 10, 10, 7],
+            [1, 1, 3, 7, 6, 4, 10, 8, 9, 3, 1, 0, 2, 10, 5],
+            [10, 2, 0, 7, 4, 6, 9, 8, 0, 5, 3, 7, 1, 5, 9],
+            [3, 10, 0, 8, 5, 9, 9, 1, 7, 6, 10, 2, 4, 3, 3],
+            [9, 7, 5, 4, 6, 5, 10, 3, 1, 9, 8, 6, 2, 0, 8],
+        ];
+        const randomIndex = _.random(samples.length - 1);
+        console.log(`B${randomIndex}`);
+        return samples[randomIndex];
+    }
+
+    protected setBoardFullItems() {
+        const data = this.generateRandomBoardData();
+        this.slotBoard.setBoardData(data);
+        this.slotBoard.applyData(data);
+    }
+
     initSlotBoard() {
         this.slotBoard.initReels();
         this.slotBoard.previewPopup.onSymbolPreview = this.onSymbolPreview.bind(this);
         this.slotBoard.setItemWinningEffect();
+        this.setBoardFullItems();
     }
 
     onSymbolPreview(symbol, worldPosition: Vec3, isInfoOnLeft: boolean) {

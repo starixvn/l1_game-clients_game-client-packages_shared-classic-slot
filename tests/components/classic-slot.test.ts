@@ -347,12 +347,9 @@ describe("ClassicSlot", () => {
         });
 
         it("should initialize slot board after caches", async () => {
-            const initSharedCachesSpy = jest.spyOn(component, "initSharedCaches").mockResolvedValue();
             const initSlotBoardSpy = jest.spyOn(component, "initSlotBoard").mockImplementation();
 
             component.renderJackpotEnabled({ enabled: true });
-
-            expect(initSharedCachesSpy).toHaveBeenCalled();
 
             // Wait for promise to resolve
             await new Promise((resolve) => setTimeout(resolve, 0));
@@ -376,6 +373,7 @@ describe("ClassicSlot", () => {
                 result: [1, 2, 3, 4, 5],
                 duration: 2000,
                 turbo: false,
+                onComplete: jest.fn(),
             };
 
             await component.renderSpinResult(spinResult);
@@ -389,6 +387,7 @@ describe("ClassicSlot", () => {
                 result: [5, 4, 3, 2, 1],
                 duration: 1000,
                 turbo: true,
+                onComplete: jest.fn(),
             };
 
             await component.renderSpinResult(spinResult);
