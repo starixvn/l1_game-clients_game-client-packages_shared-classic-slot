@@ -55,6 +55,10 @@ export class SlotBoardStore {
         return !this.isReadyBet && !this.betControlStore.autoSpinEnabled;
     }
 
+    get preventChangeBet() {
+        return !this.isReadyBet || this.betControlStore.autoSpinEnabled;
+    }
+
     bottomMessageState = SlotNotification.READY;
 
     reset() {

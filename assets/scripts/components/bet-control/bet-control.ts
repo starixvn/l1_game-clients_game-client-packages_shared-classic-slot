@@ -171,9 +171,9 @@ export default class BetControl extends ObserverComponent {
         AudioUtils.playClick();
     }
 
-    @render(SlotBoardStore, (store) => store.isReadyBet)
-    renderCascadingState(isReadyBet: boolean) {
-        this.btnShowStakeSelector.interactable = isReadyBet;
+    @render(SlotBoardStore, (store) => store.preventChangeBet)
+    renderPreventChangeBet(preventChangeBet: boolean) {
+        this.btnShowStakeSelector.interactable = !preventChangeBet;
     }
 
     @render(SlotBoardStore, (store) => store.preventOpenAutoSpin)
