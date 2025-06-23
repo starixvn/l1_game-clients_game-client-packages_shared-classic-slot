@@ -133,7 +133,7 @@ describe("BetControlStore", () => {
             expect(freshStore.stakeSelectorShow).toBe(false);
             expect(freshStore.stakeSelectorDisabled).toBe(false);
             expect(freshStore.showLineSelection).toBeNull();
-            expect(freshStore.triggerAutoSpin).toBe(true);
+            expect(freshStore.triggerAutoSpin).toBe(false);
             expect(freshStore.autoSpinCount).toBe(0);
             expect(freshStore.autoSpinEnabled).toBe(false);
             expect(freshStore.autoSpinDialogOpenEvent).toBeNull();

@@ -50,7 +50,7 @@ export class BetControlStore {
 
     showLineSelection = null;
 
-    triggerAutoSpin = true;
+    triggerAutoSpin = false;
     autoSpinCount = 0;
     autoSpinEnabled = false;
     autoSpinDialogOpenEvent = null;
