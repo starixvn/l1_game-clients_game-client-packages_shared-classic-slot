@@ -32,12 +32,16 @@ export default class EffectContainer extends ObserverComponent {
         if (!receivedFreeSpins) {
             return;
         }
-        const { duration } = receivedFreeSpins;
-        AudioUtils.playSFX(AudioIds.FREESPIN);
-        const effect = instantiate(this.effectFreeSpin);
-        const animation = effect.getComponent(CallbackAnimation);
-        animation.setDuration(duration);
-        await this.showEffect(effect);
+        try {
+            const transtition = await this.playEffectTransition();
+            const { duration } = receivedFreeSpins;
+            AudioUtils.playSFX(AudioIds.FREESPIN);
+            const effect = instantiate(this.effectFreeSpin);
+            const animation = effect.getComponent(CallbackAnimation);
+            animation.setDuration(duration);
+            await this.showEffect(effect);
+            transtition?.destroy();
+        } catch (e) {}
     }
 
     @render(SlotBoardStore, (store) => store.receivedBigWin, { fireImmediately: false })
@@ -51,14 +55,18 @@ export default class EffectContainer extends ObserverComponent {
         if (!receivedBigWin) {
             return;
         }
-        const { duration, showBigWinValue, delayShowBigWinValue, amount } = receivedBigWin;
-        AudioUtils.playSFX(AudioIds.BIG_WIN);
-        const effect = instantiate(this.effectBigWin);
-        const callbackAnim = effect.getComponent(CallbackAnimation);
-        callbackAnim.setDuration(duration);
-        const bigWinAnimation = effect.getComponent(BigWinAnimation);
-        bigWinAnimation.setAmount({ amount, duration: showBigWinValue, delayTime: delayShowBigWinValue });
-        await this.showEffect(effect);
+        try {
+            const transtition = await this.playEffectTransition();
+            const { duration, showBigWinValue, delayShowBigWinValue, amount } = receivedBigWin;
+            AudioUtils.playSFX(AudioIds.BIG_WIN);
+            const effect = instantiate(this.effectBigWin);
+            const callbackAnim = effect.getComponent(CallbackAnimation);
+            callbackAnim.setDuration(duration);
+            const bigWinAnimation = effect.getComponent(BigWinAnimation);
+            bigWinAnimation.setAmount({ amount, duration: showBigWinValue, delayTime: delayShowBigWinValue });
+            await this.showEffect(effect);
+            transtition?.destroy();
+        } catch (e) {}
     }
 
     @render(SlotBoardStore, (store) => store.receivedJackpot, { fireImmediately: false })
@@ -66,15 +74,17 @@ export default class EffectContainer extends ObserverComponent {
         if (!receivedJackpot) {
             return;
         }
-        const { jackpot, duration } = receivedJackpot;
-        AudioUtils.playSFX(AudioIds.JACKPOT_HIT);
-        const transtition = await this.playEffectTransition();
-        const effect = instantiate(this.effectJackpot);
-        const animation = effect.getComponent(CallbackAnimation);
-        animation.setDuration(duration);
-        await this.showEffect(effect);
-        transtition?.destroy();
-        await this.showJackpotGame(jackpot.prizes);
+        try {
+            const { jackpot, duration } = receivedJackpot;
+            const transtition = await this.playEffectTransition();
+            AudioUtils.playSFX(AudioIds.JACKPOT_HIT);
+            const effect = instantiate(this.effectJackpot);
+            const animation = effect.getComponent(CallbackAnimation);
+            animation.setDuration(duration);
+            await this.showEffect(effect);
+            transtition?.destroy();
+            await this.showJackpotGame(jackpot.prizes);
+        } catch (e) {}
     }
 
     protected showJackpotGame(prizes: number) {
@@ -93,16 +103,19 @@ export default class EffectContainer extends ObserverComponent {
         if (!receivedBonus) {
             return Promise.resolve();
         }
-        const { bonus, duration } = receivedBonus;
-        AudioUtils.playSFX(AudioIds.BONUS);
-        return new Promise<void>(async (resolve, reject) => {
+        try {
+            const { bonus, duration } = receivedBonus;
+            const transtition = await this.playEffectTransition();
+            AudioUtils.playSFX(AudioIds.BONUS);
             const effect = instantiate(this.effectBonus);
             const animation = effect.getComponent(CallbackAnimation);
             animation.setDuration(duration);
             await this.showEffect(effect);
             AudioUtils.playSFX(AudioIds.BONUS_POPUP);
-            this.showBonusDialog(bonus, resolve);
-        });
+            this.showBonusDialog(bonus, () => {
+                transtition?.destroy();
+            });
+        } catch (e) {}
     }
 
     showBonusDialog(bonus: any, onBonusFinished: () => void) {
