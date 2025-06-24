@@ -129,7 +129,7 @@ export class BetControlStore {
     setTurbo(turbo: boolean) {
         if (this.turboEnabled !== turbo) {
             const msg = turbo ? gc.Translator.gameTranslate("enable_turbo_mode") : gc.Translator.gameTranslate("disable_turbo_mode");
-            this.noticeStore.addWarning(msg);
+            this.noticeStore.addWarning(msg.toUpperCase());
         }
 
         this.turboEnabled = turbo;
