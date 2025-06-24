@@ -98,6 +98,7 @@ export default class SpinButton extends ObserverComponent {
     }
 
     protected addEvent() {
+        game.canvas.focus();
         input.on(Input.EventType.KEY_DOWN, this.onKeyDown, this);
         input.on(Input.EventType.KEY_UP, this.onKeyUp, this);
     }
