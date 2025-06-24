@@ -133,7 +133,10 @@ export class SlotSettlementHandler {
                 result,
                 duration: this.slotDurationStore.spinDuration,
                 turbo: this.betControlStore.turboEnabledOnSpin,
-                onComplete: resolve,
+                onComplete: () => {
+                    this.slotBoardStore.slotState = SlotState.SPIN_DONE;
+                    resolve();
+                },
             };
         });
     }

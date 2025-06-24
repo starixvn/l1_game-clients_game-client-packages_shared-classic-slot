@@ -59,7 +59,8 @@ export enum SlotState {
     READY = 1,
     BET = 2,
     SPINNING = 3,
-    SETTLED = 4,
+    SPIN_DONE = 4,
+    SETTLED = 5,
 }
 
 export enum InGameMenuEvents {
