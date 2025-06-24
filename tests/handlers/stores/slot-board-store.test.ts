@@ -82,7 +82,7 @@ describe("SlotBoardStore", () => {
 
     describe("constructor", () => {
         it("should initialize with default values", () => {
-            expect(slotBoardStore.spinResult).toEqual({ result: [], duration: 0, turbo: false });
+            expect(slotBoardStore.spinResult).toEqual({ result: [], duration: 0, turbo: false, onComplete: expect.any(Function) });
             expect(slotBoardStore.receivedBonus).toBeNull();
             expect(slotBoardStore.receivedJackpot).toBeNull();
             expect(slotBoardStore.receivedFreeSpins).toBeNull();
@@ -110,9 +110,14 @@ describe("SlotBoardStore", () => {
 
     describe("spinResult property", () => {
         it("should allow setting spin result", () => {
-            const newSpinResult = { result: [1, 2, 3], duration: 1000, turbo: true };
+            const newSpinResult = { result: [1, 2, 3], duration: 1000, turbo: true, onComplete: () => {} };
             slotBoardStore.spinResult = newSpinResult;
-            expect(slotBoardStore.spinResult).toEqual(newSpinResult);
+            expect(slotBoardStore.spinResult).toEqual({
+                result: [1, 2, 3],
+                duration: 1000,
+                turbo: true,
+                onComplete: expect.any(Function),
+            });
         });
     });
 
@@ -259,7 +264,7 @@ describe("SlotBoardStore", () => {
 
         it("should not affect other properties", () => {
             // Set up some data that should not be reset
-            const spinResult = { result: [1, 2, 3], duration: 1000, turbo: false };
+            const spinResult = { result: [1, 2, 3], duration: 1000, turbo: false, onComplete: () => {} };
             const winningLines: LineData[] = [{ payline: 1, positions: [0, 3, 6], symbol: 5 }];
             const winningItemsOnLines = [{ line: 1, items: [1, 2, 3] }];
             const winningBet = 500;
@@ -275,7 +280,12 @@ describe("SlotBoardStore", () => {
             slotBoardStore.reset();
 
             // Verify these properties are not affected
-            expect(slotBoardStore.spinResult).toEqual(spinResult);
+            expect(slotBoardStore.spinResult).toEqual({
+                result: [1, 2, 3],
+                duration: 1000,
+                turbo: false,
+                onComplete: expect.any(Function),
+            });
             expect(slotBoardStore.winningLines).toEqual(winningLines);
             expect(slotBoardStore.winningItemsOnLines).toEqual(winningItemsOnLines);
             expect(slotBoardStore.winningBet).toBe(winningBet);
@@ -284,7 +294,7 @@ describe("SlotBoardStore", () => {
     });
 
     describe("resetOnNewSpin method", () => {
-        it("should reset winning lines and items arrays", () => {
+        it("should reset winning lines, items arrays, and other spin-related properties", () => {
             // Set up some data first
             const winningLines: LineData[] = [
                 { payline: 1, positions: [0, 3, 6], symbol: 5 },
@@ -297,32 +307,60 @@ describe("SlotBoardStore", () => {
 
             slotBoardStore.winningLines = winningLines;
             slotBoardStore.winningItemsOnLines = winningItemsOnLines;
+            slotBoardStore.winningBet = 1500;
+            slotBoardStore.forceStopSettle = { force: true, reason: "manual" };
+            slotBoardStore.slotState = SlotState.SETTLED;
+            slotBoardStore.bottomMessageState = SlotNotification.SETTLED;
 
             // Call resetOnNewSpin
             slotBoardStore.resetOnNewSpin();
 
-            // Verify arrays are reset to empty
+            // Verify arrays and properties are reset
             expect(slotBoardStore.winningLines).toEqual([]);
             expect(slotBoardStore.winningItemsOnLines).toEqual([]);
+            expect(slotBoardStore.winningBet).toBe(0);
+            expect(slotBoardStore.forceStopSettle).toEqual({});
+            expect(slotBoardStore.slotState).toBe(SlotState.BET);
+            expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SPINNING);
         });
 
-        it("should not affect other properties", () => {
+        it("should not affect bonus and other non-spin properties", () => {
             // Set up some data that should not be reset
             const receivedBonus = { type: "bonus" };
-            const slotState = SlotState.SPINNING;
-            const winningBet = 1000;
+            const receivedJackpot = { amount: 1000 };
+            const receivedFreeSpins = { count: 5 };
+            const receivedBigWin = { amount: 500 };
+            const winningJackpot = { level: 1 };
+            const bonusChest = { type: "gold" };
+            const highlightSpecialSymbols = [7, 8, 9];
+            const spinResult = { result: [1, 2, 3], duration: 1000, turbo: false, onComplete: () => {} };
 
             slotBoardStore.receivedBonus = receivedBonus;
-            slotBoardStore.slotState = slotState;
-            slotBoardStore.winningBet = winningBet;
+            slotBoardStore.receivedJackpot = receivedJackpot;
+            slotBoardStore.receivedFreeSpins = receivedFreeSpins;
+            slotBoardStore.receivedBigWin = receivedBigWin;
+            slotBoardStore.winningJackpot = winningJackpot;
+            slotBoardStore.bonusChest = bonusChest;
+            slotBoardStore.highlightSpecialSymbols = highlightSpecialSymbols;
+            slotBoardStore.spinResult = spinResult;
 
             // Call resetOnNewSpin
             slotBoardStore.resetOnNewSpin();
 
             // Verify these properties are not affected
             expect(slotBoardStore.receivedBonus).toEqual(receivedBonus);
-            expect(slotBoardStore.slotState).toBe(slotState);
-            expect(slotBoardStore.winningBet).toBe(winningBet);
+            expect(slotBoardStore.receivedJackpot).toEqual(receivedJackpot);
+            expect(slotBoardStore.receivedFreeSpins).toEqual(receivedFreeSpins);
+            expect(slotBoardStore.receivedBigWin).toEqual(receivedBigWin);
+            expect(slotBoardStore.winningJackpot).toEqual(winningJackpot);
+            expect(slotBoardStore.bonusChest).toEqual(bonusChest);
+            expect(slotBoardStore.highlightSpecialSymbols).toEqual(highlightSpecialSymbols);
+            expect(slotBoardStore.spinResult).toEqual({
+                result: [1, 2, 3],
+                duration: 1000,
+                turbo: false,
+                onComplete: expect.any(Function),
+            });
         });
     });
 });

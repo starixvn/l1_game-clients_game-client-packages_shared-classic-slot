@@ -74,7 +74,13 @@ export class SlotBoardStore {
     }
 
     resetOnNewSpin() {
+        this.forceStopSettle = {};
+
         this.winningItemsOnLines = [];
         this.winningLines = [];
+        this.winningBet = 0;
+
+        this.slotState = SlotState.BET;
+        this.bottomMessageState = SlotNotification.SPINNING;
     }
 }

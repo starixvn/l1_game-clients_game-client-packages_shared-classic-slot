@@ -1,6 +1,6 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
-import { SLOT_BET_CHOICES, SlotNotification, SlotState } from "../../definitions";
+import { SLOT_BET_CHOICES } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 const { injectable, inject } = inversify;
@@ -24,8 +24,6 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         }
 
         this.resetOnNewSpin();
-        this.slotBoardStore.slotState = SlotState.BET;
-        this.slotBoardStore.bottomMessageState = SlotNotification.SPINNING;
 
         const betData = this.createBetData({});
         Object.assign(betData, {
@@ -36,7 +34,6 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     resetOnNewSpin() {
-        this.slotBoardStore.forceStopSettle = {};
         this.slotBoardStore.resetOnNewSpin();
     }
 

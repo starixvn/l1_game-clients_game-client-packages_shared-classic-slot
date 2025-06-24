@@ -185,10 +185,9 @@ describe("SlotBetHandler", () => {
     });
 
     describe("resetOnNewSpin", () => {
-        it("should reset force stop settle and call slot board store reset", () => {
+        it("should call slot board store resetOnNewSpin method", () => {
             slotBetHandler.resetOnNewSpin();
 
-            expect(slotBoardStore.forceStopSettle).toEqual({});
             expect(slotBoardStore.resetOnNewSpin).toHaveBeenCalledTimes(1);
         });
     });
