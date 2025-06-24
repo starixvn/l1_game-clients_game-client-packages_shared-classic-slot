@@ -113,6 +113,7 @@ export default class BetControl extends ObserverComponent {
     @handle(BetControlStore, (store, turbo: boolean) => store.setTurbo(turbo))
     onToggleTurbo() {
         AudioUtils.playClick();
+        this.closeStakeSelectorSilently();
         return this.toggleTurbo.isChecked;
     }
 
