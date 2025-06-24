@@ -1,14 +1,17 @@
 import gc from "@sg/game-client-base";
 import inversify from "inversify";
 import { SLOT_BET_CHOICES } from "../../definitions";
+import { DialogName } from "../../utils/classic-slot-utils";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
+import { SlotUIHandler } from "./slot-ui-handler";
 const { injectable, inject } = inversify;
 
 @injectable()
 export class SlotBetHandler extends gc.Bet.BetHandler {
     @inject(BetControlStore) protected betControlStore: BetControlStore;
     @inject(SlotBoardStore) protected slotBoardStore: SlotBoardStore;
+    @inject(SlotUIHandler) protected slotUIHandler: SlotUIHandler;
 
     protected timeoutHolding: NodeJS.Timeout;
     protected readonly HOLDING_THRESHOLD = 1000;
@@ -99,6 +102,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
 
     openAutoSpinDialog() {
         this.betControlStore.autoSpinDialogOpenEvent = {};
+        this.slotUIHandler.triggerDialogOpen({ name: DialogName.AUTO_SPIN });
     }
 
     showLineSelection() {

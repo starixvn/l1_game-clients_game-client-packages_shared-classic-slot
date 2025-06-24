@@ -11,7 +11,15 @@ import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { JackpotPoolStore } from "../handlers/stores/jackpot-pool-store";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../handlers/stores/slot-duration-store";
-import { ColorJson, loadSlotSymbols, loadWinningSymbolAnimation, resourceCaches, setSlotGameConfigs } from "../utils/classic-slot-utils";
+import { SlotUIStore } from "../handlers/stores/slot-ui-store";
+import {
+    ColorJson,
+    DialogName,
+    loadSlotSymbols,
+    loadWinningSymbolAnimation,
+    resourceCaches,
+    setSlotGameConfigs,
+} from "../utils/classic-slot-utils";
 import { SymbolPreviewType } from "./others/symbol-preview";
 import SlotBoard from "./slot-board/slot-board";
 const { ccclass, property } = _decorator;
@@ -118,6 +126,12 @@ export default class ClassicSlot extends GameComponent {
         this.slotBoard.previewPopup.onSymbolPreview = this.onSymbolPreview.bind(this);
         this.slotBoard.setItemWinningEffect();
         this.setBoardFullItems();
+    }
+
+    @render(SlotUIStore, (store) => store.dialogOpenEvent)
+    renderDialogOpenEvent(dialogOpenEvent: { name: string }) {
+        const shouldClose = dialogOpenEvent.name !== DialogName.PREVIEW_ODDS && dialogOpenEvent.name !== DialogName.STAKE_SELECTOR;
+        shouldClose && this.slotBoard.previewPopup.hideSymbolPreview();
     }
 
     onSymbolPreview(symbol, worldPosition: Vec3, isInfoOnLeft: boolean) {

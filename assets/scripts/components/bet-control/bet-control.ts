@@ -8,7 +8,8 @@ import { ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
 import { BetControlStore, SlotBetHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
-import { floatToNumber, resourceCaches } from "../../utils/classic-slot-utils";
+import { SlotUIStore } from "../../handlers/stores/slot-ui-store";
+import { DialogName, floatToNumber, resourceCaches } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
 
@@ -142,6 +143,12 @@ export default class BetControl extends ObserverComponent {
         this.stakeSelectorShow = show;
     }
 
+    @render(SlotUIStore, (store) => store.dialogOpenEvent)
+    renderDialogOpenEvent(dialogOpenEvent: { name: string }) {
+        const shouldClose = dialogOpenEvent.name !== DialogName.STAKE_SELECTOR;
+        shouldClose && this.closeStakeSelector();
+    }
+
     toggleStakeSelector() {
         if (this.stakeSelectorShow) {
             this.closeStakeSelector();
@@ -157,6 +164,10 @@ export default class BetControl extends ObserverComponent {
 
     closeStakeSelector() {
         AudioUtils.playClick();
+        this.showStakeSelector(false);
+    }
+
+    closeStakeSelectorSilently() {
         this.showStakeSelector(false);
     }
 

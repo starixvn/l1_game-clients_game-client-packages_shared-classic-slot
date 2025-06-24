@@ -182,3 +182,10 @@ export const floatToNumber = (data: { from: number; to: number; duration: number
 export const getSpriteLine = (line: number) => {
     return resourceCaches.sharedSlotAtlas.getSpriteFrame(`line-selection-${line + 1}`);
 };
+
+export enum DialogName {
+    AUTO_SPIN = "auto-spin",
+    STAKE_SELECTOR = "stake-selector",
+    LINE_SELECTION = "line-selection",
+    PREVIEW_ODDS = "preview-odds",
+}

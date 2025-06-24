@@ -6,6 +6,8 @@ import { ObserverComponent } from "db://shared-components/shared/common-componen
 import Observer from "observer";
 import { SlotBetHandler } from "../../handlers";
 import { BetControlStore } from "../../handlers/stores/bet-control-store";
+import { SlotUIStore } from "../../handlers/stores/slot-ui-store";
+import { DialogName } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 
@@ -29,6 +31,12 @@ export default class AutoSpinDialog extends ObserverComponent {
             this.node.destroy();
         };
         super.onLoad();
+    }
+
+    @render(SlotUIStore, (store) => store.dialogOpenEvent)
+    renderDialogOpenEvent(dialogOpenEvent: { name: string }) {
+        const shouldClose = dialogOpenEvent.name !== DialogName.AUTO_SPIN;
+        shouldClose && this.dialog.hide();
     }
 
     @render(BetControlStore, (store) => store.turboEnabled)

@@ -2,7 +2,9 @@ import { _decorator, instantiate, Node, Prefab, tween, v3 } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
+import { SlotUIHandler } from "../../handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../../handlers/stores/bet-control-store";
+import { DialogName } from "../../utils/classic-slot-utils";
 import BetLevelItem from "./bet-level-item";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
@@ -82,6 +84,7 @@ export default class BetLevelsContainer extends ObserverComponent {
         ComponentUtils.setOpacityNode(this.node, 0);
     }
 
+    @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.STAKE_SELECTOR }))
     protected onShow() {
         this.node.active = true;
         const duration = 0.2;
