@@ -7,9 +7,10 @@ import { ObserverComponent } from "db://shared-components/shared/common-componen
 import { AnimationUtils } from "db://shared-components/shared/utils/utils";
 import Observer from "observer";
 import { SlotState } from "../../definitions";
-import { BetControlStore } from "../../handlers";
+import { BetControlStore, SlotUIHandler } from "../../handlers";
 import { SlotBetHandler } from "../../handlers/handlers/slot-bet-handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
+import { DialogName } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
 
@@ -147,6 +148,7 @@ export default class SpinButton extends ObserverComponent {
         }
     }
 
+    @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.SPINNING }))
     @handle(SlotBetHandler, (handler) => handler.callTriggerAction())
     callTriggerAction() {
         AudioUtils.playSFX(AudioIds.SPIN_BUTTON);

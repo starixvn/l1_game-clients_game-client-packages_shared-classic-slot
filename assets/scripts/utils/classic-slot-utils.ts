@@ -188,4 +188,5 @@ export enum DialogName {
     STAKE_SELECTOR = "stake-selector",
     LINE_SELECTION = "line-selection",
     PREVIEW_ODDS = "preview-odds",
+    SPINNING = "spinning",
 }
