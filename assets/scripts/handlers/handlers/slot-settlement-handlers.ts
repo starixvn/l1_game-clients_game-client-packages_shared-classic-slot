@@ -20,6 +20,7 @@ export class SlotSettlementHandler {
     @inject(gc.Bet.BetStore) protected readonly betStore: gc.Bet.BetStore;
     @inject(gc.Error.ErrorStore) protected readonly errorStore: gc.Error.ErrorStore;
     @inject(SlotErrorHandler) protected readonly slotErrorHandler: SlotErrorHandler;
+    @inject(gc.Auth.AuthHandlers.GetBalance) protected readonly getBalanceHandler: gc.Auth.AuthHandlers.GetBalance;
 
     eventHandleList = [
         {
@@ -159,10 +160,15 @@ export class SlotSettlementHandler {
             this.settleDone();
         }
         if (betWin === 0) {
-            this.slotBoardStore.winningBet = betWin;
+            this.updateWinningBet(betWin);
         }
 
         this.handleSettleTween(bigWin, newFreeSpinCount, betWin, jackpot, winningLines, freeSpins);
+    }
+
+    protected updateWinningBet(betWin: number) {
+        this.slotBoardStore.winningBet = betWin;
+        this.getBalanceHandler.handle();
     }
 
     protected handleSettleTween(bigWin: any, newFreeSpinCount: any, betWin: any, jackpot: any, winningLines: any, freeSpins: any) {
@@ -251,13 +257,13 @@ export class SlotSettlementHandler {
                 };
             })
             .delay(delayToUpdateWinningBet)
-            .call(() => (this.slotBoardStore.winningBet = betWin))
+            .call(() => this.updateWinningBet(betWin))
             .delay(delayToEndBigWin);
     }
 
     protected showWinningLines(betWin: number, bigWin: boolean, jackpot: any, winningLines: LineData[]) {
         if (betWin > 0 && !bigWin) {
-            this.slotBoardStore.winningBet = betWin;
+            this.updateWinningBet(betWin);
         }
 
         const lines: LineData[] = [];
