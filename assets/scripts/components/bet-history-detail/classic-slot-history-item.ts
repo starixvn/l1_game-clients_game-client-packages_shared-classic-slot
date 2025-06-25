@@ -72,9 +72,9 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
     }
 
     protected showJackpotIcon(jackpot) {
-        if (jackpot && this.jackpotIcon) {
-            this.jackpotIcon.active = true;
-            this.updateJackpotSprite();
+        if (this.jackpotIcon) {
+            this.jackpotIcon.active = jackpot;
+            jackpot && this.updateJackpotSprite();
         }
     }
 
