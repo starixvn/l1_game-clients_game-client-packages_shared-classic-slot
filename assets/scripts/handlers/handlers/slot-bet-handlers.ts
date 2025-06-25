@@ -4,6 +4,7 @@ import { SLOT_BET_CHOICES } from "../../definitions";
 import { DialogName } from "../../utils/classic-slot-utils";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
+import { SlotBetResponseHandler } from "./slot-bet-response-handlers";
 import { SlotUIHandler } from "./slot-ui-handler";
 const { injectable, inject } = inversify;
 
@@ -12,6 +13,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     @inject(BetControlStore) protected betControlStore: BetControlStore;
     @inject(SlotBoardStore) protected slotBoardStore: SlotBoardStore;
     @inject(SlotUIHandler) protected slotUIHandler: SlotUIHandler;
+    @inject(SlotBetResponseHandler) protected slotBetResponseHandler: SlotBetResponseHandler;
 
     protected timeoutHolding: NodeJS.Timeout;
     protected readonly HOLDING_THRESHOLD = 1000;
@@ -110,6 +112,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     handlePlaceBetFailed() {
+        this.slotBetResponseHandler.stopProcessingBetAndClearInterval();
         this.cancelAutoSpin();
         this.clearTriggerAction();
         this.slotBoardStore.reset();
