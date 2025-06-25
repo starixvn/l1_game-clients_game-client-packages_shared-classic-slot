@@ -70,7 +70,7 @@ export class TopWinnersHandler {
     }
 
     getValueByExchangeRateCode(value: number, exchangeRateCode) {
-        let currencyRate = exchangeRateCode[this.mainPlayerStore.currency];
+        let currencyRate = exchangeRateCode[this.mainPlayerStore.currencyCode];
         if (!currencyRate) {
             currencyRate = 1;
         }
