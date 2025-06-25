@@ -24,6 +24,7 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
         setTimeout(() => {
             if (this.betStore.lastReceivedBet?.value === -1) {
                 this.handleApiError(apiError);
+                this.slotBetHandler.handlePlaceBetFailed();
             } else {
                 this.endGameApiError = apiError;
             }
