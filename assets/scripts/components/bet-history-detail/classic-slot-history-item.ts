@@ -1,8 +1,9 @@
 import gc from "@sg/game-client-base";
-import { _decorator, Button, Color, Label, Node } from "cc";
+import { _decorator, Button, Color, Label, Node, Sprite } from "cc";
 import BetHistoryBodyItem from "db://shared-components/game/bet-history/scripts/components/bet-history-body-item";
-import { ComponentUtils } from "db://shared-components/shared/utils";
+import { AppUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
+import { resourceCaches } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { handle } = Observer;
 
@@ -73,6 +74,15 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
     protected showJackpotIcon(jackpot) {
         if (jackpot && this.jackpotIcon) {
             this.jackpotIcon.active = true;
+            this.updateJackpotSprite();
         }
+    }
+
+    protected updateJackpotSprite() {
+        const gameAtlas = resourceCaches.gameAtlas;
+        const sprite = this.jackpotIcon.getComponent(Sprite);
+        const lang = AppUtils.getLocale();
+        const suffix = lang === "vi-VN" ? `.${lang}` : "";
+        gameAtlas && (sprite.spriteFrame = gameAtlas.getSpriteFrame(`history-jackpot${suffix}`));
     }
 }
