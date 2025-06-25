@@ -1,7 +1,9 @@
 import gc from "@sg/game-client-base";
 import { _decorator, JsonAsset, SpriteAtlas, Vec3 } from "cc";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
+import MainPlayerProfile from "db://shared-components/game/main-player-profile/scripts/components/main-player-profile";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
+import { ComponentUtils } from "db://shared-components/shared/utils";
 import _ from "lodash";
 import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
@@ -48,6 +50,7 @@ export default class ClassicSlot extends GameComponent {
 
     onLoad() {
         this.initSharedCaches();
+        this.updateBalanceColor();
         super.onLoad();
     }
 
@@ -69,6 +72,13 @@ export default class ClassicSlot extends GameComponent {
         resourceCaches.gameAtlas = this.gameAtlas;
         resourceCaches.sharedSlotAtlas = this.sharedSlotAtlas;
         resourceCaches.colorJson = this.colorJson.json as ColorJson;
+    }
+
+    updateBalanceColor() {
+        const profile = this.getComponentInChildren(MainPlayerProfile);
+        if (profile) {
+            ComponentUtils.setNodeColor(profile.lblBalance.node, resourceCaches.colorJson.bottomAreaWinAmountColor);
+        }
     }
 
     async loadSymbols() {
