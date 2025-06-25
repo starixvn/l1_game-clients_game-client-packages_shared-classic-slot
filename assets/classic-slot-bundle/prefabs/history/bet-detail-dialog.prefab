@@ -84,7 +84,7 @@
       "__id__": 1
     },
     "_children": [],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 3
@@ -228,10 +228,7 @@
       "b": 0,
       "a": 255
     },
-    "_spriteFrame": {
-      "__uuid__": "274b102a-9505-4157-90c4-cc537af86c68@ff1d0",
-      "__expectedType__": "cc.SpriteFrame"
-    },
+    "_spriteFrame": null,
     "_type": 0,
     "_fillType": 0,
     "_sizeMode": 0,
@@ -244,10 +241,7 @@
     "_fillRange": 0,
     "_isTrimmedMode": true,
     "_useGrayscale": false,
-    "_atlas": {
-      "__uuid__": "274b102a-9505-4157-90c4-cc537af86c68",
-      "__expectedType__": "cc.SpriteAtlas"
-    },
+    "_atlas": null,
     "_id": ""
   },
   {
