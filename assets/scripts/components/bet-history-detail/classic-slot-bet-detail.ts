@@ -103,7 +103,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     }
 
     protected addJackpotLog(jackpot: any, bet, order: number) {
-        let jackpotName = gc.Translator.gameTranslate("ui.jackpot");
+        let jackpotName = gc.Translator.gameTranslate("jackpot");
         const { pool } = jackpot;
 
         if (pool) {
