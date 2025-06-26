@@ -97,7 +97,7 @@ export class BetControlStore {
     }
 
     get preventOpenAutoSpin() {
-        return !this.isReadyBet && !this.autoSpinEnabled;
+        return (!this.isReadyBet && !this.autoSpinEnabled) || this.freeSpinEnabled;
     }
 
     get preventChangeBet() {
