@@ -75,9 +75,13 @@ export class TopWinnersStore {
 
     constructor() {
         mobx.makeAutoObservable(this);
-        setTimeout(() => {}, 0);
     }
 
     type = TopWinnerType.BigWinningWinners;
     data: WinnersData = null;
+
+    reset() {
+        this.type = TopWinnerType.BigWinningWinners;
+        this.data = null;
+    }
 }

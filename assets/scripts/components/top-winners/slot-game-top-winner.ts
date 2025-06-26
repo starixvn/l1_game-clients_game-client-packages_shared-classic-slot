@@ -37,6 +37,14 @@ export default class SlotGameTopWinner extends ObserverComponent {
         this.onPageChanged(1);
     }
 
+    onDestroy() {
+        this.resetStore();
+        super.onDestroy();
+    }
+
+    @handle(TopWinnersStore, (store) => store.reset())
+    resetStore() {}
+
     @render(TopWinnersStore, (store) => store.type)
     renderType(type: TopWinnerType) {
         const toggle = this.toggleContainer.toggleItems.find((toggle) => toggle.name === type);
