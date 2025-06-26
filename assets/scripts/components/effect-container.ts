@@ -5,6 +5,7 @@ import { bundleManager } from "db://shared-components/shared/common-components/b
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
+import { CLASSIC_SLOT_BUNDLE } from "../utils/classic-slot-utils";
 import BonusDialog from "./bonus/bonus-dialog";
 import CallbackAnimation from "./callback-animation/callback-animation";
 import BigWinAnimation from "./others/big-win-animation";
@@ -93,7 +94,8 @@ export default class EffectContainer extends ObserverComponent {
             return;
         }
         const path = `prefabs/jackpot-game`;
-        this.jackpotGamePrefab = await this.loadPrefab(path);
+
+        this.jackpotGamePrefab = await bundleManager.loadAssetsFromBundle<Prefab>(CLASSIC_SLOT_BUNDLE, path, Prefab, null);
     }
 
     @render(SlotBoardStore, (store) => store.receivedJackpot, { fireImmediately: false })
