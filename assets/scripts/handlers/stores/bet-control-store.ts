@@ -90,7 +90,16 @@ export class BetControlStore {
     }
 
     get preventChangeBet() {
-        return !this.isReadyBet || this.autoSpinEnabled;
+        return !this.isReadyBet || this.slotBoardStore.slotState === SlotState.SPINNING;
+    }
+
+    get disableSpinButton() {
+        return (
+            this.autoSpinEnabled ||
+            this.slotBoardStore.slotState === SlotState.SPINNING ||
+            this.slotBoardStore.slotState === SlotState.NOT_READY ||
+            this.slotBoardStore.slotState === SlotState.SPIN_DONE
+        );
     }
 
     setStake(stake: number) {

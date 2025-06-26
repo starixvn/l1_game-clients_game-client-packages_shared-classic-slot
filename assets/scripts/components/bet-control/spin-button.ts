@@ -174,12 +174,12 @@ export default class SpinButton extends ObserverComponent {
         }
     }
 
-    @render(BetControlStore, (store) => store.isReadyBet)
-    renderCascadingState(isReadyBet: boolean) {
+    @render(BetControlStore, (store) => store.disableSpinButton)
+    renderDisableSpinButton(disableSpinButton: boolean) {
         //HACK: disable button too fast will cause the button transition scale not working
         setTimeout(() => {
             try {
-                this.button.interactable = isReadyBet;
+                this.button.interactable = !disableSpinButton;
             } catch (error) {}
         }, 100);
     }
