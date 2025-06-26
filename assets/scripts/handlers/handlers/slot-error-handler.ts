@@ -16,9 +16,20 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
             name: "notice",
             handle: this.slotHandleNotice,
         },
+        {
+            name: `${gc.GameServiceMessage.ApiError.eventName},${gc.GameServiceMessage.BetResponse.eventName}`,
+            handle: this.handlePlaceBetError,
+        },
     ];
 
     endGameApiError: gc.GameServiceMessage.ApiError = null;
+
+    handlePlaceBetError(data: { endBet: number; apiError: gc.GameServiceMessage.ApiError }) {
+        const { endBet, apiError } = data;
+        if (endBet === -1 && apiError) {
+            this.betStore.lastReceivedBet = { value: endBet, isAnimated: false };
+        }
+    }
 
     slotHandleApiError(apiError: gc.GameServiceMessage.ApiError) {
         setTimeout(() => {
