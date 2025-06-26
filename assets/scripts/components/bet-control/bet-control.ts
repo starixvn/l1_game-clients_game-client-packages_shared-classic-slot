@@ -197,12 +197,12 @@ export default class BetControl extends ObserverComponent {
         AudioUtils.playClick();
     }
 
-    @render(SlotBoardStore, (store) => store.preventChangeBet)
+    @render(BetControlStore, (store) => store.preventChangeBet)
     renderPreventChangeBet(preventChangeBet: boolean) {
         this.btnShowStakeSelector.interactable = !preventChangeBet;
     }
 
-    @render(SlotBoardStore, (store) => store.preventOpenAutoSpin)
+    @render(BetControlStore, (store) => store.preventOpenAutoSpin)
     renderPreventOpenAutoSpin(preventOpenAutoSpin: boolean) {
         this.btnOpenAutoSpin.interactable = !preventOpenAutoSpin;
     }

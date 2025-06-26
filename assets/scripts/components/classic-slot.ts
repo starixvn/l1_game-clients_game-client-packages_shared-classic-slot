@@ -163,8 +163,8 @@ export default class ClassicSlot extends GameComponent {
         this.slotBoard.showPreviewPopup(info, isInfoOnLeft, worldPosition);
     }
 
-    @render(SlotBoardStore, (store) => store.isReadyBet)
-    renderCascadingState(isReadyBet: boolean) {
+    @render(BetControlStore, (store) => store.isReadyBet)
+    renderReadyBet(isReadyBet: boolean) {
         this.isReadyBet = isReadyBet;
     }
 

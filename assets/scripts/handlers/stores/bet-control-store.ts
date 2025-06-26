@@ -3,7 +3,8 @@ import mobx from "mobx";
 const { injectable, inject } = inversify;
 
 import gc from "@sg/game-client-base";
-import { SLOT_LINES } from "../../definitions";
+import { SLOT_LINES, SlotState } from "../../definitions";
+import { SlotBoardStore } from "./slot-board-store";
 
 @injectable()
 export class BetControlStore {
@@ -17,6 +18,7 @@ export class BetControlStore {
     @inject(gc.GameUserSettings.GameUserSettingHandler)
     protected readonly gameUserSettingHandler: gc.GameUserSettings.GameUserSettingHandler;
     @inject(gc.Notices.NoticeStore) protected readonly noticeStore: gc.Notices.NoticeStore;
+    @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
 
     constructor() {
         mobx.makeAutoObservable(this);
@@ -77,6 +79,18 @@ export class BetControlStore {
 
     get disableDecreaseStake() {
         return this.stakeIndex === 0 || this.stakeIndex === -1;
+    }
+
+    get isReadyBet() {
+        return this.slotBoardStore.slotState === SlotState.READY || this.slotBoardStore.slotState === SlotState.SETTLED;
+    }
+
+    get preventOpenAutoSpin() {
+        return !this.isReadyBet && !this.autoSpinEnabled;
+    }
+
+    get preventChangeBet() {
+        return !this.isReadyBet || this.autoSpinEnabled;
     }
 
     setStake(stake: number) {

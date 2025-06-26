@@ -174,7 +174,7 @@ export default class SpinButton extends ObserverComponent {
         }
     }
 
-    @render(SlotBoardStore, (store) => store.isReadyBet)
+    @render(BetControlStore, (store) => store.isReadyBet)
     renderCascadingState(isReadyBet: boolean) {
         //HACK: disable button too fast will cause the button transition scale not working
         setTimeout(() => {

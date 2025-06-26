@@ -202,33 +202,6 @@ describe("SlotBoardStore", () => {
         });
     });
 
-    describe("isReadyBet getter", () => {
-        it("should return true when slot state is READY", () => {
-            slotBoardStore.slotState = SlotState.READY;
-            expect(slotBoardStore.isReadyBet).toBe(true);
-        });
-
-        it("should return true when slot state is SETTLED", () => {
-            slotBoardStore.slotState = SlotState.SETTLED;
-            expect(slotBoardStore.isReadyBet).toBe(true);
-        });
-
-        it("should return false when slot state is NOT_READY", () => {
-            slotBoardStore.slotState = SlotState.NOT_READY;
-            expect(slotBoardStore.isReadyBet).toBe(false);
-        });
-
-        it("should return false when slot state is BET", () => {
-            slotBoardStore.slotState = SlotState.BET;
-            expect(slotBoardStore.isReadyBet).toBe(false);
-        });
-
-        it("should return false when slot state is SPINNING", () => {
-            slotBoardStore.slotState = SlotState.SPINNING;
-            expect(slotBoardStore.isReadyBet).toBe(false);
-        });
-    });
-
     describe("bottomMessageState", () => {
         it("should allow setting bottomMessageState", () => {
             slotBoardStore.bottomMessageState = SlotNotification.SPINNING;

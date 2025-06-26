@@ -24,7 +24,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     callBet() {
-        if (!this.slotBoardStore.isReadyBet) {
+        if (!this.betControlStore.isReadyBet) {
             return;
         }
 
