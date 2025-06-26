@@ -18,7 +18,7 @@ export default class JackpotVisibility extends ObserverComponent {
     @property({ type: Enum(GameMode) })
     mode = GameMode.Jackpot;
 
-    @render(JackpotPoolStore, (store) => store.jackpotEnabled)
+    @render(JackpotPoolStore, (store) => store.jackpotEnabled, { fireImmediately: false })
     renderJackpotEnabled(jackpotEnabled: { enabled: boolean }) {
         const active = this.mode === GameMode.Jackpot ? jackpotEnabled.enabled : !jackpotEnabled.enabled;
         this.target.active = active;
