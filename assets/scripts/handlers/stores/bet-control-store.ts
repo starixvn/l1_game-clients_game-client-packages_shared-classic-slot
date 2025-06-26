@@ -101,7 +101,7 @@ export class BetControlStore {
     }
 
     get preventChangeBet() {
-        return !this.isReadyBet || this.slotBoardStore.slotState === SlotState.SPINNING || this.freeSpinEnabled;
+        return !this.isReadyBet || this.slotBoardStore.slotState === SlotState.SPINNING || this.autoSpinEnabled || this.freeSpinEnabled;
     }
 
     get disableSpinButton() {
