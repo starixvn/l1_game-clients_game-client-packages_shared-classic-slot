@@ -240,7 +240,10 @@ export class SlotSettlementHandler {
                 this.slotBoardStore.receivedFreeSpins = { freeSpins, duration: this.slotDurationStore.freespinDuration };
             })
             .delay(this.slotDurationStore.freespinDuration)
-            .call(() => this.betControlStore.syncFreeSpinCount());
+            .call(() => {
+                this.betControlStore.setFreeSpinStake(this.betControlStore.stake);
+                this.betControlStore.syncFreeSpinCount();
+            });
     }
 
     createTweenShowBigWin(betWin: number, bigWin: boolean) {
@@ -323,9 +326,10 @@ export class SlotSettlementHandler {
         }, delayDuration);
     }
 
-    handleFreeSpins(freeSpins: { total: number }) {
+    handleFreeSpins(freeSpins: { total: number; bet: number }) {
         const total = freeSpins.total;
         if (total > 0) {
+            this.betControlStore.setFreeSpinStake(freeSpins.bet);
             this.betControlStore.setTotalFreeSpins(total);
             this.betControlStore.syncFreeSpinCount();
         }

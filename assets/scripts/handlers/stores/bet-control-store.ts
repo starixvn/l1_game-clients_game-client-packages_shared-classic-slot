@@ -39,15 +39,21 @@ export class BetControlStore {
 
     betLevels: number[] = [];
     stake = 0;
+    freeSpinStake = -1;
+    defaultStake = 0;
+
+    get displayStake() {
+        if (this.freeSpinEnabled && this.freeSpinStake !== -1) {
+            return this.freeSpinStake;
+        }
+
+        return this.stake;
+    }
 
     roundId = -1;
 
     get totalBet() {
-        if (this.slotBoardStore.slotState === SlotState.READY && this.freeSpinEnabled) {
-            return 0;
-        }
-
-        return this.stake * SLOT_LINES;
+        return this.displayStake * SLOT_LINES;
     }
 
     stakeSelectorShow = false;
@@ -95,7 +101,7 @@ export class BetControlStore {
     }
 
     get preventChangeBet() {
-        return !this.isReadyBet || this.slotBoardStore.slotState === SlotState.SPINNING;
+        return !this.isReadyBet || this.slotBoardStore.slotState === SlotState.SPINNING || this.freeSpinEnabled;
     }
 
     get disableSpinButton() {
@@ -110,6 +116,10 @@ export class BetControlStore {
 
     setStake(stake: number) {
         this.stake = stake;
+    }
+
+    setFreeSpinStake(stake: number) {
+        this.freeSpinStake = stake;
     }
 
     quickChangeStake(increase: boolean) {
@@ -141,6 +151,14 @@ export class BetControlStore {
 
     setBetLevels(betLevels: number[]) {
         this.betLevels = betLevels;
+    }
+
+    setDefaultStake(defaultStake: number) {
+        this.defaultStake = defaultStake;
+    }
+
+    resetDefaultStake() {
+        this.stake = this.defaultStake;
     }
 
     setTotalFreeSpins(totalFreeSpins: number) {

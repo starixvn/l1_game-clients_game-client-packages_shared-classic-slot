@@ -22,6 +22,7 @@ export class SlotConfigsHandler {
             return;
         }
         this.betControlStore.setBetLevels(betLevels);
+        this.betControlStore.setDefaultStake(defaultBetLevel);
         if (this.betControlStore.stake === 0) {
             this.betControlStore.setStake(defaultBetLevel);
         }
