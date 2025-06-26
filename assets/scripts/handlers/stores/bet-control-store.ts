@@ -55,6 +55,7 @@ export class BetControlStore {
 
     showLineSelection = null;
 
+    didSpin = false;
     triggerAutoSpin = false;
     autoSpinCount = 0;
     autoSpinEnabled = false;
@@ -100,6 +101,7 @@ export class BetControlStore {
     get disableSpinButton() {
         return (
             this.autoSpinEnabled ||
+            (this.didSpin && this.freeSpinEnabled) ||
             this.slotBoardStore.slotState === SlotState.SPINNING ||
             this.slotBoardStore.slotState === SlotState.NOT_READY ||
             this.slotBoardStore.slotState === SlotState.SPIN_DONE

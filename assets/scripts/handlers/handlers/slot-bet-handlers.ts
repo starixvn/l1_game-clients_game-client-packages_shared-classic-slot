@@ -28,6 +28,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
             return;
         }
 
+        this.betControlStore.didSpin = true;
         this.betControlStore.decreaseFreeSpinCount();
         this.resetOnNewSpin();
 
@@ -127,5 +128,6 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         this.clearTriggerAction();
         this.slotBoardStore.reset();
         this.betControlStore.clearFreeSpins();
+        this.betControlStore.didSpin = false;
     }
 }
