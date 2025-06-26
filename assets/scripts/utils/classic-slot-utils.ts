@@ -189,4 +189,6 @@ export enum DialogName {
     LINE_SELECTION = "line-selection",
     PREVIEW_ODDS = "preview-odds",
     SPINNING = "spinning",
+    IN_GAME_MENU = "in-game-menu",
+    DUMMY_DIALOG = "dummy-dialog",
 }

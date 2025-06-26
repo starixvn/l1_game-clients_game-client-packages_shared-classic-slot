@@ -10,6 +10,7 @@ import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
 import { LineData } from "../definitions";
+import { SlotUIHandler } from "../handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { JackpotPoolStore } from "../handlers/stores/jackpot-pool-store";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
@@ -139,9 +140,9 @@ export default class ClassicSlot extends GameComponent {
         this.setBoardFullItems();
     }
 
-    @render(SlotUIStore, (store) => store.dialogOpenEvent)
+    @render(SlotUIStore, (store) => store.dialogOpenEvent, { fireImmediately: false })
     renderDialogOpenEvent(dialogOpenEvent: { name: string }) {
-        const shouldClose = dialogOpenEvent.name !== DialogName.PREVIEW_ODDS && dialogOpenEvent.name !== DialogName.STAKE_SELECTOR;
+        const shouldClose = dialogOpenEvent.name !== DialogName.PREVIEW_ODDS;
         shouldClose && this.slotBoard.previewPopup.hideSymbolPreview();
     }
 
@@ -149,6 +150,7 @@ export default class ClassicSlot extends GameComponent {
         if (!this.gameConfigOdds || !this.isReadyBet) {
             return;
         }
+        this.triggerOpenPreviewOdds();
         AudioUtils.playSFX(AudioIds.TAP_SYMBOL);
         const symbolCache = resourceCaches.slotSymbols;
         const spine = symbolCache[symbol.index].symbol;
@@ -163,6 +165,9 @@ export default class ClassicSlot extends GameComponent {
         } as SymbolPreviewType;
         this.slotBoard.showPreviewPopup(info, isInfoOnLeft, worldPosition);
     }
+
+    @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.PREVIEW_ODDS }))
+    triggerOpenPreviewOdds() {}
 
     @render(BetControlStore, (store) => store.isReadyBet)
     renderReadyBet(isReadyBet: boolean) {
