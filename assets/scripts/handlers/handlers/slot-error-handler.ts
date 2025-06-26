@@ -13,7 +13,7 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
             handle: this.slotHandleApiError,
         },
         {
-            name: "notice",
+            name: `notice,${gc.GameServiceMessage.BetResponse.eventName}`,
             handle: this.slotHandleNotice,
         },
         {
@@ -49,8 +49,9 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
         }
     }
 
-    slotHandleNotice(notice: { errorCode: string }) {
-        if (notice && notice.errorCode === "SB1929") {
+    slotHandleNotice(data: { endBet: number; notice: { errorCode: string } }) {
+        const { endBet, notice } = data;
+        if (endBet === -1 && notice.errorCode) {
             this.slotBetHandler.handlePlaceBetFailed();
         }
     }
