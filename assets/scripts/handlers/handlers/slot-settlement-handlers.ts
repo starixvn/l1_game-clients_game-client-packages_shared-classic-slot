@@ -3,7 +3,7 @@ import { tween } from "cc";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import inversify from "inversify";
 import mobx from "mobx";
-import { LineData, paylines, SlotNotification, SlotState, SpecialSymbol } from "../../definitions";
+import { LineData, paylines, SlotGameServiceMessage, SlotNotification, SlotState, SpecialSymbol } from "../../definitions";
 import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
@@ -24,24 +24,28 @@ export class SlotSettlementHandler {
 
     eventHandleList = [
         {
-            name: "finish",
+            name: SlotGameServiceMessage.Settlement,
             handle: this.handleFinish,
         },
         {
-            name: "bonuses",
+            name: SlotGameServiceMessage.Bonuses,
             handle: this.handleBonuses,
         },
         {
-            name: "bonusChest",
+            name: SlotGameServiceMessage.BonusChest,
             handle: this.handleBonusChest,
         },
         {
-            name: "jackpot",
+            name: SlotGameServiceMessage.Jackpot,
             handle: this.handleJackpot,
         },
         {
-            name: "winningJackpot",
+            name: SlotGameServiceMessage.WinningJackpot,
             handle: this.handleWinningJackpot,
+        },
+        {
+            name: SlotGameServiceMessage.FreeSpins,
+            handle: this.handleFreeSpins,
         },
     ];
 
@@ -296,7 +300,6 @@ export class SlotSettlementHandler {
     protected checkSpinNextRound() {
         if (this.betControlStore.freeSpinEnabled) {
             this.scheduleNextSpin(() => {
-                this.betControlStore.decreaseFreeSpinCount();
                 this.slotBetHandler.callBet();
             });
             return;
@@ -318,5 +321,10 @@ export class SlotSettlementHandler {
         this.timeoutNextSpin = setTimeout(() => {
             action();
         }, delayDuration);
+    }
+
+    handleFreeSpins(freeSpins: any) {
+        this.betControlStore.setTotalFreeSpins(freeSpins.total);
+        this.betControlStore.syncFreeSpinCount();
     }
 }

@@ -66,3 +66,12 @@ export enum SlotState {
 export enum InGameMenuEvents {
     OPEN_TOP_WINNER = "open_top_winner",
 }
+
+export enum SlotGameServiceMessage {
+    FreeSpins = "freeSpins",
+    Bonuses = "bonuses",
+    BonusChest = "bonusChest",
+    Jackpot = "jackpot",
+    WinningJackpot = "winningJackpot",
+    Settlement = "finish",
+}
