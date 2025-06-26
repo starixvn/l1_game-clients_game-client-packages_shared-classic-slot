@@ -1,5 +1,6 @@
 import gc from "@sg/game-client-base";
 import { _decorator, JsonAsset, SpriteAtlas, Vec3 } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import MainPlayerProfile from "db://shared-components/game/main-player-profile/scripts/components/main-player-profile";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
@@ -148,7 +149,7 @@ export default class ClassicSlot extends GameComponent {
         if (!this.gameConfigOdds || !this.isReadyBet) {
             return;
         }
-        AudioUtils.playClick();
+        AudioUtils.playSFX(AudioIds.TAP_SYMBOL);
         const symbolCache = resourceCaches.slotSymbols;
         const spine = symbolCache[symbol.index].symbol;
         const colorConfig = resourceCaches.colorJson;
@@ -186,6 +187,7 @@ export default class ClassicSlot extends GameComponent {
         if (winningItemsOnLines.length === 0) {
             return;
         }
+        AudioUtils.playSFX(AudioIds.SYMBOL_WIN);
         winningItemsOnLines.forEach((line) => {
             this.slotBoard.showWinningEffectOnLine(line);
         });
