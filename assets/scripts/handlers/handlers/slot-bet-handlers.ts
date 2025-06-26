@@ -64,13 +64,19 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
             return false;
         }
 
-        const totalBet = this.betControlStore.totalBet;
-        if (!this.betControlStore.freeSpinEnabled && totalBet > this.betStore.availableBalance) {
-            this.showNoticePlaceBetFailure();
+        if (!this.betControlStore.freeSpinEnabled && !this.isEnoughBalance()) {
             this.handlePlaceBetFailed();
             return false;
         }
 
+        return true;
+    }
+
+    isEnoughBalance() {
+        if (this.betControlStore.totalBet > this.betStore.availableBalance) {
+            this.showNoticePlaceBetFailure();
+            return false;
+        }
         return true;
     }
 
@@ -103,6 +109,9 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     openAutoSpinDialog() {
+        if (!this.isEnoughBalance()) {
+            return;
+        }
         this.betControlStore.autoSpinDialogOpenEvent = {};
         this.slotUIHandler.triggerDialogOpen({ name: DialogName.AUTO_SPIN });
     }
