@@ -1,6 +1,7 @@
 import { _decorator, instantiate, Node, Prefab } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
+import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { SlotBoardStore } from "../handlers/stores/slot-board-store";
@@ -12,21 +13,21 @@ const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
 export default class EffectContainer extends ObserverComponent {
-    @property(Prefab)
-    protected effectTransitionPrefab: Prefab = null;
-    @property(Prefab)
+    protected effectTransition: Prefab = null;
     protected effectJackpot: Prefab = null;
-    @property(Prefab)
     protected effectBonus: Prefab = null;
-    @property(Prefab)
     protected effectFreeSpin: Prefab = null;
-    @property(Prefab)
     protected effectBigWin: Prefab = null;
-    @property(Prefab)
     protected jackpotGamePrefab: Prefab = null;
-    @property(Prefab)
     protected bonusDialogPrefab: Prefab = null;
 
+    async loadEffectFreeSpin() {
+        if (this.effectFreeSpin) {
+            return;
+        }
+        const path = `prefabs/effects/effect-freespin`;
+        this.effectFreeSpin = await this.loadPrefab(path);
+    }
     @render(SlotBoardStore, (store) => store.receivedFreeSpins, { fireImmediately: false })
     async receivedFreeSpins(receivedFreeSpins: { freeSpins: any; duration: number }) {
         if (!receivedFreeSpins) {
@@ -36,12 +37,21 @@ export default class EffectContainer extends ObserverComponent {
             const transtition = await this.playEffectTransition();
             const { duration } = receivedFreeSpins;
             AudioUtils.playSFX(AudioIds.FREESPIN);
+            await this.loadEffectFreeSpin();
             const effect = instantiate(this.effectFreeSpin);
             const animation = effect.getComponent(CallbackAnimation);
             animation.setDuration(duration);
             await this.showEffect(effect);
             transtition?.destroy();
         } catch (e) {}
+    }
+
+    async loadEffectBigWin() {
+        if (this.effectBigWin) {
+            return;
+        }
+        const path = `prefabs/effects/effect-big-win`;
+        this.effectBigWin = await this.loadPrefab(path);
     }
 
     @render(SlotBoardStore, (store) => store.receivedBigWin, { fireImmediately: false })
@@ -59,6 +69,7 @@ export default class EffectContainer extends ObserverComponent {
             const transtition = await this.playEffectTransition();
             const { duration, showBigWinValue, delayShowBigWinValue, amount } = receivedBigWin;
             AudioUtils.playSFX(AudioIds.BIG_WIN);
+            await this.loadEffectBigWin();
             const effect = instantiate(this.effectBigWin);
             const callbackAnim = effect.getComponent(CallbackAnimation);
             callbackAnim.setDuration(duration);
@@ -67,6 +78,22 @@ export default class EffectContainer extends ObserverComponent {
             await this.showEffect(effect);
             transtition?.destroy();
         } catch (e) {}
+    }
+
+    async loadEffectJackpot() {
+        if (this.effectJackpot) {
+            return;
+        }
+        const path = `prefabs/effects/effect-jackpot`;
+        this.effectJackpot = await this.loadPrefab(path);
+    }
+
+    async loadJackpotGame() {
+        if (this.jackpotGamePrefab) {
+            return;
+        }
+        const path = `prefabs/jackpot-game`;
+        this.jackpotGamePrefab = await this.loadPrefab(path);
     }
 
     @render(SlotBoardStore, (store) => store.receivedJackpot, { fireImmediately: false })
@@ -78,11 +105,13 @@ export default class EffectContainer extends ObserverComponent {
             const { jackpot, duration } = receivedJackpot;
             const transtition = await this.playEffectTransition();
             AudioUtils.playSFX(AudioIds.JACKPOT_HIT);
+            await this.loadEffectJackpot();
             const effect = instantiate(this.effectJackpot);
             const animation = effect.getComponent(CallbackAnimation);
             animation.setDuration(duration);
             await this.showEffect(effect);
             transtition?.destroy();
+            await this.loadJackpotGame();
             await this.showJackpotGame(jackpot.prizes);
         } catch (e) {}
     }
@@ -98,6 +127,22 @@ export default class EffectContainer extends ObserverComponent {
         });
     }
 
+    async loadEffectBonus() {
+        if (this.effectBonus) {
+            return;
+        }
+        const path = `prefabs/effects/effect-bonus`;
+        this.effectBonus = await this.loadPrefab(path);
+    }
+
+    async loadBonusDialog() {
+        if (this.bonusDialogPrefab) {
+            return;
+        }
+        const path = `prefabs/dialogs/dialog-bonus`;
+        this.bonusDialogPrefab = await this.loadPrefab(path);
+    }
+
     @render(SlotBoardStore, (store) => store.receivedBonus, { fireImmediately: false })
     async receivedBonus(receivedBonus: { bonus: any; duration: number }) {
         if (!receivedBonus) {
@@ -107,11 +152,13 @@ export default class EffectContainer extends ObserverComponent {
             const { bonus, duration } = receivedBonus;
             const transtition = await this.playEffectTransition();
             AudioUtils.playSFX(AudioIds.BONUS);
+            await this.loadEffectBonus();
             const effect = instantiate(this.effectBonus);
             const animation = effect.getComponent(CallbackAnimation);
             animation.setDuration(duration);
             await this.showEffect(effect);
             AudioUtils.playSFX(AudioIds.BONUS_POPUP);
+            await this.loadBonusDialog();
             this.showBonusDialog(bonus, () => {
                 transtition?.destroy();
             });
@@ -127,11 +174,21 @@ export default class EffectContainer extends ObserverComponent {
         dialog.onBonusFinished = onBonusFinished;
     }
 
-    protected async playEffectTransition() {
-        if (!this.effectTransitionPrefab) {
-            return null;
+    async loadEffectTransition() {
+        if (this.effectTransition) {
+            return;
         }
-        const effect = instantiate(this.effectTransitionPrefab);
+        const path = `prefabs/effects/effect-transition`;
+        this.effectTransition = await this.loadPrefab(path);
+    }
+
+    loadPrefab(path: string) {
+        return bundleManager.loadResourcesAsset<Prefab>(path, Prefab);
+    }
+
+    protected async playEffectTransition() {
+        await this.loadEffectTransition();
+        const effect = instantiate(this.effectTransition);
         const animation = effect.getComponent(CallbackAnimation);
         animation.autoDestroyNode = false;
 
