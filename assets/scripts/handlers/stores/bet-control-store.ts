@@ -43,6 +43,10 @@ export class BetControlStore {
     roundId = -1;
 
     get totalBet() {
+        if (this.slotBoardStore.slotState === SlotState.READY && this.freeSpinEnabled) {
+            return 0;
+        }
+
         return this.stake * SLOT_LINES;
     }
 

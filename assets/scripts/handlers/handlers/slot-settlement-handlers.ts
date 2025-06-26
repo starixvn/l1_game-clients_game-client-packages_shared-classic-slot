@@ -323,8 +323,11 @@ export class SlotSettlementHandler {
         }, delayDuration);
     }
 
-    handleFreeSpins(freeSpins: any) {
-        this.betControlStore.setTotalFreeSpins(freeSpins.total);
-        this.betControlStore.syncFreeSpinCount();
+    handleFreeSpins(freeSpins: { total: number }) {
+        const total = freeSpins.total;
+        if (total > 0) {
+            this.betControlStore.setTotalFreeSpins(total);
+            this.betControlStore.syncFreeSpinCount();
+        }
     }
 }
