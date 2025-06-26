@@ -53,6 +53,9 @@ export class BetControlStore {
     roundId = -1;
 
     get totalBet() {
+        if (this.freeSpinEnabled && this.freeSpinStake !== -1) {
+            return 0;
+        }
         return this.displayStake * SLOT_LINES;
     }
 
@@ -203,5 +206,6 @@ export class BetControlStore {
     clearFreeSpins() {
         this.freeSpinCount = -1;
         this.freeSpinCountDisplay = -1;
+        this.freeSpinStake = -1;
     }
 }
