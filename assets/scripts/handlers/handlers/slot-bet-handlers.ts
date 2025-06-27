@@ -36,6 +36,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         Object.assign(betData, {
             amount: this.betControlStore.stake,
             betChoice: SLOT_BET_CHOICES,
+            freeBet: this.betControlStore.freeSpinEnabled,
         });
         this.handleBetData(betData);
     }
