@@ -121,6 +121,11 @@ export const loadSlotSymbols = async (jackpotEnabled: boolean) => {
 
 const addSymbolCache = (index: number, jackpotEnabled: boolean) => {
     const path = getSymbolName(index, jackpotEnabled);
+
+    if (bundleManager.cachedAssets[path]) {
+        return Promise.resolve(bundleManager.cachedAssets[path]);
+    }
+
     return bundleManager.loadResourcesAsset<sp.SkeletonData>(path, sp.SkeletonData);
 };
 
