@@ -77,7 +77,7 @@ export default class BetControl extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.displayStake)
     renderStake(stake: number) {
-        this.lblStake.string = gc.FormatUtils.numberWithCommas(stake);
+        this.lblStake.string = gc.FormatUtils.numberWithCommas(stake, 2, true);
     }
 
     @render(SlotBoardStore, (store) => store.winningBet)

@@ -1,3 +1,4 @@
+import gc from "@sg/game-client-base";
 import { _decorator, instantiate, Node, Prefab, tween, v3 } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils, ComponentUtils } from "db://shared-components/shared/utils";
@@ -49,7 +50,9 @@ export default class BetLevelsContainer extends ObserverComponent {
             this.containerNode.addChild(node);
 
             const itemComp = node.getComponent(BetLevelItem);
-            itemComp.setData(`${value}`, index);
+
+            const valueStr = gc.FormatUtils.numberWithCommas(value, 2, true);
+            itemComp.setData(valueStr, index);
             itemComp.onStakeChanged = (param: number) => {
                 this.onStakeToggleChanged(param);
             };

@@ -58,7 +58,7 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
         this.lblRound.string = id.toString();
-        this.lblBet.string = gc.FormatUtils.numberWithCommas(bet);
+        this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2, true);
         this.lblLine.string = "25";
         this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : gc.FormatUtils.numberWithCommas(totalAmount, 2);
         this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(win, 2, false);
