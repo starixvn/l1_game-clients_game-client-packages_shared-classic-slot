@@ -1,4 +1,4 @@
-import { _decorator, instantiate, Node, Prefab, ToggleContainer } from "cc";
+import { _decorator, instantiate, Node, Prefab, Toggle, ToggleContainer } from "cc";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import RawPagination from "db://shared-components/game/pagination/scripts/components/raw-pagination";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
@@ -26,6 +26,8 @@ export default class SlotGameTopWinner extends ObserverComponent {
     @property(Node)
     content: Node = null;
 
+    protected currentType = "";
+
     onLoad() {
         this.dialog.onHideComplete = () => {
             this.node.destroy();
@@ -47,6 +49,7 @@ export default class SlotGameTopWinner extends ObserverComponent {
 
     @render(TopWinnersStore, (store) => store.type)
     renderType(type: TopWinnerType) {
+        this.currentType = type;
         const toggle = this.toggleContainer.toggleItems.find((toggle) => toggle.name === type);
         if (toggle) {
             toggle.isChecked = true;
@@ -76,7 +79,12 @@ export default class SlotGameTopWinner extends ObserverComponent {
     }
 
     @handle(TopWinnersHandler, (handler) => handler.swapType())
-    onToggleChanged() {
+    swapType() {}
+
+    onToggleChanged(toggle: Toggle) {
         AudioUtils.playClick();
+        if (this.currentType !== toggle.node.name) {
+            this.swapType();
+        }
     }
 }
