@@ -122,12 +122,15 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         this.betControlStore.showLineSelection = {};
     }
 
-    handlePlaceBetFailed() {
+    handlePlaceBetFailed(clearFreeSpins = false) {
         this.slotBetResponseHandler.stopProcessingBetAndClearInterval();
         this.cancelAutoSpin();
         this.clearTriggerAction();
         this.slotBoardStore.reset();
 
+        if (clearFreeSpins) {
+            this.betControlStore.clearFreeSpins();
+        }
         this.betControlStore.didSpin = false;
     }
 }

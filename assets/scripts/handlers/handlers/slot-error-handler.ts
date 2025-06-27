@@ -55,7 +55,8 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
         const { endBet, notice } = data;
         if (endBet === -1 && notice.errorCode) {
             console.log("slotHandleNotice   -------");
-            this.slotBetHandler.handlePlaceBetFailed();
+            const isValidFreeSpin = notice.errorCode === "SB1929";
+            this.slotBetHandler.handlePlaceBetFailed(isValidFreeSpin);
         }
     }
 }
