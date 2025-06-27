@@ -14,7 +14,6 @@ export default class BonusItem extends Component {
     private isOpenItem = false;
 
     onLoad() {
-        console.log("Loaded");
         this.openChestSkeleton.setAnimation(0, "entry", false);
         AnimationUtils.delayTime(1).then(() => {
             if (this.isOpenItem) {
@@ -25,7 +24,6 @@ export default class BonusItem extends Component {
     }
 
     async open(value: number) {
-        console.log("open");
         this.openChestSkeleton.setAnimation(0, "open", false);
         this.isOpenItem = true;
         await AnimationUtils.delayTime(0.5);
