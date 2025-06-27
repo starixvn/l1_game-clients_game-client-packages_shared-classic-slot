@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Layout, Node, Prefab, Tween, tween, v3 } from "cc";
+import { _decorator, Component, instantiate, Layout, Node, Prefab, Tween, tween, v3, Vec3 } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
@@ -29,6 +29,7 @@ export default class SlotReel extends Component {
     public gameId: number;
 
     private initialized = false;
+    private cachePositions: Vec3[] = [];
     onLoad() {
         this.init();
     }
@@ -51,6 +52,7 @@ export default class SlotReel extends Component {
             item.gameId = this.gameId;
             this.items.push(item);
             const random = _.random(slotGameConfig.itemTypeCount - 1);
+            item.node.name = `item-${i}`;
             item.setItem(random);
         }
 
@@ -58,6 +60,8 @@ export default class SlotReel extends Component {
         this.itemHeight = transform.height;
         this.layout.updateLayout();
         this.layout.enabled = false;
+
+        this.cachePositions = this.items.map((item) => new Vec3(item.node.position));
     }
 
     setReelData(items: number[]) {
@@ -104,12 +108,19 @@ export default class SlotReel extends Component {
         const highlight = item.index === symbol || (item.index === SpecialSymbol.WILD && symbol !== SpecialSymbol.JACKPOT);
         item.showWinningEffect(highlight);
         itemCopy.showWinningEffect(highlight);
-        ComponentUtils.moveToOtherNode(item.node, this.winningContainer);
+        this.moveToOtherNode(item, this.winningContainer);
+    }
+
+    moveToOtherNode(item: SlotReelItem, destNode: Node) {
+        const wPos = new Vec3(item.node.worldPosition);
+        item.node.parent = destNode;
+        item.node.worldPosition = wPos;
     }
 
     hideWinningEffect() {
-        this.items.forEach((item) => {
-            ComponentUtils.moveToOtherNode(item.node, this.node);
+        this.items.forEach((item, index) => {
+            item.node.parent = this.node;
+            item.node.position = this.cachePositions[index];
             item.showWinningEffect(false);
         });
     }
@@ -118,7 +129,7 @@ export default class SlotReel extends Component {
         for (let i = 0; i < this.itemDisplayCount; i++) {
             const item = this.getItemBottom(i);
             if (item.index === symbol) {
-                ComponentUtils.moveToOtherNode(item.node, this.winningContainer);
+                this.moveToOtherNode(item, this.winningContainer);
                 item.showWinningEffect(true);
                 break;
             }

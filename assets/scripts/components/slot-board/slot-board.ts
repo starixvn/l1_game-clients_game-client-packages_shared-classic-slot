@@ -44,7 +44,6 @@ export default class SlotBoard extends Component {
     protected previewSymbolLeft: Prefab = null;
     protected previewSymbolRight: Prefab = null;
 
-    turbo: boolean;
     symbolCountPerReel = 24;
     stepSymbolPerReel = 6;
 
@@ -175,11 +174,12 @@ export default class SlotBoard extends Component {
     }
 
     getSymbolCountPerReel(index: number) {
-        if (this.turbo) {
-            return this.symbolCountPerReel;
-        } else {
-            return this.symbolCountPerReel + index * this.stepSymbolPerReel;
-        }
+        // if (this.turbo) {
+        //     debugger;
+        // return this.symbolCountPerReel;
+        // } else {
+        return this.symbolCountPerReel + index * this.stepSymbolPerReel;
+        // }
     }
 
     async showPreviewPopup(info: SymbolPreviewType, isInfoOnLeft: boolean, worldPosition: Vec3) {
