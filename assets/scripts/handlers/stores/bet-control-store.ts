@@ -104,7 +104,8 @@ export class BetControlStore {
     }
 
     get preventChangeBet() {
-        return !this.isReadyBet || this.slotBoardStore.slotState === SlotState.SPINNING || this.autoSpinEnabled || this.freeSpinEnabled;
+        const preventStates = [SlotState.SPINNING, SlotState.SPIN_DONE];
+        return !this.isReadyBet || preventStates.includes(this.slotBoardStore.slotState) || this.autoSpinEnabled || this.freeSpinEnabled;
     }
 
     get disableSpinButton() {
