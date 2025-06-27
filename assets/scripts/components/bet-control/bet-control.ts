@@ -72,7 +72,7 @@ export default class BetControl extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.totalBet)
     renderTotalBet(totalBet: number) {
-        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet);
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 2, true);
     }
 
     @render(BetControlStore, (store) => store.displayStake)
@@ -96,7 +96,7 @@ export default class BetControl extends ObserverComponent {
             to: totalWin,
             duration: 0.6,
             progress: (value) => {
-                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value);
+                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2, true);
             },
         });
     }
