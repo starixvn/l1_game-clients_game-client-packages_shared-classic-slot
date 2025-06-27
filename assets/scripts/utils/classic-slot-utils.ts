@@ -143,7 +143,10 @@ export const loadWinningSymbolAnimation = async () => {
 
     if (prefabCache !== null) {
         const path = `spines/symbols/winning-animation`;
-        const data = await bundleManager.loadResourcesAsset<sp.SkeletonData>(path, sp.SkeletonData);
+
+        const data = bundleManager.cachedAssets[path]
+            ? bundleManager.cachedAssets[path]
+            : await bundleManager.loadResourcesAsset<sp.SkeletonData>(path, sp.SkeletonData);
         resourceCaches.slotWinningAnimation = data;
     }
 };
