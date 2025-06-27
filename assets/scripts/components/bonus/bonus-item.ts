@@ -11,14 +11,23 @@ export default class BonusItem extends Component {
     @property(Label)
     value: Label = null;
 
-    async onLoad() {
+    private isOpenItem = false;
+
+    onLoad() {
+        console.log("Loaded");
         this.openChestSkeleton.setAnimation(0, "entry", false);
-        await AnimationUtils.delayTime(1);
-        this.openChestSkeleton.setAnimation(0, "idle", true);
+        AnimationUtils.delayTime(1).then(() => {
+            if (this.isOpenItem) {
+                return;
+            }
+            this.openChestSkeleton.setAnimation(0, "idle", true);
+        });
     }
 
     async open(value: number) {
+        console.log("open");
         this.openChestSkeleton.setAnimation(0, "open", false);
+        this.isOpenItem = true;
         await AnimationUtils.delayTime(0.5);
 
         if (value > 0) {
