@@ -239,7 +239,7 @@ export class SlotSettlementHandler {
                 this.slotBoardStore.highlightSpecialSymbols = [SpecialSymbol.FREESPIN];
                 this.slotBoardStore.receivedFreeSpins = { freeSpins, duration: this.slotDurationStore.freespinDuration };
             })
-            .delay(this.slotDurationStore.freespinDuration)
+            .delay(this.slotDurationStore.freespinDuration + this.slotDurationStore.transitionDuration)
             .call(() => {
                 this.betControlStore.setFreeSpinStake(this.betControlStore.stake);
                 this.betControlStore.syncFreeSpinCount();
@@ -247,6 +247,7 @@ export class SlotSettlementHandler {
     }
 
     createTweenShowBigWin(betWin: number, bigWin: boolean) {
+        const transitionDuration = this.slotDurationStore.transitionDuration;
         const duration = this.slotDurationStore.bigWinDuration;
         const showBigWinValue = this.slotDurationStore.showBigWinValueDuration;
         const delayShowBigWinValue = this.slotDurationStore.delayShowBigWinValue;
@@ -263,7 +264,7 @@ export class SlotSettlementHandler {
                     delayShowBigWinValue,
                 };
             })
-            .delay(delayToUpdateWinningBet)
+            .delay(transitionDuration + delayToUpdateWinningBet)
             .call(() => this.updateWinningBet(betWin))
             .delay(delayToEndBigWin);
     }

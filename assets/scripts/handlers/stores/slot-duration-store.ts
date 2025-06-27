@@ -63,6 +63,10 @@ export class SlotDurationStore {
         return this.configDuration.bigWinDuration;
     }
 
+    get transitionDuration() {
+        return this.configDuration.transitionDuration;
+    }
+
     get showBigWinValueDuration() {
         return this.configDuration.showBigWinValueDuration;
     }

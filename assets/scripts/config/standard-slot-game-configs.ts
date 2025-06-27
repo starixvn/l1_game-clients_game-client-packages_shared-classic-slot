@@ -15,6 +15,7 @@ export class StandardSlotGameConfigs implements SlotGameBaseConfigs {
         bonusDuration: 2,
         jackpotDuration: 2,
 
+        transitionDuration: 0.5,
         bigWinDuration: 4,
         showBigWinValueDuration: 1,
         delayShowBigWinValue: 1.5,
@@ -28,6 +29,7 @@ export class StandardSlotGameConfigs implements SlotGameBaseConfigs {
         bonusDuration: 1.5,
         jackpotDuration: 1.5,
 
+        transitionDuration: 0.5,
         bigWinDuration: 3.2,
         showBigWinValueDuration: 0.8,
         delayShowBigWinValue: 1.2,

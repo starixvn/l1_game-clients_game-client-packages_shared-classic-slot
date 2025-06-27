@@ -20,4 +20,5 @@ export interface CustomDuration {
     readonly bonusDuration: number;
     readonly showBigWinValueDuration: number;
     readonly delayShowBigWinValue: number;
+    readonly transitionDuration: number;
 }
