@@ -63,6 +63,7 @@ export class SlotSettlementHandler {
                 () => this.errorStore.apiError,
                 (apiError) => {
                     if (apiError) {
+                        console.log("reaction handlePlaceBetFailed apiError  -------");
                         this.slotBetHandler.handlePlaceBetFailed();
                     }
                 }
@@ -72,6 +73,7 @@ export class SlotSettlementHandler {
                 () => this.betStore.lastReceivedBet,
                 (lastReceivedBet) => {
                     if (lastReceivedBet?.value === -1) {
+                        console.log("reaction handlePlaceBetFailed lastReceivedBet  -------");
                         this.slotBetHandler.handlePlaceBetFailed();
                     }
                 }

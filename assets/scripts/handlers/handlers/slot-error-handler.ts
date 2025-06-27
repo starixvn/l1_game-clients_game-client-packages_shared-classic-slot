@@ -35,6 +35,7 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
         setTimeout(() => {
             if (this.betStore.lastReceivedBet?.value === -1) {
                 this.handleApiError(apiError);
+                console.log("slotHandleApiError   -------");
                 this.slotBetHandler.handlePlaceBetFailed();
             } else {
                 this.endGameApiError = apiError;
@@ -45,6 +46,7 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
     handleEndGameApiError() {
         if (this.endGameApiError) {
             this.handleApiError(this.endGameApiError);
+            console.log("handleEndGameApiError   -------");
             this.slotBetHandler.handlePlaceBetFailed();
         }
     }
@@ -52,6 +54,7 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
     slotHandleNotice(data: { endBet: number; notice: { errorCode: string } }) {
         const { endBet, notice } = data;
         if (endBet === -1 && notice.errorCode) {
+            console.log("slotHandleNotice   -------");
             this.slotBetHandler.handlePlaceBetFailed();
         }
     }
