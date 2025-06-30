@@ -174,12 +174,7 @@ export default class SlotBoard extends Component {
     }
 
     getSymbolCountPerReel(index: number) {
-        // if (this.turbo) {
-        //     debugger;
-        // return this.symbolCountPerReel;
-        // } else {
         return this.symbolCountPerReel + index * this.stepSymbolPerReel;
-        // }
     }
 
     async showPreviewPopup(info: SymbolPreviewType, isInfoOnLeft: boolean, worldPosition: Vec3) {
