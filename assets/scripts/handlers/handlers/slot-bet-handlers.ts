@@ -127,7 +127,8 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         this.slotBetResponseHandler.stopProcessingBetAndClearInterval();
         this.cancelAutoSpin();
         this.clearTriggerAction();
-        this.slotBoardStore.reset();
+        this.slotBoardStore.clearSettlement();
+        this.slotBoardStore.resetToReady();
 
         if (clearFreeSpins) {
             this.betControlStore.clearFreeSpins();

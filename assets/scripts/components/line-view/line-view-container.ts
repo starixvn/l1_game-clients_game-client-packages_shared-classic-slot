@@ -39,8 +39,11 @@ export default class LineViewContainer extends ObserverComponent {
     @render(SlotBoardStore, (store) => store.winningLines)
     protected renderWinningLine(winningLines: LineData[]) {
         this.showingWinningLine = winningLines.length > 0;
-        this.hideAllLines();
         this.showWinningLinesTween?.stop();
+        this.hideAllLines();
+        if (winningLines.length === 0) {
+            return;
+        }
 
         winningLines.forEach((line) => {
             this.showLine(line.payline + 1, this.showingWinningLine);
@@ -60,6 +63,9 @@ export default class LineViewContainer extends ObserverComponent {
                 .repeatForever(
                     tween()
                         .call(() => {
+                            if (!this.showingWinningLine) {
+                                return;
+                            }
                             if (lastPayline !== -1) {
                                 this.showLine(lastPayline, false);
                             }

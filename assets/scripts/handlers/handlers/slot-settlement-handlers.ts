@@ -82,11 +82,11 @@ export class SlotSettlementHandler {
         }, 0);
     }
 
-    reset() {
+    clearSettlement() {
         this.stopSettleTween();
         this.timeoutNextSpin && clearTimeout(this.timeoutNextSpin);
         this.timeoutNextSpin = null;
-        this.slotBoardStore.reset();
+        this.slotBoardStore.clearSettlement();
     }
 
     requestOpenJackpot(index: number) {
@@ -211,6 +211,7 @@ export class SlotSettlementHandler {
             .sequence(...sequenceTweens)
             .call(() => {
                 this.finishSettlement();
+                this.slotBoardStore.resetToReady();
                 this.slotErrorHandler.handleEndGameApiError();
                 this.checkSpinNextRound();
             })
@@ -305,7 +306,7 @@ export class SlotSettlementHandler {
     }
 
     protected finishSettlement() {
-        this.reset();
+        this.clearSettlement();
     }
 
     protected checkSpinNextRound() {

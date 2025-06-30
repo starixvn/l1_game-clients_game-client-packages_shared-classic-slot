@@ -393,7 +393,7 @@ describe("SlotBetHandler", () => {
 
             expect(cancelAutoSpinSpy).toHaveBeenCalledTimes(1);
             expect(clearTriggerActionSpy).toHaveBeenCalledTimes(1);
-            expect(slotBoardStore.reset).toHaveBeenCalledTimes(1);
+            expect(slotBoardStore.clearSettlement).toHaveBeenCalledTimes(1);
             expect(betControlStore.clearFreeSpins).toHaveBeenCalledTimes(1);
         });
     });

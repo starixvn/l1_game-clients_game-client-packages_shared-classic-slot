@@ -235,7 +235,7 @@ describe("SlotSettlementHandler", () => {
 
         jest.useFakeTimers();
         jest.requireMock("db://shared-components/shared/utils").AnimationUtils.delayTime.mockClear();
-        slotBoardStore.reset.mockClear();
+        slotBoardStore.clearSettlement.mockClear();
         connectionStore.connection.emit.mockClear();
         if (slotBetHandler.handlePlaceBetFailed) slotBetHandler.handlePlaceBetFailed.mockClear();
         betControlStore.setTotalFreeSpins.mockClear();
@@ -266,7 +266,7 @@ describe("SlotSettlementHandler", () => {
             const resetSpy = jest.spyOn(slotBoardStore, "reset");
 
             settlementHandler.timeoutNextSpin = {} as any;
-            settlementHandler.reset();
+            settlementHandler.clearSettlement();
 
             expect(clearTimeoutSpy).toHaveBeenCalled();
             expect(resetSpy).toHaveBeenCalled();

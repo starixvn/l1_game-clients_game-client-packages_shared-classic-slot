@@ -222,7 +222,7 @@ describe("SlotBoardStore", () => {
             slotBoardStore.slotState = SlotState.SPINNING;
 
             // Call reset
-            slotBoardStore.reset();
+            slotBoardStore.clearSettlement();
 
             // Verify all properties are reset
             expect(slotBoardStore.receivedBonus).toBeNull();
@@ -250,7 +250,7 @@ describe("SlotBoardStore", () => {
             slotBoardStore.bottomMessageState = bottomMessageState;
 
             // Call reset
-            slotBoardStore.reset();
+            slotBoardStore.clearSettlement();
 
             // Verify these properties are not affected
             expect(slotBoardStore.spinResult).toEqual({

@@ -45,7 +45,7 @@ export class SlotBoardStore {
 
     bottomMessageState = SlotNotification.READY;
 
-    reset() {
+    clearSettlement() {
         this.receivedBonus = null;
         this.receivedJackpot = null;
         this.receivedFreeSpins = null;
@@ -54,6 +54,9 @@ export class SlotBoardStore {
         this.highlightSpecialSymbols = [];
         this.winningJackpot = null;
         this.bonusChest = null;
+    }
+
+    resetToReady() {
         this.slotState = SlotState.READY;
     }
 
