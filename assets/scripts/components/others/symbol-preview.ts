@@ -1,7 +1,7 @@
 import { _decorator, Component, Label, Node, sp, Sprite } from "cc";
 import { AppUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import { SpecialSymbol } from "../../definitions";
-import { globalEmitter, InternalEvents, resourceCaches } from "../../utils/classic-slot-utils";
+import { resourceCaches } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 
 export interface SymbolPreviewType {
@@ -31,23 +31,6 @@ export default class SymbolPreview extends Component {
 
     @property(Node)
     textImages: Node = null;
-
-    onLoad() {
-        const events = [
-            InternalEvents.CLICK_AUTO_SPIN_BUTTON,
-            InternalEvents.CLICK_LINE_SELECTION_BUTTON,
-            InternalEvents.CLICK_SPIN_BUTTON,
-            InternalEvents.CLICK_HAMBURGER_MENU,
-            InternalEvents.CLICK_OUTSIDE_REEL_AREA,
-        ];
-        events.forEach((event) => {
-            globalEmitter.on(event, this.hidePreview.bind(this), this);
-        });
-    }
-
-    onDestroy() {
-        globalEmitter.targetOff(this);
-    }
 
     hidePreview() {
         this.node.parent.active = false;
