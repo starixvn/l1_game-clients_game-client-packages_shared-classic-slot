@@ -12,6 +12,8 @@ export default class PreviewOddsPopup extends Component {
 
     gameId: number;
 
+    protected previewNodes: { [key: string]: Node } = {};
+
     private currentPreviewItem: Node = null;
     onSymbolPreview = (symbol, worldPosition: Vec3, isInfoOnLeft: boolean) => {};
 
@@ -38,22 +40,33 @@ export default class PreviewOddsPopup extends Component {
         });
     }
 
+    addPreviewNode(previewNode: Node) {
+        this.previewNodes[previewNode.uuid] = previewNode;
+        this.previewOverlay.addChild(previewNode);
+    }
+
     showPreview(previewNode: Node, worldPosition: Vec3) {
         this.previewOverlay.active = true;
         this.hideOtherPreview();
-        this.previewOverlay.addChild(previewNode);
+        this.addPreviewNode(previewNode);
         const transform = ComponentUtils.getTransform(this.previewOverlay);
         previewNode.position = transform.convertToNodeSpaceAR(worldPosition);
         AnimationUtils.fadeIn(previewNode, 0.3);
     }
 
     hideOtherPreview() {
-        this.previewOverlay.children.forEach((node) => {
+        Object.keys(this.previewNodes).forEach((uuid) => {
+            const node = this.previewNodes[uuid];
             AnimationUtils.fadeOut(node, 0.3).then(() => {
                 node?.isValid && node.destroy();
-                this.previewOverlay.active = this.previewOverlay.children.length > 0;
+                delete this.previewNodes[uuid];
+                this.checkToHideOverlay();
             });
         });
+    }
+
+    checkToHideOverlay() {
+        this.previewOverlay.active = Object.keys(this.previewNodes).length > 0;
     }
 
     protected onSymbolTouched(symbol, worldPosition: Vec3, isInfoOnLeft: boolean) {
@@ -62,7 +75,11 @@ export default class PreviewOddsPopup extends Component {
 
     hideSymbolPreview() {
         this.previewOverlay.active = false;
-        this.previewOverlay.destroyAllChildren();
         this.currentPreviewItem = null;
+        Object.keys(this.previewNodes).forEach((uuid) => {
+            const node = this.previewNodes[uuid];
+            node?.isValid && node.destroy();
+            delete this.previewNodes[uuid];
+        });
     }
 }
