@@ -99,7 +99,7 @@ export default class BetLevelsContainer extends ObserverComponent {
 
     protected onStakeToggleChanged(index: number) {
         this.setStake(this.betLevels[index]);
-        this.onHide();
+        this.closeStakeSelector();
     }
 
     @handle(BetControlStore, (store, stake: number) => store.setStake(stake))
