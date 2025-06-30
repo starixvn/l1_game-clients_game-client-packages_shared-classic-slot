@@ -211,8 +211,11 @@ export class SlotSettlementHandler {
             .call(() => {
                 this.finishSettlement();
                 this.slotBoardStore.resetToReady();
-                this.slotErrorHandler.handleEndGameApiError();
-                this.checkSpinNextRound();
+                const isEndGameError = this.slotErrorHandler.handleEndGameApiError();
+
+                if (!isEndGameError) {
+                    this.checkSpinNextRound();
+                }
             })
             .start();
     }

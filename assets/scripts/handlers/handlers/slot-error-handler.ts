@@ -48,7 +48,12 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
             this.handleApiError(this.endGameApiError);
             console.log("handleEndGameApiError   -------");
             this.slotBetHandler.handlePlaceBetFailed();
+
+            this.endGameApiError = null;
+            return true;
         }
+
+        return false;
     }
 
     slotHandleNotice(data: { endBet: number; notice: { errorCode: string } }) {
