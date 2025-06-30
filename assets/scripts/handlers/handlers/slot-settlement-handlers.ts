@@ -21,6 +21,7 @@ export class SlotSettlementHandler {
     @inject(gc.Error.ErrorStore) protected readonly errorStore: gc.Error.ErrorStore;
     @inject(SlotErrorHandler) protected readonly slotErrorHandler: SlotErrorHandler;
     @inject(gc.Auth.AuthHandlers.GetBalance) protected readonly getBalanceHandler: gc.Auth.AuthHandlers.GetBalance;
+    @inject(gc.Player.MainPlayerStore) protected readonly mainPlayerStore: gc.Player.MainPlayerStore;
 
     eventHandleList = [
         {
@@ -101,7 +102,11 @@ export class SlotSettlementHandler {
     }
 
     handleWinningJackpot(winningJackpot: any) {
-        this.slotBoardStore.winningJackpot = winningJackpot;
+        this.slotBoardStore.winningJackpot = {
+            winnerName: winningJackpot.winnerName,
+            pool: winningJackpot.pool,
+            amount: gc.NumberUtils.getValueByCurrency(winningJackpot.amount, this.mainPlayerStore.rate),
+        };
     }
 
     async handleJackpot(jackpot: any) {

@@ -14,7 +14,7 @@ export default class JackpotWinningAmount extends BigWinAnimation {
             const prizeTxt = `text-${pool}`;
             const frame = await bundleManager.loadAssetsFromBundle<SpriteFrame>(
                 CLASSIC_SLOT_BUNDLE,
-                `images/jackpot/${prizeTxt}`,
+                `images/jackpot/${prizeTxt}/spriteFrame`,
                 SpriteFrame,
                 null
             );
