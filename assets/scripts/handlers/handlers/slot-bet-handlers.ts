@@ -29,7 +29,6 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         }
 
         this.betControlStore.didSpin = true;
-        this.betControlStore.decreaseFreeSpinCount();
         this.resetOnNewSpin();
 
         const betData = this.createBetData({});

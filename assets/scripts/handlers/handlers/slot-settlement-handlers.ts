@@ -138,6 +138,7 @@ export class SlotSettlementHandler {
 
     protected async spin(result: number[]) {
         return new Promise<void>((resolve) => {
+            this.betControlStore.decreaseFreeSpinCount();
             this.slotBoardStore.slotState = SlotState.SPINNING;
             this.slotBoardStore.spinResult = {
                 result,
