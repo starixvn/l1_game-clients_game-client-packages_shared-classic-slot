@@ -57,7 +57,7 @@ export class SlotSettlementHandler {
         setTimeout(() => {
             mobx.reaction(
                 () => this.slotBoardStore.forceStopSettle,
-                () => this.finishSettlement()
+                () => this.stopSettleTween()
             );
 
             mobx.reaction(
@@ -84,8 +84,6 @@ export class SlotSettlementHandler {
 
     clearSettlement() {
         this.stopSettleTween();
-        this.timeoutNextSpin && clearTimeout(this.timeoutNextSpin);
-        this.timeoutNextSpin = null;
         this.slotBoardStore.clearSettlement();
     }
 
@@ -299,6 +297,9 @@ export class SlotSettlementHandler {
             this.settleTween.stop();
             this.settleTween = null;
         }
+
+        this.timeoutNextSpin && clearTimeout(this.timeoutNextSpin);
+        this.timeoutNextSpin = null;
     }
 
     protected settleDone() {

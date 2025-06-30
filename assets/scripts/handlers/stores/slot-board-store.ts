@@ -63,6 +63,8 @@ export class SlotBoardStore {
     resetOnNewSpin() {
         this.forceStopSettle = {};
 
+        this.clearSettlement();
+
         this.winningItemsOnLines = [];
         this.winningLines = [];
         this.winningBet = 0;
