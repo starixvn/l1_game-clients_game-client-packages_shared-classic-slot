@@ -29,7 +29,7 @@ export default class BonusItem extends Component {
         await AnimationUtils.delayTime(0.5);
 
         if (value > 0) {
-            this.value.string = gc.FormatUtils.numberWithCommas(value);
+            this.value.string = gc.FormatUtils.numberWithCommas(value, 2);
         }
     }
 }
