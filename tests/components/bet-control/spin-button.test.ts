@@ -471,7 +471,8 @@ describe("SpinButton", () => {
             it("should register keyboard event listeners", () => {
                 const { input } = require("cc");
 
-                (spinButton as any).addEvent();
+                //@ts-ignore
+                spinButton.addEvent();
 
                 expect(input.on).toHaveBeenCalledWith(Input.EventType.KEY_DOWN, (spinButton as any).onKeyDown, spinButton);
                 expect(input.on).toHaveBeenCalledWith(Input.EventType.KEY_UP, (spinButton as any).onKeyUp, spinButton);
@@ -610,7 +611,7 @@ describe("SpinButton", () => {
             });
 
             it("should enable button interaction when ready to bet", () => {
-                spinButton.renderCascadingState(true);
+                spinButton.renderDisableSpinButton(false);
 
                 jest.advanceTimersByTime(100);
 
@@ -618,7 +619,7 @@ describe("SpinButton", () => {
             });
 
             it("should disable button interaction when not ready to bet", () => {
-                spinButton.renderCascadingState(false);
+                spinButton.renderDisableSpinButton(true);
 
                 jest.advanceTimersByTime(100);
 
@@ -635,7 +636,7 @@ describe("SpinButton", () => {
                 });
 
                 expect(() => {
-                    spinButton.renderCascadingState(true);
+                    spinButton.renderDisableSpinButton(true);
                     jest.advanceTimersByTime(100);
                 }).not.toThrow();
             });

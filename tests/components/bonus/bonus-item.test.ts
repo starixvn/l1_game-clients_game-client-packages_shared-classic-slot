@@ -82,7 +82,7 @@ describe("BonusItem", () => {
 
             expect(mockOpenChestSkeleton.setAnimation).toHaveBeenCalledWith(0, "open", false);
             expect(AnimationUtils.delayTime).toHaveBeenCalledWith(0.5);
-            expect(FormatUtils.numberWithCommas).toHaveBeenCalledWith(1000);
+            expect(FormatUtils.numberWithCommas).toHaveBeenCalledWith(1000, 2);
             expect(mockValue.string).toBe("1,000");
         });
 
@@ -125,7 +125,7 @@ describe("BonusItem", () => {
 
             await component.open(123456.78);
 
-            expect(FormatUtils.numberWithCommas).toHaveBeenCalledWith(123456.78);
+            expect(FormatUtils.numberWithCommas).toHaveBeenCalledWith(123456.78, 2);
             expect(mockValue.string).toBe("123,456.78");
         });
     });

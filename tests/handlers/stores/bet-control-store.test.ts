@@ -40,6 +40,16 @@ jest.mock("@sg/game-client-base", () => {
                 },
             },
         },
+        Notices: {
+            ...actualGc.Notices,
+            NoticeStore: jest.fn().mockImplementation(() => ({
+                addWarning: jest.fn(),
+            })),
+        },
+        Translator: {
+            ...actualGc.Translator,
+            gameTranslate: jest.fn().mockImplementation((key) => key),
+        },
     };
 });
 
@@ -63,6 +73,7 @@ describe("BetControlStore", () => {
             .bind(gc.GameUserSettings.GameUserSettingHandler)
             .toConstantValue(new (jest.requireMock("@sg/game-client-base").GameUserSettings.GameUserSettingHandler)());
 
+        container.bind(gc.Notices.NoticeStore).toConstantValue(new (jest.requireMock("@sg/game-client-base").Notices.NoticeStore)());
         betControlStore = container.get(BetControlStore);
 
         // Manually trigger the reaction logic for betLevels initialization as it's in a setTimeout
@@ -366,6 +377,22 @@ describe("BetControlStore", () => {
                 expect(betControlStore.turboEnabled).toBe(true);
                 betControlStore.setTurbo(false);
                 expect(betControlStore.turboEnabled).toBe(false);
+            });
+
+            it("setTurbo should add warning notice if turboEnabled is changed", () => {
+                betControlStore.turboEnabled = false;
+                betControlStore.setTurbo(true);
+                expect(betControlStore.turboEnabled).toBe(true);
+                //@ts-ignore
+                expect(betControlStore.noticeStore.addWarning).toHaveBeenCalledWith("ENABLE_TURBO_MODE");
+            });
+
+            it("setTurbo should not add warning notice if turboEnabled is not changed", () => {
+                betControlStore.turboEnabled = true;
+                betControlStore.setTurbo(true);
+                expect(betControlStore.turboEnabled).toBe(true);
+                //@ts-ignore
+                expect(betControlStore.noticeStore.addWarning).not.toHaveBeenCalled();
             });
         });
 

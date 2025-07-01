@@ -17,6 +17,8 @@ interface EnhancedMockedBetControlStore extends jest.Mocked<BetControlStore> {
     freeSpinEnabled: boolean;
     turboEnabled: boolean;
     triggerAutoSpin: boolean;
+    stake: number;
+    freeSpinStake: number;
     // Methods like setTotalFreeSpins, decreaseFreeSpinCount, etc., are part of jest.Mocked<BetControlStore>
     // if they are actual methods of BetControlStore.
     // The mock implementation below adds them as jest.fn() properties on the instance.
@@ -24,6 +26,8 @@ interface EnhancedMockedBetControlStore extends jest.Mocked<BetControlStore> {
     decreaseFreeSpinCount: jest.Mock;
     clearFreeSpins: jest.Mock;
     syncFreeSpinCount: jest.Mock;
+    setFreeSpinStake: jest.Mock;
+    get turboEnabledOnSpin(): boolean;
 }
 
 jest.mock(
@@ -44,6 +48,8 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
         this.freeSpinEnabled = false;
         this.turboEnabled = false;
         this.triggerAutoSpin = false;
+        this.stake = 100;
+        this.freeSpinStake = -1;
 
         this.setTotalFreeSpins = jest.fn((count: number) => {
             this.totalFreeSpins = count;
@@ -51,6 +57,16 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
         this.decreaseFreeSpinCount = jest.fn();
         this.clearFreeSpins = jest.fn();
         this.syncFreeSpinCount = jest.fn();
+        this.setFreeSpinStake = jest.fn((stake: number) => {
+            this.freeSpinStake = stake;
+        });
+
+        // Add getter for turboEnabledOnSpin
+        Object.defineProperty(this, "turboEnabledOnSpin", {
+            get: jest.fn(() => this.turboEnabled || this.triggerAutoSpin),
+            configurable: true,
+        });
+
         return this;
     }),
 }));
@@ -65,9 +81,17 @@ jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
         receivedJackpot: null,
         receivedBigWin: null,
         receivedFreeSpins: null,
+        receivedBonus: null,
         highlightSpecialSymbols: [],
-        reset: jest.fn(),
+        clearSettlement: jest.fn(),
+        resetToReady: jest.fn(),
         winningBet: 0, // Added property
+        spinResult: {
+            result: [],
+            duration: 0,
+            turbo: false,
+            onComplete: () => {},
+        },
     })),
 }));
 jest.mock("../../assets/scripts/handlers/stores/slot-duration-store", () => ({
@@ -83,11 +107,15 @@ jest.mock("../../assets/scripts/handlers/stores/slot-duration-store", () => ({
         showJackpotWinningAmountDuration: 600,
         spinDuration: 700,
         totalSpinDuration: 800,
+        bonusDuration: 300,
+        transitionDuration: 100,
     })),
 }));
 jest.mock("../../assets/scripts/handlers/handlers/slot-bet-handlers", () => ({
     SlotBetHandler: jest.fn().mockImplementation(() => ({
         handlePlaceBetFailed: jest.fn(),
+        callBet: jest.fn(),
+        actionAutoSpin: jest.fn(),
     })),
 }));
 jest.mock("../../assets/scripts/handlers/handlers/slot-error-handler", () => ({
@@ -119,6 +147,24 @@ jest.mock("@sg/game-client-base", () => {
             ErrorStore: jest.fn().mockImplementation(() => ({
                 apiError: null,
             })),
+        },
+        Auth: {
+            ...actualGc.Auth,
+            AuthHandlers: {
+                GetBalance: jest.fn().mockImplementation(() => ({
+                    handle: jest.fn(),
+                })),
+            },
+        },
+        Player: {
+            ...actualGc.Player,
+            MainPlayerStore: jest.fn().mockImplementation(() => ({
+                rate: 1,
+            })),
+        },
+        NumberUtils: {
+            ...actualGc.NumberUtils,
+            getValueByCurrency: jest.fn((amount: number, rate: number) => amount * rate),
         },
     };
 });
@@ -164,6 +210,7 @@ jest.mock("cc", () => {
             start: jest.fn(function () {
                 executeTweenActions(actions);
             }),
+            stop: jest.fn(),
             // Custom method for this mock, allowing a sequence to execute its child tweens
             execute: jest.fn(function () {
                 executeTweenActions(actions);
@@ -192,6 +239,8 @@ describe("SlotSettlementHandler", () => {
     let connectionStore: jest.Mocked<gc.Connection.ConnectionStore>;
     let betStore: jest.Mocked<gc.Bet.BetStore>;
     let errorStore: jest.Mocked<gc.Error.ErrorStore>;
+    let mainPlayerStore: jest.Mocked<gc.Player.MainPlayerStore>;
+    let getBalanceHandler: jest.Mocked<gc.Auth.AuthHandlers.GetBalance>;
 
     beforeEach(() => {
         container = new Container();
@@ -231,28 +280,45 @@ describe("SlotSettlementHandler", () => {
         errorStore = new MockedErrorStore();
         container.bind(gc.Error.ErrorStore).toConstantValue(errorStore);
 
+        const MockedMainPlayerStore = jest.requireMock("@sg/game-client-base").Player.MainPlayerStore;
+        mainPlayerStore = new MockedMainPlayerStore();
+        container.bind(gc.Player.MainPlayerStore).toConstantValue(mainPlayerStore);
+
+        const MockedGetBalanceHandler = jest.requireMock("@sg/game-client-base").Auth.AuthHandlers.GetBalance;
+        getBalanceHandler = new MockedGetBalanceHandler();
+        container.bind(gc.Auth.AuthHandlers.GetBalance).toConstantValue(getBalanceHandler);
+
         settlementHandler = container.get(SlotSettlementHandler);
 
         jest.useFakeTimers();
         jest.requireMock("db://shared-components/shared/utils").AnimationUtils.delayTime.mockClear();
         slotBoardStore.clearSettlement.mockClear();
+        slotBoardStore.resetToReady.mockClear();
         connectionStore.connection.emit.mockClear();
         if (slotBetHandler.handlePlaceBetFailed) slotBetHandler.handlePlaceBetFailed.mockClear();
+        if (slotBetHandler.callBet) slotBetHandler.callBet.mockClear();
+        if (slotBetHandler.actionAutoSpin) slotBetHandler.actionAutoSpin.mockClear();
         betControlStore.setTotalFreeSpins.mockClear();
         betControlStore.decreaseFreeSpinCount.mockClear();
         betControlStore.clearFreeSpins.mockClear();
         betControlStore.syncFreeSpinCount.mockClear();
+        betControlStore.setFreeSpinStake.mockClear();
+        getBalanceHandler.handle.mockClear();
+        (gc.NumberUtils.getValueByCurrency as jest.Mock).mockClear();
 
         slotBoardStore.slotState = SlotState.NOT_READY;
         slotBoardStore.highlightSpecialSymbols = [];
         slotBoardStore.receivedBigWin = null;
         slotBoardStore.receivedFreeSpins = null;
+        slotBoardStore.receivedBonus = null;
         slotBoardStore.winningBet = -1; // Set to a sentinel value
 
         betControlStore.totalFreeSpins = 0;
+        betControlStore.freeSpinStake = -1;
         // Properties like autoSpinEnabled are set by the mock constructor, no need to reset here unless for a specific test.
         betStore.lastReceivedBet = null;
         errorStore.apiError = null;
+        mainPlayerStore.rate = 1;
     });
 
     afterEach(() => {
@@ -263,7 +329,7 @@ describe("SlotSettlementHandler", () => {
     describe("reset", () => {
         it("should clear timeouts and reset board store", () => {
             const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
-            const resetSpy = jest.spyOn(slotBoardStore, "reset");
+            const resetSpy = jest.spyOn(slotBoardStore, "clearSettlement");
 
             settlementHandler.timeoutNextSpin = {} as any;
             settlementHandler.clearSettlement();
@@ -298,15 +364,23 @@ describe("SlotSettlementHandler", () => {
     });
 
     describe("handleWinningJackpot", () => {
-        it("should update winningJackpot in board store", () => {
-            const winningJackpot = { value: 1000 };
+        it("should update winningJackpot in board store with currency conversion", () => {
+            const winningJackpot = { amount: 1000, winnerName: "John Doe", pool: "minor" };
             settlementHandler.handleWinningJackpot(winningJackpot);
-            expect(slotBoardStore.winningJackpot).toEqual(winningJackpot);
+            expect(gc.NumberUtils.getValueByCurrency).toHaveBeenCalledWith(1000, 1);
+            expect(slotBoardStore.winningJackpot).toEqual({
+                winnerName: "John Doe",
+                pool: "minor",
+                amount: 1000, // amount * rate = 1000 * 1
+            });
         });
     });
 
     describe("handleJackpot", () => {
         it("should process jackpot win correctly", async () => {
+            // Mock the spin method to resolve immediately
+            const spinSpy = jest.spyOn(settlementHandler as any, "spin").mockResolvedValue(undefined);
+
             const jackpot = {
                 winningLine: 0,
                 symbol: "WILD",
@@ -322,6 +396,45 @@ describe("SlotSettlementHandler", () => {
                 jackpot,
                 duration: slotDurationStore.jackpotDuration,
             });
+
+            spinSpy.mockRestore();
+        });
+    });
+
+    describe("handleBonuses", () => {
+        it("should handle bonuses with jackpot delay when jackpot exists", async () => {
+            const bonuses = { bonus: { count: 1 }, roundId: 1, result: [1, 2, 3] };
+            slotBoardStore.receivedJackpot = { jackpot: {}, duration: 1000 };
+
+            await settlementHandler.handleBonuses(bonuses);
+
+            expect(jest.requireMock("db://shared-components/shared/utils").AnimationUtils.delayTime).toHaveBeenCalledWith(
+                slotDurationStore.showJackpotWinningAmountDuration
+            );
+            expect(slotBoardStore.receivedBonus).toEqual({
+                bonus: bonuses.bonus,
+                duration: slotDurationStore.bonusDuration,
+            });
+        });
+
+        it("should handle bonuses without jackpot delay when no jackpot", async () => {
+            // Mock the spin method to resolve immediately
+            const spinSpy = jest.spyOn(settlementHandler as any, "spin").mockResolvedValue(undefined);
+
+            const bonuses = { bonus: { count: 1 }, roundId: 1, result: [1, 2, 3] };
+            slotBoardStore.receivedJackpot = null;
+
+            await settlementHandler.handleBonuses(bonuses);
+
+            expect(jest.requireMock("db://shared-components/shared/utils").AnimationUtils.delayTime).not.toHaveBeenCalledWith(
+                slotDurationStore.showJackpotWinningAmountDuration
+            );
+            expect(slotBoardStore.receivedBonus).toEqual({
+                bonus: bonuses.bonus,
+                duration: slotDurationStore.bonusDuration,
+            });
+
+            spinSpy.mockRestore();
         });
     });
 
@@ -347,26 +460,37 @@ describe("SlotSettlementHandler", () => {
         };
 
         it("should handle normal win scenario", async () => {
+            // Mock the spin method to resolve immediately
+            const spinSpy = jest.spyOn(settlementHandler as any, "spin").mockResolvedValue(undefined);
+
             const finish = createFinishData();
             await settlementHandler.handleFinish(finish as any);
 
             expect(slotBoardStore.slotState).toBe(SlotState.SETTLED);
             expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SETTLED);
             expect(betControlStore.roundId).toBe(finish.roundId);
+
+            spinSpy.mockRestore();
         });
 
         it("should handle big win scenario", async () => {
+            // Mock the spin method to resolve immediately
+            const spinSpy = jest.spyOn(settlementHandler as any, "spin").mockResolvedValue(undefined);
             const finish = createFinishData({ bigWin: true, betWin: 1000 });
             // @ts-ignore
             const createTweenShowBigWinSpy = jest.spyOn(settlementHandler, "createTweenShowBigWin");
             await settlementHandler.handleFinish(finish as any);
 
-            expect(slotBoardStore.slotState).toBe(SlotState.SPINNING); // This might change depending on async nature
             expect(betControlStore.roundId).toBe(finish.roundId);
             expect(createTweenShowBigWinSpy).toHaveBeenCalledWith(finish.betWin, finish.bigWin);
+
+            spinSpy.mockRestore();
         });
 
         it("should handle free spins win scenario", async () => {
+            // Mock the spin method to resolve immediately
+            const spinSpy = jest.spyOn(settlementHandler as any, "spin").mockResolvedValue(undefined);
+
             const finish = createFinishData({
                 settlementResult: { freeSpins: { count: 5 } },
                 totalOfFreeSpins: 5,
@@ -379,9 +503,14 @@ describe("SlotSettlementHandler", () => {
             expect(betControlStore.setTotalFreeSpins).toHaveBeenCalledWith(5);
             expect(betControlStore.totalFreeSpins).toBe(5);
             expect(createTweenShowFreeSpinsSpy).toHaveBeenCalledWith(finish.settlementResult.freeSpins);
+
+            spinSpy.mockRestore();
         });
 
         it("should set winningBet to 0 if betWin is 0, even with other special conditions", async () => {
+            // Mock the spin method to resolve immediately
+            const spinSpy = jest.spyOn(settlementHandler as any, "spin").mockResolvedValue(undefined);
+
             const finish = createFinishData({
                 betWin: 0,
                 settlementResult: { freeSpins: { count: 5 } }, // e.g., won free spins but betWin is 0
@@ -393,6 +522,8 @@ describe("SlotSettlementHandler", () => {
             // Directly check if winningBet is set to 0 after initial processing in handleFinish
             // This happens before the tweens complete for showing big wins or free spins.
             expect(slotBoardStore.winningBet).toBe(0);
+
+            spinSpy.mockRestore();
         });
     });
 
@@ -431,6 +562,7 @@ describe("SlotSettlementHandler", () => {
             jest.runAllTimers();
 
             expect(finishSettlementSpy).toHaveBeenCalled();
+            expect(slotBoardStore.resetToReady).toHaveBeenCalled();
             expect(slotErrorHandler.handleEndGameApiError).toHaveBeenCalled();
             expect(checkSpinNextRoundSpy).toHaveBeenCalled();
         });
@@ -639,6 +771,157 @@ describe("SlotSettlementHandler", () => {
                 slotDurationStore.showJackpotWinningAmountDuration
             );
             expect(spinSpy).toHaveBeenCalledWith(result);
+        });
+    });
+
+    describe("createTweenShowFreeSpins", () => {
+        it("should create tween that sets free spin state and calls setFreeSpinStake", () => {
+            const freeSpins = { count: 5, data: {} };
+
+            // @ts-ignore
+            const tween = settlementHandler.createTweenShowFreeSpins(freeSpins);
+
+            // Execute the tween to trigger the callbacks
+            tween.start();
+
+            expect(slotBoardStore.highlightSpecialSymbols).toEqual([SpecialSymbol.FREESPIN]);
+            expect(slotBoardStore.receivedFreeSpins).toEqual({
+                freeSpins,
+                duration: slotDurationStore.freespinDuration,
+            });
+            expect(betControlStore.setFreeSpinStake).toHaveBeenCalledWith(betControlStore.stake);
+            expect(betControlStore.syncFreeSpinCount).toHaveBeenCalled();
+        });
+    });
+
+    describe("createTweenShowBigWin", () => {
+        it("should create tween that sets big win state and calls updateWinningBet", () => {
+            const betWin = 1000;
+            const bigWin = true;
+
+            // @ts-ignore
+            const tween = settlementHandler.createTweenShowBigWin(betWin, bigWin);
+
+            // Execute the tween to trigger the callbacks
+            tween.start();
+
+            expect(slotBoardStore.receivedBigWin).toEqual({
+                amount: betWin,
+                bigWin,
+                duration: slotDurationStore.bigWinDuration,
+                showBigWinValue: slotDurationStore.showBigWinValueDuration,
+                delayShowBigWinValue: slotDurationStore.delayShowBigWinValue,
+            });
+            expect(getBalanceHandler.handle).toHaveBeenCalled();
+        });
+    });
+
+    describe("showWinningLines", () => {
+        it("should update winning bet and set winning lines", () => {
+            const betWin = 100;
+            const bigWin = false;
+            const jackpot = null;
+            const winningLines = [{ payline: 0, positions: [0, 1, 2], symbol: "A" }];
+
+            // @ts-ignore
+            settlementHandler.showWinningLines(betWin, bigWin, jackpot, winningLines);
+
+            expect(slotBoardStore.winningBet).toBe(betWin);
+            expect(getBalanceHandler.handle).toHaveBeenCalled();
+            expect(slotBoardStore.winningLines).toEqual(winningLines);
+        });
+
+        it("should not update winning bet for big wins", () => {
+            const betWin = 1000;
+            const bigWin = true;
+            const jackpot = null;
+            const winningLines = [{ payline: 0, positions: [0, 1, 2], symbol: "A" }];
+
+            // @ts-ignore
+            settlementHandler.showWinningLines(betWin, bigWin, jackpot, winningLines);
+
+            expect(getBalanceHandler.handle).not.toHaveBeenCalled();
+            expect(slotBoardStore.winningLines).toEqual(winningLines);
+        });
+
+        it("should include jackpot line when jackpot exists", () => {
+            const betWin = 100;
+            const bigWin = false;
+            const jackpot = { winningLine: 1, positions: [3, 4, 5], symbol: "WILD" };
+            const winningLines = [{ payline: 0, positions: [0, 1, 2], symbol: "A" }];
+
+            // @ts-ignore
+            settlementHandler.showWinningLines(betWin, bigWin, jackpot, winningLines);
+
+            expect(slotBoardStore.winningLines).toEqual([
+                { payline: 1, positions: [3, 4, 5], symbol: "WILD" },
+                { payline: 0, positions: [0, 1, 2], symbol: "A" },
+            ]);
+        });
+    });
+
+    describe("handleFreeSpins", () => {
+        it("should set free spin stake and count when total > 0", () => {
+            const freeSpins = { total: 5, bet: 50 };
+
+            settlementHandler.handleFreeSpins(freeSpins);
+
+            expect(betControlStore.setFreeSpinStake).toHaveBeenCalledWith(50);
+            expect(betControlStore.setTotalFreeSpins).toHaveBeenCalledWith(5);
+            expect(betControlStore.syncFreeSpinCount).toHaveBeenCalled();
+        });
+
+        it("should not set anything when total is 0", () => {
+            const freeSpins = { total: 0, bet: 50 };
+
+            settlementHandler.handleFreeSpins(freeSpins);
+
+            expect(betControlStore.setFreeSpinStake).not.toHaveBeenCalled();
+            expect(betControlStore.setTotalFreeSpins).not.toHaveBeenCalled();
+            expect(betControlStore.syncFreeSpinCount).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("checkSpinNextRound", () => {
+        it("should call bet for free spins when free spin enabled", () => {
+            betControlStore.freeSpinEnabled = true;
+
+            // @ts-ignore
+            settlementHandler.checkSpinNextRound();
+
+            // Advance timers to trigger the setTimeout callback
+            jest.advanceTimersByTime(1000);
+
+            expect(slotBetHandler.callBet).toHaveBeenCalled();
+        });
+
+        it("should clear free spins and call auto spin when auto spin enabled", () => {
+            betControlStore.freeSpinEnabled = false;
+            betControlStore.autoSpinEnabled = true;
+
+            // @ts-ignore
+            settlementHandler.checkSpinNextRound();
+
+            // Advance timers to trigger the setTimeout callback
+            jest.advanceTimersByTime(1000);
+
+            expect(betControlStore.clearFreeSpins).toHaveBeenCalled();
+            expect(slotBetHandler.actionAutoSpin).toHaveBeenCalled();
+        });
+
+        it("should clear free spins and call bet when trigger auto spin", () => {
+            betControlStore.freeSpinEnabled = false;
+            betControlStore.autoSpinEnabled = false;
+            betControlStore.triggerAutoSpin = true;
+
+            // @ts-ignore
+            settlementHandler.checkSpinNextRound();
+
+            // Advance timers to trigger the setTimeout callback
+            jest.advanceTimersByTime(1000);
+
+            expect(betControlStore.clearFreeSpins).toHaveBeenCalled();
+            expect(slotBetHandler.callBet).toHaveBeenCalled();
         });
     });
 });

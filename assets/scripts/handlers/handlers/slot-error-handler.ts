@@ -7,7 +7,7 @@ export class SlotErrorHandler extends gc.Error.ErrorHandlers {
     @inject(gc.Bet.BetStore) protected readonly betStore: gc.Bet.BetStore;
     @inject(SlotBetHandler) protected readonly slotBetHandler: SlotBetHandler;
 
-    eventHandleList = [
+    eventHandleList: Array<{ name: string; handle: any }> = [
         {
             name: gc.GameServiceMessage.ApiError.eventName,
             handle: this.slotHandleApiError,

@@ -242,7 +242,7 @@ describe("TopWinnersHandler", () => {
 
     describe("getValueByExchangeRateCode", () => {
         beforeEach(() => {
-            mockMainPlayerStore.currency = "USD";
+            mockMainPlayerStore.currencyCode = "USD";
             mockMainPlayerStore.multiplier = 1;
         });
 
@@ -252,15 +252,15 @@ describe("TopWinnersHandler", () => {
             let result = topWinnersHandler.getValueByExchangeRateCode(100, exchangeRateCode);
             expect(result).toBe(100);
 
-            mockMainPlayerStore.currency = "EUR";
+            mockMainPlayerStore.currencyCode = "EUR";
             // @ts-ignore - testing protected method
             result = topWinnersHandler.getValueByExchangeRateCode(80, exchangeRateCode);
-            expect(result).toBe(100); // 80 / 0.8
+            expect(result).toBe(100); // 80 / 0.8â
         });
 
         it("should use rate 1 if currency not in exchangeRateCode", () => {
             const exchangeRateCode = { EUR: 0.8 };
-            mockMainPlayerStore.currency = "JPY"; // JPY not in codes
+            mockMainPlayerStore.currencyCode = "JPY"; // JPY not in codes
             // @ts-ignore - testing protected method
             const result = topWinnersHandler.getValueByExchangeRateCode(100, exchangeRateCode);
             expect(result).toBe(100); // 100 / 1 (default rate)
@@ -303,7 +303,7 @@ describe("TopWinnersHandler", () => {
 
         beforeEach(() => {
             mockMainPlayerStore.name = "TestPlayer";
-            mockMainPlayerStore.currency = "USD";
+            mockMainPlayerStore.currencyCode = "USD";
             mockMainPlayerStore.multiplier = 1;
             (gc.DateTimeUtils.getStringDateByTime as jest.Mock).mockImplementation((timeNum) => new Date(timeNum).toLocaleDateString());
             (gc.FormatUtils.numberWithCommas as jest.Mock).mockImplementation((val) => String(val));

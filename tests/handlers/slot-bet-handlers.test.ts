@@ -3,6 +3,8 @@ import { Container } from "inversify";
 import "reflect-metadata";
 import { SLOT_BET_CHOICES, SlotNotification, SlotState } from "../../assets/scripts/definitions";
 import { SlotBetHandler } from "../../assets/scripts/handlers/handlers/slot-bet-handlers";
+import { SlotBetResponseHandler } from "../../assets/scripts/handlers/handlers/slot-bet-response-handlers";
+import { SlotUIHandler } from "../../assets/scripts/handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
 
@@ -10,6 +12,15 @@ import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-
 jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
     BetControlStore: jest.fn().mockImplementation(function (this: any) {
         this.stake = 100;
+        this._isReadyBet = true;
+        Object.defineProperty(this, "isReadyBet", {
+            get() {
+                return this._isReadyBet;
+            },
+            set(value) {
+                this._isReadyBet = value;
+            },
+        });
         this._totalBet = 2500;
         Object.defineProperty(this, "totalBet", {
             get() {
@@ -45,20 +56,13 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
 // Mock SlotBoardStore
 jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
     SlotBoardStore: jest.fn().mockImplementation(function (this: any) {
-        this._isReadyBet = true;
-        Object.defineProperty(this, "isReadyBet", {
-            get() {
-                return this._isReadyBet;
-            },
-            set(value) {
-                this._isReadyBet = value;
-            },
-        });
         this.slotState = SlotState.READY;
         this.bottomMessageState = SlotNotification.READY;
         this.forceStopSettle = null;
         this.resetOnNewSpin = jest.fn();
         this.reset = jest.fn();
+        this.clearSettlement = jest.fn();
+        this.resetToReady = jest.fn();
         return this;
     }),
 }));
@@ -94,6 +98,22 @@ jest.mock("@sg/game-client-base", () => {
     };
 });
 
+// Mock SlotBetResponseHandler
+jest.mock("../../assets/scripts/handlers/handlers/slot-bet-response-handlers", () => ({
+    SlotBetResponseHandler: jest.fn().mockImplementation(function (this: any) {
+        this.stopProcessingBetAndClearInterval = jest.fn();
+        return this;
+    }),
+}));
+
+// Mock SlotUIHandler
+jest.mock("../../assets/scripts/handlers/handlers/slot-ui-handler", () => ({
+    SlotUIHandler: jest.fn().mockImplementation(function (this: any) {
+        this.triggerDialogOpen = jest.fn();
+        return this;
+    }),
+}));
+
 describe("SlotBetHandler", () => {
     let container: Container;
     let slotBetHandler: SlotBetHandler;
@@ -121,6 +141,15 @@ describe("SlotBetHandler", () => {
         const MockedBetStore = jest.requireMock("@sg/game-client-base").Bet.BetStore;
         const mockBetStoreInstance = new MockedBetStore();
         container.bind(gc.Bet.BetStore).toConstantValue(mockBetStoreInstance);
+
+        // Bind mocked handlers
+        const mockSlotBetResponseHandlerInstance = new (jest.requireMock(
+            "../../assets/scripts/handlers/handlers/slot-bet-response-handlers"
+        ).SlotBetResponseHandler)();
+        container.bind(SlotBetResponseHandler).toConstantValue(mockSlotBetResponseHandlerInstance);
+
+        const mockSlotUIHandlerInstance = new (jest.requireMock("../../assets/scripts/handlers/handlers/slot-ui-handler").SlotUIHandler)();
+        container.bind(SlotUIHandler).toConstantValue(mockSlotUIHandlerInstance);
 
         // Get instances
         slotBetHandler = container.get(SlotBetHandler);
@@ -151,7 +180,7 @@ describe("SlotBetHandler", () => {
 
     describe("callBet", () => {
         it("should not proceed when board is not ready for bet", () => {
-            (slotBoardStore as any)._isReadyBet = false;
+            (betControlStore as any)._isReadyBet = false;
             const resetOnNewSpinSpy = jest.spyOn(slotBetHandler, "resetOnNewSpin");
 
             slotBetHandler.callBet();
@@ -161,7 +190,7 @@ describe("SlotBetHandler", () => {
         });
 
         it("should execute full bet flow when board is ready", () => {
-            (slotBoardStore as any)._isReadyBet = true;
+            (betControlStore as any)._isReadyBet = true;
             betControlStore.stake = 50;
             const resetOnNewSpinSpy = jest.spyOn(slotBetHandler, "resetOnNewSpin");
             const createBetDataSpy = jest.spyOn(slotBetHandler, "createBetData");
@@ -173,8 +202,7 @@ describe("SlotBetHandler", () => {
             slotBetHandler.callBet();
 
             expect(resetOnNewSpinSpy).toHaveBeenCalledTimes(1);
-            expect(slotBoardStore.slotState).toBe(SlotState.BET);
-            expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SPINNING);
+            expect(slotBoardStore.resetOnNewSpin).toHaveBeenCalledTimes(1);
             expect(createBetDataSpy).toHaveBeenCalledWith({});
             expect(handleBetDataSpy).toHaveBeenCalledWith({
                 ...mockBetData,
@@ -389,11 +417,16 @@ describe("SlotBetHandler", () => {
             const cancelAutoSpinSpy = jest.spyOn(slotBetHandler, "cancelAutoSpin");
             const clearTriggerActionSpy = jest.spyOn(slotBetHandler, "clearTriggerAction");
 
-            slotBetHandler.handlePlaceBetFailed();
+            slotBetHandler.handlePlaceBetFailed(false);
 
             expect(cancelAutoSpinSpy).toHaveBeenCalledTimes(1);
             expect(clearTriggerActionSpy).toHaveBeenCalledTimes(1);
             expect(slotBoardStore.clearSettlement).toHaveBeenCalledTimes(1);
+        });
+
+        it("should clear free spins when clearFreeSpins is true", () => {
+            slotBetHandler.handlePlaceBetFailed(true);
+
             expect(betControlStore.clearFreeSpins).toHaveBeenCalledTimes(1);
         });
     });

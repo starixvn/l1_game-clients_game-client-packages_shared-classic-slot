@@ -1,10 +1,23 @@
-import { Node, Prefab, instantiate } from "cc";
-import { Container } from "inversify";
 import "reflect-metadata";
-import EffectContainer from "../../assets/scripts/components/effect-container";
-import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
 
-// Mock game client base
+import { Node, Prefab } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { Container } from "inversify";
+import BonusDialog from "../../assets/scripts/components/bonus/bonus-dialog";
+import CallbackAnimation from "../../assets/scripts/components/callback-animation/callback-animation";
+import EffectContainer from "../../assets/scripts/components/effect-container";
+import BigWinAnimation from "../../assets/scripts/components/others/big-win-animation";
+import JackpotGame from "../../assets/scripts/components/others/jackpot-game";
+import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
+import { CLASSIC_SLOT_BUNDLE } from "../../assets/scripts/utils/classic-slot-utils";
+
+// Mock instantiate function
+jest.mock("cc", () => ({
+    ...jest.requireActual("cc"),
+    instantiate: jest.fn(),
+}));
+
+// Mock game client base - COMPLETE structure
 jest.mock("@sg/game-client-base", () => ({
     FormatUtils: {
         numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
@@ -37,24 +50,6 @@ jest.mock("@sg/game-client-base", () => ({
     },
 }));
 
-// Mock AudioIds and AudioUtils
-jest.mock("db://assets/game/audios/AudioIds", () => ({
-    AudioIds: {
-        FREESPIN: "freespin",
-        BIG_WIN: "big_win",
-        JACKPOT_HIT: "jackpot_hit",
-        BONUS: "bonus",
-        BONUS_POPUP: "bonus_popup",
-        TRANSITION: "transition",
-    },
-}));
-
-jest.mock("db://shared-components/game/audios/utils", () => ({
-    AudioUtils: {
-        playSFX: jest.fn(),
-    },
-}));
-
 // Mock ObserverComponent with ALL lifecycle methods
 jest.mock("db://shared-components/shared/common-components/observer-component/scripts/observer-component", () => ({
     ObserverComponent: class MockObserverComponent {
@@ -62,120 +57,126 @@ jest.mock("db://shared-components/shared/common-components/observer-component/sc
         onDestroy() {}
         start() {}
         update() {}
-        node = new Node();
+        node = require("cc").Node ? new (require("cc").Node)() : { on: jest.fn(), off: jest.fn() };
     },
 }));
 
 // Mock Observer
 jest.mock("observer", () => ({
-    __esModule: true,
-    default: {
-        handle: jest.fn(() => () => {}),
-        render: jest.fn(() => () => {}),
-    },
-    handle: jest.fn(() => () => {}),
-    render: jest.fn(() => () => {}),
+    render: jest.fn(() => jest.fn()),
+    handle: jest.fn(() => jest.fn()),
 }));
 
-// Mock stores
-jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
-    SlotBoardStore: jest.fn().mockImplementation(() => ({
-        receivedFreeSpins: null,
-        receivedBigWin: null,
-        receivedJackpot: null,
-        receivedBonus: null,
-        reset: jest.fn(),
-        resetOnNewSpin: jest.fn(),
-    })),
+// Mock AudioUtils
+jest.mock("db://shared-components/game/audios/utils", () => ({
+    AudioUtils: {
+        playSFX: jest.fn(),
+    },
+}));
+
+// Mock bundleManager
+jest.mock("db://shared-components/shared/common-components/bundle-manager/bundle-manager", () => ({
+    bundleManager: {
+        loadResourcesAsset: jest.fn(),
+        loadAssetsFromBundle: jest.fn(),
+    },
+}));
+
+// Mock classic-slot-utils
+jest.mock("../../assets/scripts/utils/classic-slot-utils", () => ({
+    CLASSIC_SLOT_BUNDLE: "classic-slot-bundle",
 }));
 
 // Mock component dependencies
 jest.mock("../../assets/scripts/components/bonus/bonus-dialog", () => ({
-    __esModule: true,
     default: class MockBonusDialog {
         initBonusItems = jest.fn();
         setBonusCount = jest.fn();
-        onBonusFinished = jest.fn();
+        onBonusFinished = null;
     },
 }));
 
 jest.mock("../../assets/scripts/components/callback-animation/callback-animation", () => ({
-    __esModule: true,
     default: class MockCallbackAnimation {
         setDuration = jest.fn();
+        autoDestroyNode = false;
+        onFinishedCallback = null;
         play = jest.fn();
-        onFinishedCallback = jest.fn();
-        autoDestroyNode = true;
     },
 }));
 
 jest.mock("../../assets/scripts/components/others/big-win-animation", () => ({
-    __esModule: true,
     default: class MockBigWinAnimation {
         setAmount = jest.fn();
     },
 }));
 
 jest.mock("../../assets/scripts/components/others/jackpot-game", () => ({
-    __esModule: true,
     default: class MockJackpotGame {
         prizes = 0;
         initJackpotItems = jest.fn();
-        onJackpotGameFinished = jest.fn();
+        onJackpotGameFinished = null;
     },
 }));
 
-// Mock cc instantiate
-jest.mock("cc", () => {
-    const originalCc = jest.requireActual("cc");
-    return {
-        ...originalCc,
-        instantiate: jest.fn().mockImplementation(() => {
-            const node = new originalCc.Node();
-            node.getComponent = jest.fn();
-            node.destroy = jest.fn();
-            return node;
-        }),
-    };
-});
+// Mock SlotBoardStore
+jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
+    SlotBoardStore: jest.fn().mockImplementation(() => ({
+        receivedBonus: null,
+        receivedJackpot: null,
+        receivedFreeSpins: null,
+        receivedBigWin: null,
+    })),
+}));
 
 describe("EffectContainer", () => {
     let container: Container;
     let effectContainer: EffectContainer;
     let mockSlotBoardStore: jest.Mocked<SlotBoardStore>;
-    let mockInstantiate: jest.MockedFunction<typeof instantiate>;
-    let mockAudioUtils: any;
+    let mockNode: Node;
+    let mockPrefab: Prefab;
+    let mockEffectNode: Node;
+    let mockCallbackAnimation: jest.Mocked<CallbackAnimation>;
+    let mockBigWinAnimation: jest.Mocked<BigWinAnimation>;
+    let mockBonusDialog: jest.Mocked<BonusDialog>;
+    let mockJackpotGame: jest.Mocked<JackpotGame>;
 
     beforeEach(() => {
         container = new Container();
 
-        // Create mock store instance
-        const MockSlotBoardStoreClass = jest.requireMock("../../assets/scripts/handlers/stores/slot-board-store").SlotBoardStore;
-        mockSlotBoardStore = new MockSlotBoardStoreClass() as jest.Mocked<SlotBoardStore>;
+        // Create mock instances
+        const MockedSlotBoardStore = jest.requireMock("../../assets/scripts/handlers/stores/slot-board-store").SlotBoardStore;
+        mockSlotBoardStore = new MockedSlotBoardStore() as jest.Mocked<SlotBoardStore>;
 
-        // Bind dependencies to container
+        // Create mock UI components
+        mockNode = new Node();
+        mockPrefab = {} as Prefab;
+        mockEffectNode = new Node();
+        mockCallbackAnimation = new (jest.requireMock(
+            "../../assets/scripts/components/callback-animation/callback-animation"
+        ).default)() as jest.Mocked<CallbackAnimation>;
+        mockBigWinAnimation = new (jest.requireMock(
+            "../../assets/scripts/components/others/big-win-animation"
+        ).default)() as jest.Mocked<BigWinAnimation>;
+        mockBonusDialog = new (jest.requireMock(
+            "../../assets/scripts/components/bonus/bonus-dialog"
+        ).default)() as jest.Mocked<BonusDialog>;
+        mockJackpotGame = new (jest.requireMock(
+            "../../assets/scripts/components/others/jackpot-game"
+        ).default)() as jest.Mocked<JackpotGame>;
+
+        // Bind to container
         container.bind(SlotBoardStore).toConstantValue(mockSlotBoardStore);
-        container.bind(EffectContainer).toSelf();
 
-        // Get instances from container
-        effectContainer = container.get(EffectContainer);
+        // Create component instance
+        effectContainer = new EffectContainer();
+        effectContainer.node = mockNode;
 
-        // Set up component properties
-        effectContainer.node = new Node();
-        effectContainer.node.addChild = jest.fn();
+        // Mock getComponent method
+        effectContainer.getComponent = jest.fn();
 
-        // Set up prefab properties using type assertion to access protected properties
-        (effectContainer as any).effectTransitionPrefab = new Prefab();
-        (effectContainer as any).effectJackpot = new Prefab();
-        (effectContainer as any).effectBonus = new Prefab();
-        (effectContainer as any).effectFreeSpin = new Prefab();
-        (effectContainer as any).effectBigWin = new Prefab();
-        (effectContainer as any).jackpotGamePrefab = new Prefab();
-        (effectContainer as any).bonusDialogPrefab = new Prefab();
-
-        // Get mocked functions
-        mockInstantiate = instantiate as jest.MockedFunction<typeof instantiate>;
-        mockAudioUtils = jest.requireMock("db://shared-components/game/audios/utils").AudioUtils;
+        // Mock node methods
+        jest.spyOn(mockNode, "addChild").mockImplementation(() => {});
 
         // Clear all mocks
         jest.clearAllMocks();
@@ -185,315 +186,560 @@ describe("EffectContainer", () => {
         jest.clearAllMocks();
     });
 
+    describe("loadEffectFreeSpin", () => {
+        it("should load free spin effect prefab when not already loaded", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+
+            // Act
+            await effectContainer.loadEffectFreeSpin();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).toHaveBeenCalledWith("prefabs/effects/effect-freespin", Prefab);
+            expect((effectContainer as any).effectFreeSpin).toBe(mockPrefab);
+        });
+
+        it("should not load prefab if already loaded", async () => {
+            // Arrange
+            (effectContainer as any).effectFreeSpin = mockPrefab;
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+
+            // Act
+            await effectContainer.loadEffectFreeSpin();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
+        });
+    });
+
     describe("receivedFreeSpins", () => {
-        it("should return early if receivedFreeSpins is null", async () => {
+        it("should handle free spins effect when data is provided", async () => {
+            // Arrange
+            const freeSpinsData = { freeSpins: {}, duration: 3000 };
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            const mockAudioUtils = jest.requireMock("db://shared-components/game/audios/utils").AudioUtils;
+
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue();
+            jest.spyOn(effectContainer, "loadEffectFreeSpin").mockResolvedValue();
+
+            const mockInstantiate = jest.requireMock("cc").instantiate;
+            mockInstantiate.mockReturnValue(mockEffectNode);
+            jest.spyOn(mockEffectNode, "getComponent").mockReturnValue(mockCallbackAnimation);
+
+            // Act
+            await effectContainer.receivedFreeSpins(freeSpinsData);
+
+            // Assert
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.FREESPIN);
+            expect(effectContainer.loadEffectFreeSpin).toHaveBeenCalled();
+            expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(3000);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffectNode);
+            expect(mockEffectNode.destroy).toHaveBeenCalled();
+        });
+
+        it("should return early when no free spins data is provided", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+
+            // Act
             await effectContainer.receivedFreeSpins(null);
 
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("loadEffectBigWin", () => {
+        it("should load big win effect prefab when not already loaded", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+
+            // Act
+            await effectContainer.loadEffectBigWin();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).toHaveBeenCalledWith("prefabs/effects/effect-big-win", Prefab);
+            expect((effectContainer as any).effectBigWin).toBe(mockPrefab);
         });
 
-        it("should return early if receivedFreeSpins is undefined", async () => {
-            await effectContainer.receivedFreeSpins(undefined);
+        it("should not load prefab if already loaded", async () => {
+            // Arrange
+            (effectContainer as any).effectBigWin = mockPrefab;
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
 
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
-        });
+            // Act
+            await effectContainer.loadEffectBigWin();
 
-        it("should play freespin effect when receivedFreeSpins is provided", async () => {
-            const receivedFreeSpins = { freeSpins: {}, duration: 2000 };
-
-            const mockEffect = new Node();
-            const mockAnimation = {
-                setDuration: jest.fn(),
-                onFinishedCallback: jest.fn(),
-                play: jest.fn(),
-            };
-            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
-            mockInstantiate.mockReturnValue(mockEffect);
-
-            // Mock showEffect to resolve immediately
-            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
-
-            await effectContainer.receivedFreeSpins(receivedFreeSpins);
-
-            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("freespin");
-            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectFreeSpin);
-            expect(mockAnimation.setDuration).toHaveBeenCalledWith(2000);
-            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
         });
     });
 
     describe("receivedBigWin", () => {
-        it("should return early if receivedBigWin is null", async () => {
+        it("should handle big win effect when data is provided", async () => {
+            // Arrange
+            const bigWinData = {
+                bigWin: {},
+                duration: 5000,
+                showBigWinValue: 2000,
+                delayShowBigWinValue: 1000,
+                amount: 10000,
+            };
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            const mockAudioUtils = jest.requireMock("db://shared-components/game/audios/utils").AudioUtils;
+
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue();
+            jest.spyOn(effectContainer, "loadEffectBigWin").mockResolvedValue();
+            //@ts-ignore
+            jest.spyOn(effectContainer, "playEffectTransition").mockResolvedValueOnce(mockEffectNode);
+
+            const mockInstantiate = jest.requireMock("cc").instantiate;
+            mockInstantiate.mockReturnValue(mockEffectNode);
+            jest.spyOn(mockEffectNode, "getComponent").mockReturnValueOnce(mockCallbackAnimation).mockReturnValueOnce(mockBigWinAnimation);
+            // Act
+            await effectContainer.receivedBigWin(bigWinData);
+
+            // Assert
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.BIG_WIN);
+            expect(effectContainer.loadEffectBigWin).toHaveBeenCalled();
+            expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(5000);
+            expect(mockBigWinAnimation.setAmount).toHaveBeenCalledWith({
+                amount: 10000,
+                duration: 2000,
+                delayTime: 1000,
+            });
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffectNode);
+        });
+
+        it("should return early when no big win data is provided", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+
+            // Act
             await effectContainer.receivedBigWin(null);
 
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("loadEffectJackpot", () => {
+        it("should load jackpot effect prefab when not already loaded", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+
+            // Act
+            await effectContainer.loadEffectJackpot();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).toHaveBeenCalledWith("prefabs/effects/effect-jackpot", Prefab);
+            //@ts-ignore
+            expect(effectContainer.effectJackpot).toBe(mockPrefab);
         });
 
-        it("should return early if receivedBigWin is undefined", async () => {
-            await effectContainer.receivedBigWin(undefined);
+        it("should not load prefab if already loaded", async () => {
+            // Arrange
+            //@ts-ignore
+            effectContainer.effectJackpot = mockPrefab;
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
 
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
+            // Act
+            await effectContainer.loadEffectJackpot();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("loadJackpotGame", () => {
+        it("should load jackpot game prefab when not already loaded", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadAssetsFromBundle.mockResolvedValue(mockPrefab);
+
+            // Act
+            await effectContainer.loadJackpotGame();
+
+            // Assert
+            expect(mockBundleManager.loadAssetsFromBundle).toHaveBeenCalledWith(CLASSIC_SLOT_BUNDLE, "prefabs/jackpot-game", Prefab, null);
+            //@ts-ignore
+            expect(effectContainer.jackpotGamePrefab).toBe(mockPrefab);
         });
 
-        it("should play big win effect when receivedBigWin is provided", async () => {
-            const receivedBigWin = {
-                bigWin: {},
-                duration: 3000,
-                showBigWinValue: 1500,
-                delayShowBigWinValue: 500,
-                amount: 1000,
-            };
+        it("should not load prefab if already loaded", async () => {
+            // Arrange
+            //@ts-ignore
+            effectContainer.jackpotGamePrefab = mockPrefab;
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
 
-            const mockEffect = new Node();
-            const mockCallbackAnimation = {
-                setDuration: jest.fn(),
-                onFinishedCallback: jest.fn(),
-                play: jest.fn(),
-            };
-            const mockBigWinAnimation = {
-                setAmount: jest.fn(),
-            };
+            // Act
+            await effectContainer.loadJackpotGame();
 
-            mockEffect.getComponent = jest.fn().mockReturnValueOnce(mockCallbackAnimation).mockReturnValueOnce(mockBigWinAnimation);
-            mockInstantiate.mockReturnValue(mockEffect);
-
-            // Mock showEffect to resolve immediately
-            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
-
-            await effectContainer.receivedBigWin(receivedBigWin);
-
-            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("big_win");
-            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectBigWin);
-            expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(3000);
-            expect(mockBigWinAnimation.setAmount).toHaveBeenCalledWith({
-                amount: 1000,
-                duration: 1500,
-                delayTime: 500,
-            });
-            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
+            // Assert
+            expect(mockBundleManager.loadAssetsFromBundle).not.toHaveBeenCalled();
         });
     });
 
     describe("receivedJackpot", () => {
-        it("should return early if receivedJackpot is null", async () => {
-            await effectContainer.receivedJackpot(null);
-
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
-        });
-
-        it("should return early if receivedJackpot is undefined", async () => {
-            await effectContainer.receivedJackpot(undefined);
-
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
-        });
-
-        it("should play jackpot effect with transition and jackpot game", async () => {
-            const receivedJackpot = {
-                jackpot: { prizes: 5000 },
+        it("should handle jackpot effect when data is provided", async () => {
+            // Arrange
+            const jackpotData = {
+                jackpot: { prizes: 50000 },
                 duration: 4000,
             };
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            const mockAudioUtils = jest.requireMock("db://shared-components/game/audios/utils").AudioUtils;
 
-            const mockTransition = new Node();
-            mockTransition.destroy = jest.fn();
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+            mockBundleManager.loadAssetsFromBundle.mockResolvedValue(mockPrefab);
+            //@ts-ignore
+            jest.spyOn(effectContainer, "playEffectTransition").mockResolvedValue(mockEffectNode);
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue();
+            jest.spyOn(effectContainer, "loadEffectJackpot").mockResolvedValue();
+            jest.spyOn(effectContainer, "loadJackpotGame").mockResolvedValue();
+            //@ts-ignore
+            jest.spyOn(effectContainer, "showJackpotGame").mockResolvedValue();
 
-            const mockEffect = new Node();
-            const mockAnimation = {
-                setDuration: jest.fn(),
-                onFinishedCallback: jest.fn(),
-                play: jest.fn(),
-            };
-            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
-            mockInstantiate.mockReturnValue(mockEffect);
+            const mockInstantiate = jest.requireMock("cc").instantiate;
+            mockInstantiate.mockReturnValue(mockEffectNode);
+            jest.spyOn(mockEffectNode, "getComponent").mockReturnValue(mockCallbackAnimation);
 
-            // Mock methods using type assertion for protected method
-            jest.spyOn(effectContainer as any, "playEffectTransition").mockResolvedValue(mockTransition);
-            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
-            jest.spyOn(effectContainer as any, "showJackpotGame").mockResolvedValue(undefined);
+            // Act
+            await effectContainer.receivedJackpot(jackpotData);
 
-            await effectContainer.receivedJackpot(receivedJackpot);
-
-            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("jackpot_hit");
-            expect((effectContainer as any).playEffectTransition).toHaveBeenCalled();
-            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectJackpot);
-            expect(mockAnimation.setDuration).toHaveBeenCalledWith(4000);
-            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
-            expect(mockTransition.destroy).toHaveBeenCalled();
-            expect((effectContainer as any).showJackpotGame).toHaveBeenCalledWith(5000);
-        });
-    });
-
-    describe("receivedBonus", () => {
-        it("should return resolved promise if receivedBonus is null", async () => {
-            const result = await effectContainer.receivedBonus(null);
-
-            expect(result).toBeUndefined();
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
+            // Assert
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.JACKPOT_HIT);
+            expect(effectContainer.loadEffectJackpot).toHaveBeenCalled();
+            expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(4000);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffectNode);
+            expect(mockEffectNode.destroy).toHaveBeenCalled();
+            expect(effectContainer.loadJackpotGame).toHaveBeenCalled();
+            //@ts-ignore
+            expect(effectContainer.showJackpotGame).toHaveBeenCalledWith(50000);
         });
 
-        it("should return resolved promise if receivedBonus is undefined", async () => {
-            const result = await effectContainer.receivedBonus(undefined);
+        it("should return early when no jackpot data is provided", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
 
-            expect(result).toBeUndefined();
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-            expect(mockInstantiate).not.toHaveBeenCalled();
-        });
+            // Act
+            await effectContainer.receivedJackpot(null);
 
-        it("should play bonus effect and show bonus dialog", async () => {
-            const receivedBonus = {
-                bonus: { value: 1000 },
-                duration: 2500,
-            };
-
-            const mockEffect = new Node();
-            const mockAnimation = {
-                setDuration: jest.fn(),
-                onFinishedCallback: jest.fn(),
-                play: jest.fn(),
-            };
-            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
-            mockInstantiate.mockReturnValue(mockEffect);
-
-            // Mock showEffect to resolve immediately
-            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
-            jest.spyOn(effectContainer, "showBonusDialog").mockImplementation((bonus, callback) => {
-                setTimeout(callback, 0); // Simulate async callback
-            });
-
-            const result = effectContainer.receivedBonus(receivedBonus);
-
-            // Wait a tick for the async operations
-            await new Promise((resolve) => setTimeout(resolve, 0));
-
-            expect(mockAudioUtils.playSFX).toHaveBeenNthCalledWith(1, "bonus");
-            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectBonus);
-            expect(mockAnimation.setDuration).toHaveBeenCalledWith(2500);
-            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
-
-            // Wait for the bonus effect to complete
-            await result;
-
-            expect(mockAudioUtils.playSFX).toHaveBeenNthCalledWith(2, "bonus_popup");
-            expect(effectContainer.showBonusDialog).toHaveBeenCalledWith({ value: 1000 }, expect.any(Function));
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
         });
     });
 
     describe("showJackpotGame", () => {
-        it("should create jackpot game node and set up dialog", async () => {
-            const prizes = 2500;
-            const mockNode = new Node();
-            const mockDialog = {
-                prizes: 0,
-                initJackpotItems: jest.fn(),
-                onJackpotGameFinished: jest.fn(),
-            };
+        it("should create and configure jackpot game dialog", async () => {
+            // Arrange
+            const prizes = 25000;
+            //@ts-ignore
+            effectContainer.jackpotGamePrefab = mockPrefab;
 
-            mockNode.getComponent = jest.fn().mockReturnValue(mockDialog);
-            mockInstantiate.mockReturnValue(mockNode);
+            const mockInstantiate = jest.requireMock("cc").instantiate;
+            const mockGameNode = new Node();
+            mockInstantiate.mockReturnValue(mockGameNode);
+            jest.spyOn(mockGameNode, "getComponent").mockReturnValue(mockJackpotGame);
 
-            // Execute in background since it returns a promise that resolves via callback
-            const promise = (effectContainer as any).showJackpotGame(prizes);
+            // Act
+            //@ts-ignore
+            const promise = effectContainer.showJackpotGame(prizes);
 
-            // Trigger the callback to resolve the promise
+            // Simulate the promise resolution
             setTimeout(() => {
-                mockDialog.onJackpotGameFinished();
+                mockJackpotGame.onJackpotGameFinished();
             }, 0);
 
             await promise;
 
-            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).jackpotGamePrefab);
-            expect(effectContainer.node.addChild).toHaveBeenCalledWith(mockNode);
-            expect(mockDialog.prizes).toBe(2500);
-            expect(mockDialog.initJackpotItems).toHaveBeenCalled();
+            // Assert
+            expect(mockInstantiate).toHaveBeenCalledWith(mockPrefab);
+            expect(mockNode.addChild).toHaveBeenCalledWith(mockGameNode);
+            expect(mockGameNode.getComponent).toHaveBeenCalledWith(JackpotGame);
+            expect(mockJackpotGame.prizes).toBe(25000);
+            expect(mockJackpotGame.initJackpotItems).toHaveBeenCalled();
+        });
+    });
+
+    describe("loadEffectBonus", () => {
+        it("should load bonus effect prefab when not already loaded", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+
+            // Act
+            await effectContainer.loadEffectBonus();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).toHaveBeenCalledWith("prefabs/effects/effect-bonus", Prefab);
+            //@ts-ignore
+            expect(effectContainer.effectBonus).toBe(mockPrefab);
+        });
+
+        it("should not load prefab if already loaded", async () => {
+            // Arrange
+            //@ts-ignore
+            effectContainer.effectBonus = mockPrefab;
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+
+            // Act
+            await effectContainer.loadEffectBonus();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("loadBonusDialog", () => {
+        it("should load bonus dialog prefab when not already loaded", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+
+            // Act
+            await effectContainer.loadBonusDialog();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).toHaveBeenCalledWith("prefabs/dialogs/dialog-bonus", Prefab);
+            //@ts-ignore
+            expect(effectContainer.bonusDialogPrefab).toBe(mockPrefab);
+        });
+
+        it("should not load prefab if already loaded", async () => {
+            // Arrange
+            //@ts-ignore
+            effectContainer.bonusDialogPrefab = mockPrefab;
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+
+            // Act
+            await effectContainer.loadBonusDialog();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("receivedBonus", () => {
+        it("should handle bonus effect when data is provided", async () => {
+            // Arrange
+            const bonusData = { bonus: {}, duration: 3000 };
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            const mockAudioUtils = jest.requireMock("db://shared-components/game/audios/utils").AudioUtils;
+
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+            //@ts-ignore
+            jest.spyOn(effectContainer, "playEffectTransition").mockResolvedValue(mockEffectNode);
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue();
+            jest.spyOn(effectContainer, "loadEffectBonus").mockResolvedValue();
+            jest.spyOn(effectContainer, "loadBonusDialog").mockResolvedValue();
+            jest.spyOn(effectContainer, "showBonusDialog").mockImplementation(() => {});
+
+            const mockInstantiate = jest.requireMock("cc").instantiate;
+            mockInstantiate.mockReturnValue(mockEffectNode);
+            jest.spyOn(mockEffectNode, "getComponent").mockReturnValue(mockCallbackAnimation);
+
+            // Act
+            await effectContainer.receivedBonus(bonusData);
+
+            // Assert
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.BONUS);
+            expect(effectContainer.loadEffectBonus).toHaveBeenCalled();
+            expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(3000);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffectNode);
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.BONUS_POPUP);
+            expect(effectContainer.loadBonusDialog).toHaveBeenCalled();
+            expect(effectContainer.showBonusDialog).toHaveBeenCalledWith({}, expect.any(Function));
+        });
+
+        it("should return Promise.resolve when no bonus data is provided", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+
+            // Act
+            const result = await effectContainer.receivedBonus(null);
+
+            // Assert
+            expect(result).toBeUndefined();
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
         });
     });
 
     describe("showBonusDialog", () => {
-        it("should create bonus dialog node and set up dialog", () => {
-            const bonus = { value: 1500 };
-            const mockCallback = jest.fn();
-            const mockNode = new Node();
-            const mockDialog = {
-                initBonusItems: jest.fn(),
-                setBonusCount: jest.fn(),
-                onBonusFinished: jest.fn(),
-            };
+        it("should create and configure bonus dialog", () => {
+            // Arrange
+            const bonus = { count: 5 };
+            const onBonusFinished = jest.fn();
+            //@ts-ignore
+            effectContainer.bonusDialogPrefab = mockPrefab;
 
-            mockNode.getComponent = jest.fn().mockReturnValue(mockDialog);
-            mockInstantiate.mockReturnValue(mockNode);
+            const mockInstantiate = jest.requireMock("cc").instantiate;
+            const mockDialogNode = new Node();
+            mockInstantiate.mockReturnValue(mockDialogNode);
+            jest.spyOn(mockDialogNode, "getComponent").mockReturnValue(mockBonusDialog);
 
-            effectContainer.showBonusDialog(bonus, mockCallback);
+            // Act
+            effectContainer.showBonusDialog(bonus, onBonusFinished);
 
-            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).bonusDialogPrefab);
-            expect(effectContainer.node.addChild).toHaveBeenCalledWith(mockNode);
-            expect(mockDialog.initBonusItems).toHaveBeenCalled();
-            expect(mockDialog.setBonusCount).toHaveBeenCalledWith(bonus);
-            expect(mockDialog.onBonusFinished).toBe(mockCallback);
+            // Assert
+            expect(mockInstantiate).toHaveBeenCalledWith(mockPrefab);
+            expect(mockNode.addChild).toHaveBeenCalledWith(mockDialogNode);
+            expect(mockDialogNode.getComponent).toHaveBeenCalledWith(BonusDialog);
+            expect(mockBonusDialog.initBonusItems).toHaveBeenCalled();
+            expect(mockBonusDialog.setBonusCount).toHaveBeenCalledWith(bonus);
+            expect(mockBonusDialog.onBonusFinished).toBe(onBonusFinished);
+        });
+    });
+
+    describe("loadEffectTransition", () => {
+        it("should load transition effect prefab when not already loaded", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+
+            // Act
+            await effectContainer.loadEffectTransition();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).toHaveBeenCalledWith("prefabs/effects/effect-transition", Prefab);
+            //@ts-ignore
+            expect(effectContainer.effectTransition).toBe(mockPrefab);
+        });
+
+        it("should not load prefab if already loaded", async () => {
+            // Arrange
+            //@ts-ignore
+            effectContainer.effectTransition = mockPrefab;
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+
+            // Act
+            await effectContainer.loadEffectTransition();
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("loadPrefab", () => {
+        it("should call bundleManager.loadResourcesAsset with correct parameters", async () => {
+            // Arrange
+            const path = "test/path";
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            mockBundleManager.loadResourcesAsset.mockResolvedValue(mockPrefab);
+
+            // Act
+            const result = await effectContainer.loadPrefab(path);
+
+            // Assert
+            expect(mockBundleManager.loadResourcesAsset).toHaveBeenCalledWith(path, Prefab);
+            expect(result).toBe(mockPrefab);
         });
     });
 
     describe("playEffectTransition", () => {
-        it("should return null if effectTransitionPrefab is not set", async () => {
-            (effectContainer as any).effectTransitionPrefab = null;
+        it("should play transition effect and return the effect node", async () => {
+            // Arrange
+            const mockBundleManager = jest.requireMock(
+                "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
+            ).bundleManager;
+            const mockAudioUtils = jest.requireMock("db://shared-components/game/audios/utils").AudioUtils;
 
-            const result = await (effectContainer as any).playEffectTransition();
+            mockBundleManager.loadResourcesAsset.mockReturnValue(mockPrefab);
+            // Set the effectTransition property directly since we're mocking loadEffectTransition
+            (effectContainer as any).effectTransition = mockPrefab;
+            jest.spyOn(effectContainer, "loadEffectTransition").mockResolvedValue();
+            jest.spyOn(effectContainer, "showEffect").mockResolvedValue();
 
-            expect(result).toBeNull();
-            expect(mockInstantiate).not.toHaveBeenCalled();
-            expect(mockAudioUtils.playSFX).not.toHaveBeenCalled();
-        });
+            const mockInstantiate = jest.requireMock("cc").instantiate;
+            mockInstantiate.mockReturnValue(mockEffectNode);
+            jest.spyOn(mockEffectNode, "getComponent").mockReturnValue(mockCallbackAnimation);
 
-        it("should play transition effect and return effect node", async () => {
-            const mockEffect = new Node();
-            const mockAnimation = {
-                autoDestroyNode: true,
-                onFinishedCallback: jest.fn(),
-                play: jest.fn(),
-            };
-            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
-            mockInstantiate.mockReturnValue(mockEffect);
+            // Act
+            //@ts-ignore
+            const result = await effectContainer.playEffectTransition();
 
-            // Mock showEffect to resolve immediately
-            jest.spyOn(effectContainer, "showEffect").mockResolvedValue(undefined);
-
-            const result = await (effectContainer as any).playEffectTransition();
-
-            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith("transition");
-            expect(mockInstantiate).toHaveBeenCalledWith((effectContainer as any).effectTransitionPrefab);
-            expect(mockAnimation.autoDestroyNode).toBe(false);
-            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffect);
-            expect(result).toBe(mockEffect);
+            // Assert
+            expect(effectContainer.loadEffectTransition).toHaveBeenCalled();
+            expect(mockInstantiate).toHaveBeenCalledWith(mockPrefab);
+            expect(mockEffectNode.getComponent).toHaveBeenCalledWith(CallbackAnimation);
+            expect(mockCallbackAnimation.autoDestroyNode).toBe(false);
+            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.TRANSITION);
+            expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffectNode);
+            expect(result).toBe(mockEffectNode);
         });
     });
 
     describe("showEffect", () => {
         it("should add effect to node and play animation", async () => {
+            // Arrange
             const mockEffect = new Node();
-            const mockAnimation = {
-                onFinishedCallback: jest.fn(),
-                play: jest.fn(),
-            };
-            mockEffect.getComponent = jest.fn().mockReturnValue(mockAnimation);
+            jest.spyOn(mockEffect, "getComponent").mockReturnValue(mockCallbackAnimation);
 
-            // Execute showEffect and trigger the callback
+            // Act
             const promise = effectContainer.showEffect(mockEffect);
 
-            // Trigger the animation callback to resolve the promise
+            // Simulate animation completion
             setTimeout(() => {
-                mockAnimation.onFinishedCallback();
+                mockCallbackAnimation.onFinishedCallback();
             }, 0);
 
             await promise;
 
-            expect(effectContainer.node.addChild).toHaveBeenCalledWith(mockEffect);
-            expect(mockEffect.getComponent).toHaveBeenCalled();
-            expect(mockAnimation.play).toHaveBeenCalled();
+            // Assert
+            expect(mockNode.addChild).toHaveBeenCalledWith(mockEffect);
+            expect(mockEffect.getComponent).toHaveBeenCalledWith(CallbackAnimation);
+            expect(mockCallbackAnimation.play).toHaveBeenCalled();
         });
     });
 });

@@ -12,6 +12,7 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
         this.betLevels = [];
         this.setBetLevels = jest.fn();
         this.setStake = jest.fn();
+        this.setDefaultStake = jest.fn();
         return this;
     }),
 }));

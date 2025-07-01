@@ -176,7 +176,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 2, true);
             expect(betControl.lblTotalBet.string).toBe("1,000");
         });
 
@@ -185,7 +185,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 2, true);
             expect(betControl.lblTotalBet.string).toBe("0");
         });
 
@@ -194,7 +194,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 2, true);
             expect(betControl.lblTotalBet.string).toBe("1,000,000");
         });
 
@@ -203,7 +203,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 2, true);
         });
     });
 
@@ -213,7 +213,7 @@ describe("BetControl", () => {
 
             betControl.renderStake(stake);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake, 2, true);
             expect(betControl.lblStake.string).toBe("50");
         });
 
@@ -222,7 +222,7 @@ describe("BetControl", () => {
 
             betControl.renderStake(stake);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake, 2, true);
             expect(betControl.lblStake.string).toBe("0");
         });
 
@@ -231,7 +231,7 @@ describe("BetControl", () => {
 
             betControl.renderStake(stake);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake, 2, true);
         });
 
         it("should handle very large stake amounts", () => {
@@ -239,7 +239,7 @@ describe("BetControl", () => {
 
             betControl.renderStake(stake);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(stake, 2, true);
             expect(betControl.lblStake.string).toBe("999,999");
         });
     });

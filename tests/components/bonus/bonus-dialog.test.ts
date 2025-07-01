@@ -1,4 +1,5 @@
 import { Button, Label, Node, Prefab } from "cc";
+import { resourceCaches } from "db://shared-classic-slot/scripts/utils/classic-slot-utils";
 import { Container } from "inversify";
 import "reflect-metadata";
 import BonusDialog from "../../../assets/scripts/components/bonus/bonus-dialog";
@@ -115,6 +116,24 @@ jest.mock("cc", () => {
     };
 });
 
+jest.mock("db://shared-classic-slot/scripts/utils/classic-slot-utils", () => ({
+    resourceCaches: {
+        gameAtlas: null,
+        sharedSlotAtlas: null,
+        slotSymbols: {
+            0: { symbol: { spine: "mockSpine" } },
+            1: { symbol: { spine: "mockSpine" } },
+        },
+        colorJson: {
+            bottomAreaWinAmountColor: "#FFD700",
+            previewOddsSymbolNumberColor: "#ffffff",
+            previewOddsWinValueColor: "#ffff00",
+            previewOddsBorderColor: "#ff0000",
+        },
+    },
+    setSlotGameConfigs: jest.fn(),
+}));
+
 describe("BonusDialog", () => {
     let container: Container;
     let bonusDialog: BonusDialog;
@@ -123,6 +142,7 @@ describe("BonusDialog", () => {
     let mockTimer: any;
     let mockButton: Button;
     let mockBonusItem: any;
+    resourceCaches;
 
     beforeEach(() => {
         container = new Container();
@@ -388,11 +408,13 @@ describe("BonusDialog", () => {
     describe("setBonusCount", () => {
         it("should set total bonus and update display", () => {
             jest.spyOn(bonusDialog, "updateBonusCount").mockImplementation(() => {});
+            jest.spyOn(bonusDialog, "updateBonusCountItemTextColor").mockImplementation(() => {});
 
             bonusDialog.setBonusCount(5);
 
             expect((bonusDialog as any).totalBonus).toBe(5);
             expect(bonusDialog.updateBonusCount).toHaveBeenCalled();
+            expect(bonusDialog.updateBonusCountItemTextColor).toHaveBeenCalled();
         });
     });
 
@@ -415,18 +437,6 @@ describe("BonusDialog", () => {
             bonusDialog.updateBonusCount();
 
             expect(bonusDialog.bonusCount.string).toBe("3");
-        });
-    });
-
-    describe("start", () => {
-        it("should initialize timer with configuration duration", () => {
-            const { initTimer } = require("../../../assets/scripts/utils/classic-slot-utils");
-            const expectedDuration = mockSlotGameConfigs.bonusTimeOut;
-
-            bonusDialog.start();
-
-            expect(initTimer).toHaveBeenCalledWith(bonusDialog.timer, expectedDuration, expect.any(Function));
-            expect((bonusDialog as any).timerTween).toBeDefined();
         });
     });
 
