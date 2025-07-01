@@ -148,7 +148,7 @@ export default class EffectContainer extends ObserverComponent {
     @render(SlotBoardStore, (store) => store.receivedBonus, { fireImmediately: false })
     async receivedBonus(receivedBonus: { bonus: any; duration: number }) {
         if (!receivedBonus) {
-            return Promise.resolve();
+            return;
         }
         try {
             const { bonus, duration } = receivedBonus;
