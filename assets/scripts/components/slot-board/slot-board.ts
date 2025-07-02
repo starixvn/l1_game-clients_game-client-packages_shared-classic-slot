@@ -53,7 +53,7 @@ export default class SlotBoard extends Component {
             if (reel) {
                 this.reels.push(reel);
                 reel.gameId = this.gameId;
-                reel.itemCount = this.getSymbolCountPerReel(index);
+                // reel.itemCount = this.getSymbolCountPerReel(index);
                 reel.createReel();
             }
             reel.winningContainer = this.winningSymbolsNode;
@@ -153,7 +153,12 @@ export default class SlotBoard extends Component {
     async spin(duration: number, turbo: boolean) {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
-        const columns = this.convertDataToColumns(this.data);
+
+        //TODO: remove this test
+        const testData = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
+        const columns = this.convertDataToColumns(testData);
+        // const columns = this.convertDataToColumns(this.data);
+        const durations = [2, 4, 6, 8, 10];
         for (let i = 0; i < this.reels.length; i++) {
             const reel = this.reels[i];
 
@@ -162,9 +167,9 @@ export default class SlotBoard extends Component {
             }
 
             if (i < this.reels.length - 1) {
-                reel.spinWithData(duration, columns[i], turbo);
+                reel.spinWithData(durations[i], columns[i], turbo);
             } else {
-                await reel.spinWithData(duration, columns[i], turbo);
+                await reel.spinWithData(durations[i], columns[i], turbo);
             }
         }
     }
