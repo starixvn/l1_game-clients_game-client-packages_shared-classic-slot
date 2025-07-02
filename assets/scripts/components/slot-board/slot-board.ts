@@ -11,10 +11,6 @@ import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReel from "./slot-reel";
 import SlotReelItem from "./slot-reel-item";
 
-enum SlotGameSound {
-    SPINNING_NORMAL = 0,
-    SPINNING_TURBO = 1,
-}
 const { ccclass, property } = _decorator;
 
 @ccclass
