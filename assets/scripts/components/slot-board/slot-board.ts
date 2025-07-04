@@ -5,11 +5,11 @@ import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
-import { LineData, paylines } from "../../definitions";
+import { LineData, paylines, SpecialSymbol } from "../../definitions";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
-import SlotReel from "./slot-reel";
 import SlotReelItem from "./slot-reel-item";
+import SlotReelNew from "./slot-reel-new";
 
 const { ccclass, property } = _decorator;
 
@@ -27,7 +27,7 @@ export default class SlotBoard extends Component {
     @property(PreviewOddsPopup)
     previewPopup: PreviewOddsPopup = null;
 
-    public reels: SlotReel[] = [];
+    public reels: SlotReelNew[] = [];
 
     public get reelCount() {
         return this.reels.length;
@@ -49,7 +49,7 @@ export default class SlotBoard extends Component {
 
     initReels() {
         this.node.children.forEach((child, index) => {
-            const reel = child.getComponent(SlotReel);
+            const reel = child.getComponent(SlotReelNew);
             if (reel) {
                 this.reels.push(reel);
                 reel.gameId = this.gameId;
@@ -153,25 +153,77 @@ export default class SlotBoard extends Component {
     async spin(duration: number, turbo: boolean) {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
+        const columns = this.convertDataToColumns(this.data);
 
-        //TODO: remove this test
-        const testData = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1];
-        const columns = this.convertDataToColumns(testData);
-        // const columns = this.convertDataToColumns(this.data);
-        const durations = [2, 4, 6, 8, 10];
-        for (let i = 0; i < this.reels.length; i++) {
+        if (turbo) {
+            await this.spinTurbo(duration, columns);
+        } else {
+            const specialEffect = this.checkSpecialEffect(columns);
+            if (Object.keys(specialEffect).length > 0) {
+                await this.spinNormal(duration, columns, specialEffect);
+            } else {
+                await this.spinNormal(duration, columns);
+            }
+        }
+    }
+
+    async spinNormal(duration: number, columns: number[][], specialEffect?: { [symbol: number]: number }) {
+        let minIndex = this.reels.length - 1;
+        if (specialEffect) {
+            minIndex = Object.values(specialEffect).sort((a, b) => a - b)[0];
+        }
+        let i = 0;
+        for (; i < this.reels.length; i++) {
             const reel = this.reels[i];
 
-            if (i > 0 && !turbo) {
+            if (i > 0) {
                 await AnimationUtils.delayTime(this.startReelDelayTime);
             }
 
-            if (i < this.reels.length - 1) {
-                reel.spinWithData(durations[i], columns[i], turbo);
+            if (i < minIndex) {
+                reel.spinNormal(duration, columns[i]);
             } else {
-                await reel.spinWithData(durations[i], columns[i], turbo);
+                await reel.spinNormal(duration, columns[i]);
+                break;
             }
         }
+
+        if (specialEffect) {
+            //active peek effect here
+            const peekDuration = 2;
+            while (i < this.reels.length) {
+                //calculate peek effect at i
+                const peekEffects = this.checkSpecialEffect(columns.slice(i));
+                //emit data peek effects
+
+                const reel = this.reels[i];
+                await reel.spinNormal(peekDuration, columns[i]);
+
+                i++;
+            }
+        }
+    }
+
+    checkSpecialEffect(columns: number[][]) {
+        //TODO: implement special effect
+        const specialSymbols = [SpecialSymbol.WILD, SpecialSymbol.JACKPOT];
+        const result = {};
+        specialSymbols.forEach((specialSymbol) => {
+            let count = 0;
+            columns.forEach((column, index) => {
+                if (column.includes(specialSymbol)) {
+                    count++;
+                }
+                if (count === 2 && index < columns.length - 1) {
+                    result[specialSymbol] = index;
+                }
+            });
+        });
+        return result;
+    }
+
+    async spinTurbo(duration: number, columns: number[][]) {
+        //TODO: implement turbo spin
     }
 
     getSymbolCountPerReel(index: number) {

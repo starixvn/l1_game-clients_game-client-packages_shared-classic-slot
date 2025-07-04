@@ -54,12 +54,12 @@ export default class SlotReelNew extends SlotReel {
     private onSpinFinishCallback = () => {};
 
     // Public API
-    public spinWithData(spinDuration: number, data: number[], turbo: boolean) {
+    public spinNormal(spinDuration: number, data: number[]) {
         return new Promise<void>((resolve) => {
             this.onSpinFinishCallback = resolve;
             this.cachedData = data;
             this.totalDistance = 0;
-            this.startAnticipation(spinDuration, turbo);
+            this.startAnticipation(spinDuration);
         });
     }
 
@@ -83,13 +83,12 @@ export default class SlotReelNew extends SlotReel {
     }
 
     // Anticipation phase
-    private startAnticipation(spinDuration: number, turbo: boolean) {
+    private startAnticipation(spinDuration: number) {
         this.isAnticipating = true;
         this.anticipationProgress = 0;
         this.spinDuration = spinDuration;
 
         this.anticipationSpeed = this.ANTICIPATION_MIN_SPEED;
-        const duration = turbo ? this.ANTICIPATION_DURATION / 2 : this.ANTICIPATION_DURATION;
 
         this.anticipationAcceleration =
             (Math.pow(this.ANTICIPATION_MAX_SPEED, 2) - Math.pow(this.ANTICIPATION_MIN_SPEED, 2)) / (2 * this.ANTICIPATION_DISTANCE);
