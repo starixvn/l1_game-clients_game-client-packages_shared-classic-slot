@@ -4,6 +4,8 @@ import SlotReel from "./slot-reel";
 
 const { ccclass, property } = _decorator;
 
+export const SPIN_FOREVER = -1;
+
 @ccclass
 export default class SlotReelNew extends SlotReel {
     // Computed property
@@ -63,12 +65,27 @@ export default class SlotReelNew extends SlotReel {
         });
     }
 
-    public showWinningEffect(index: number, symbol: number) {
-        const id = (this.lowestIndex + index - 2 + this.items.length) % this.items.length;
+    protected rowIndexToItemIndex(index: number) {
+        return (this.lowestIndex + index - 2 + this.items.length) % this.items.length;
+    }
+
+    public showWinningEffect(rowIndex: number, symbol: number) {
+        const id = this.rowIndexToItemIndex(rowIndex);
         const item = this.items[id];
         const highlight = item.index === symbol || (item.index === SpecialSymbol.WILD && symbol !== SpecialSymbol.JACKPOT);
         item.showWinningEffect(highlight);
         this.moveToOtherNode(item, this.winningContainer);
+    }
+
+    showHighlightSpecialSymbols(symbol: number) {
+        for (let i = 0; i < 3; i++) {
+            const id = this.rowIndexToItemIndex(i);
+            const item = this.items[id];
+            if (item.index === symbol) {
+                this.moveToOtherNode(item, this.winningContainer);
+                item.showWinningEffect(true);
+            }
+        }
     }
 
     // Main update loop
@@ -119,9 +136,11 @@ export default class SlotReelNew extends SlotReel {
         this.spinDuration = spinDuration;
         this.isStoppingPhase = false;
 
-        this.scheduleOnce(() => {
-            this.prepareStop();
-        }, spinDuration);
+        if (spinDuration > 0) {
+            this.scheduleOnce(() => {
+                this.prepareStop();
+            }, spinDuration);
+        }
     }
 
     private updateSpin(dt: number) {
@@ -163,7 +182,7 @@ export default class SlotReelNew extends SlotReel {
         return this.currentSpeed * dt;
     }
 
-    private prepareStop() {
+    public prepareStop() {
         const symbolGap = this.symbolGap;
         const currentExcess = this.totalDistance % symbolGap;
         const remainingToNext = symbolGap - currentExcess;
@@ -218,14 +237,14 @@ export default class SlotReelNew extends SlotReel {
     private syncReelData() {
         this.updateLowestIndex();
         this.cachedData.forEach((row, index) => {
-            const id = (this.lowestIndex + index - 2 + this.items.length) % this.items.length;
+            const id = this.rowIndexToItemIndex(index);
             this.items[id].setItem(row);
         });
     }
 
     private updateLowestIndex() {
         const totalSymbolsPassed = Math.round(this.actualTargetDistance / this.symbolGap);
-        const symbolOffset = Math.abs(-totalSymbolsPassed) % this.items.length;
+        const symbolOffset = Math.abs(totalSymbolsPassed) % this.items.length;
         this.lowestIndex = (this.lowestIndex - symbolOffset + this.items.length) % this.items.length;
     }
 

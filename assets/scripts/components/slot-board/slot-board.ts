@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Node, Prefab, v3, Vec2, Vec3 } from "cc";
+import { _decorator, Component, instantiate, log, Node, Prefab, v3, Vec2, Vec3 } from "cc";
 
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -9,7 +9,7 @@ import { LineData, paylines, SpecialSymbol } from "../../definitions";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReelItem from "./slot-reel-item";
-import SlotReelNew from "./slot-reel-new";
+import SlotReelNew, { SPIN_FOREVER } from "./slot-reel-new";
 
 const { ccclass, property } = _decorator;
 
@@ -153,7 +153,23 @@ export default class SlotBoard extends Component {
     async spin(duration: number, turbo: boolean) {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
-        const columns = this.convertDataToColumns(this.data);
+        // const columns = this.convertDataToColumns(this.data);
+        //
+        const columns = this.convertDataToColumns([
+            1,
+            SpecialSymbol.BONUS,
+            1,
+            1,
+            SpecialSymbol.BONUS,
+            SpecialSymbol.FREESPIN,
+            SpecialSymbol.FREESPIN,
+            SpecialSymbol.FREESPIN,
+            SpecialSymbol.BONUS,
+            1,
+            SpecialSymbol.FREESPIN,
+            1,
+            1,
+        ]);
 
         if (turbo) {
             await this.spinTurbo(duration, columns);
@@ -168,45 +184,58 @@ export default class SlotBoard extends Component {
     }
 
     async spinNormal(duration: number, columns: number[][], specialEffect?: { [symbol: number]: number }) {
-        let minIndex = this.reels.length - 1;
-        if (specialEffect) {
-            minIndex = Object.values(specialEffect).sort((a, b) => a - b)[0];
-        }
-        let i = 0;
-        for (; i < this.reels.length; i++) {
-            const reel = this.reels[i];
-
-            if (i > 0) {
-                await AnimationUtils.delayTime(this.startReelDelayTime);
+        return new Promise<void>(async (resolve) => {
+            let minIndex = this.reels.length - 1;
+            if (specialEffect) {
+                minIndex = Object.values(specialEffect).sort((a, b) => a - b)[0];
             }
-
-            if (i < minIndex) {
-                reel.spinNormal(duration, columns[i]);
-            } else {
-                await reel.spinNormal(duration, columns[i]);
-                break;
-            }
-        }
-
-        if (specialEffect) {
-            //active peek effect here
-            const peekDuration = 2;
-            while (i < this.reels.length) {
-                //calculate peek effect at i
-                const peekEffects = this.checkSpecialEffect(columns.slice(i));
-                //emit data peek effects
-
+            let i = 0;
+            for (; i < this.reels.length; i++) {
                 const reel = this.reels[i];
-                await reel.spinNormal(peekDuration, columns[i]);
 
-                i++;
+                if (i > 0) {
+                    await AnimationUtils.delayTime(this.startReelDelayTime);
+                }
+                if (i < minIndex) {
+                    reel.spinNormal(duration, columns[i]);
+                } else {
+                    const current = i;
+                    const isEdgeItem = i === minIndex;
+                    reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(() => {
+                        if (current < this.reels.length - 1) {
+                            const nextReelIndex = current + 1;
+                            this.showPeekEffect(nextReelIndex);
+                            //calculate peek effect at current
+                            const peekEffects = this.checkSpecialEffect(columns.slice(0, nextReelIndex));
+                            log("peekEffects ", peekEffects);
+                            this.showPeekEffectSymbols(Object.keys(peekEffects).map(Number));
+                            //update symbols highlight
+                            this.scheduleOnce(() => {
+                                this.reels[nextReelIndex].prepareStop();
+                            }, 2);
+                        } else {
+                            resolve();
+                        }
+                    });
+                }
             }
-        }
+        });
+    }
+
+    showPeekEffect(reelIndex: number) {}
+
+    showPeekEffectSymbols(symbols: number[]) {
+        symbols.forEach((symbol) => {
+            this.reels.forEach((reel) => {
+                reel.showHighlightSpecialSymbols(symbol);
+            });
+        });
     }
 
     checkSpecialEffect(columns: number[][]) {
+        log("columns ", columns);
         //TODO: implement special effect
-        const specialSymbols = [SpecialSymbol.WILD, SpecialSymbol.JACKPOT];
+        const specialSymbols = [SpecialSymbol.BONUS, SpecialSymbol.FREESPIN];
         const result = {};
         specialSymbols.forEach((specialSymbol) => {
             let count = 0;
@@ -214,11 +243,12 @@ export default class SlotBoard extends Component {
                 if (column.includes(specialSymbol)) {
                     count++;
                 }
-                if (count === 2 && index < columns.length - 1) {
+                if (count === 2 && index < this.reelCount - 1) {
                     result[specialSymbol] = index;
                 }
             });
         });
+        log("result ", result);
         return result;
     }
 
