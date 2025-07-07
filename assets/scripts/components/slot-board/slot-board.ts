@@ -272,7 +272,9 @@ export default class SlotBoard extends Component {
     }
 
     async spinTurbo(duration: number, columns: number[][]) {
-        //TODO: implement turbo spin
+        this.reels.forEach((reel, index) => {
+            reel.spinTurbo(duration, columns[index]);
+        });
     }
 
     getSymbolCountPerReel(index: number) {
