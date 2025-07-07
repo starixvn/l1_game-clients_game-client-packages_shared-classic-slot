@@ -174,7 +174,7 @@ export default class ClassicSlot extends GameComponent {
         this.isReadyBet = isReadyBet;
     }
 
-    @render(SlotBoardStore, (store) => store.spinResult)
+    @render(SlotBoardStore, (store) => store.spinResult, { fireImmediately: false })
     async renderSpinResult(spinResult: { result: number[]; duration: number; turbo: boolean; onComplete: () => void }) {
         this.slotBoard.hideWinningEffect();
         this.slotBoard.setBoardData(spinResult.result);

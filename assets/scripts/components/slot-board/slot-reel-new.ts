@@ -207,6 +207,7 @@ export default class SlotReelNew extends SlotReel {
     }
 
     public stopSoon() {
+        this.moveAllItemsToWinningLayer();
         this.isFaster = true;
         this.blurSymbols();
         this.scheduleOnce(() => {
@@ -217,6 +218,18 @@ export default class SlotReelNew extends SlotReel {
                 this.normalSymbols();
             }, 0.3);
         }, 0.5);
+    }
+
+    protected moveAllItemsToWinningLayer() {
+        this.items.forEach((item) => {
+            this.moveToOtherNode(item, this.winningContainer);
+        });
+    }
+
+    protected moveAllItemsToReelNode() {
+        this.items.forEach((item) => {
+            this.moveToOtherNode(item, this.node);
+        });
     }
 
     blurSymbols() {
@@ -275,6 +288,7 @@ export default class SlotReelNew extends SlotReel {
             this.currentSpeed = 0;
             this.isStoppingPhase = false;
             this.onSpinFinishCallback();
+            this.moveAllItemsToReelNode();
             console.log("call stop doneeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
         }
     }

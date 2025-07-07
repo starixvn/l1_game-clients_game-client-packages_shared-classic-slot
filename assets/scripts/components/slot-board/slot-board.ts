@@ -28,6 +28,9 @@ export default class SlotBoard extends Component {
     previewPopup: PreviewOddsPopup = null;
 
     @property(Node)
+    peekEffectContainer: Node = null;
+
+    @property(Node)
     peekEffectNode: Node = null;
 
     public reels: SlotReelNew[] = [];
@@ -156,23 +159,22 @@ export default class SlotBoard extends Component {
     async spin(duration: number, turbo: boolean) {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
-        // const columns = this.convertDataToColumns(this.data);
-        //
-        const columns = this.convertDataToColumns([
-            1,
-            SpecialSymbol.BONUS,
-            1,
-            1,
-            SpecialSymbol.BONUS,
-            SpecialSymbol.FREESPIN,
-            SpecialSymbol.FREESPIN,
-            SpecialSymbol.FREESPIN,
-            SpecialSymbol.BONUS,
-            1,
-            SpecialSymbol.FREESPIN,
-            1,
-            1,
-        ]);
+        const columns = this.convertDataToColumns(this.data);
+        // const columns = this.convertDataToColumns([
+        //     1,
+        //     SpecialSymbol.BONUS,
+        //     1,
+        //     1,
+        //     SpecialSymbol.BONUS,
+        //     SpecialSymbol.FREESPIN,
+        //     SpecialSymbol.FREESPIN,
+        //     SpecialSymbol.FREESPIN,
+        //     SpecialSymbol.BONUS,
+        //     1,
+        //     SpecialSymbol.FREESPIN,
+        //     1,
+        //     1,
+        // ]);
 
         if (turbo) {
             await this.spinTurbo(duration, columns);
@@ -230,11 +232,13 @@ export default class SlotBoard extends Component {
     }
 
     showPeekEffect(reelIndex: number) {
+        this.peekEffectContainer.active = true;
         this.peekEffectNode.active = true;
         this.peekEffectNode.setPosition(this.reels[reelIndex].node.position);
     }
 
     hidePeekEffect() {
+        this.peekEffectContainer.active = false;
         this.peekEffectNode.active = false;
     }
 
@@ -253,14 +257,15 @@ export default class SlotBoard extends Component {
         const result = {};
         specialSymbols.forEach((specialSymbol) => {
             let count = 0;
-            columns.forEach((column, index) => {
+            for (const [index, column] of columns.entries()) {
                 if (column.includes(specialSymbol)) {
                     count++;
                 }
                 if (count === 2 && index < this.reelCount - 1) {
                     result[specialSymbol] = index;
+                    break;
                 }
-            });
+            }
         });
         log("result ", result);
         return result;
