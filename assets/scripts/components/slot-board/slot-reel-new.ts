@@ -1,4 +1,4 @@
-import { _decorator, Layout } from "cc";
+import { _decorator, Layout, log } from "cc";
 import { SLOT_ROW_MAX_INDEX, SpecialSymbol } from "../../definitions";
 import SlotReel from "./slot-reel";
 
@@ -13,19 +13,21 @@ export default class SlotReelNew extends SlotReel {
 
     // Configuration constants
     private readonly ANTICIPATION_DISTANCE = 20;
-    private readonly ANTICIPATION_MIN_SPEED = 20;
+    private readonly ANTICIPATION_MIN_SPEED = 200;
     private readonly ANTICIPATION_MAX_SPEED = 300;
 
-    private readonly SPIN_ACCELERATION = 2000;
-    private readonly SPIN_ACCELERATION_2 = 4000;
+    private readonly SPIN_ACCELERATION = 6000;
+    private readonly SPIN_ACCELERATION_2 = 6000;
     private readonly SPIN_MAX_SPEED = 3000;
-    private readonly SPIN_MAX_SPEED_2 = 5000;
-    private readonly SPIN_DECELERATION = 10000;
+    private readonly SPIN_MAX_SPEED_2 = 3000;
+    private readonly SPIN_DECELERATION = 3000;
     private readonly SPIN_STOP_THRESHOLD = 2;
-    private readonly SPIN_EXTRA_SYMBOLS = 10;
 
-    private readonly OVERSHOOT_DISTANCE = 80;
-    private readonly OVERSHOOT_DURATION = 0.5;
+    private readonly SPIN_EXTRA_SYMBOLS = 10;
+    private readonly SPIN_EXTRA_SYMBOLS_FAST = 3;
+
+    private readonly OVERSHOOT_DISTANCE = 60;
+    private readonly OVERSHOOT_DURATION = 0.1;
 
     // State tracking
     private isSpin = false;
@@ -38,6 +40,7 @@ export default class SlotReelNew extends SlotReel {
     private totalDistance = 0;
     private targetStopDistance = 0;
     private actualTargetDistance = 0;
+    private stoppingPoint = 0;
     private currentSpeed = 0;
     private deceleration = 2000;
 
@@ -68,6 +71,7 @@ export default class SlotReelNew extends SlotReel {
             this.cachedData = data;
             this.totalDistance = 0;
             this.startAnticipation(spinDuration);
+            log("spinNormal", spinDuration);
         });
     }
 
@@ -145,8 +149,9 @@ export default class SlotReelNew extends SlotReel {
 
         if (spinDuration > 0) {
             this.scheduleOnce(() => {
-                this.prepareStop();
+                this.prepareStop(true);
             }, spinDuration);
+            console.log("call prepareStop", spinDuration);
         }
     }
 
@@ -171,14 +176,21 @@ export default class SlotReelNew extends SlotReel {
         }
     }
 
+    // Easing function for smooth slowdown
+    private easeOutQuart(x: number): number {
+        return 1 - Math.pow(1 - x, 4);
+    }
+
     private calculateSpinOffset(dt: number) {
         if (this.isStoppingPhase) {
             const remainingDistance = this.targetStopDistance - this.totalDistance;
             if (Math.abs(remainingDistance) < this.currentSpeed * dt) {
                 return remainingDistance;
             }
-
-            this.currentSpeed = Math.max(this.SPIN_STOP_THRESHOLD, this.currentSpeed - this.deceleration * dt);
+            if (remainingDistance > 0) {
+                // Calculate deceleration based on remaining distance
+                this.currentSpeed = Math.max(this.SPIN_STOP_THRESHOLD, this.currentSpeed - this.deceleration * dt);
+            }
         } else {
             this.currentSpeed = Math.min(this.maxSpeed, this.currentSpeed + this.acceleration * dt);
         }
@@ -199,11 +211,12 @@ export default class SlotReelNew extends SlotReel {
         this.blurSymbols();
         this.scheduleOnce(() => {
             this.isFaster = false;
+            console.log("call stop beginnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+            this.prepareStop();
             this.scheduleOnce(() => {
                 this.normalSymbols();
-                this.prepareStop();
-            }, 1);
-        }, 1);
+            }, 0.3);
+        }, 0.5);
     }
 
     blurSymbols() {
@@ -212,18 +225,19 @@ export default class SlotReelNew extends SlotReel {
         });
     }
 
-    public prepareStop() {
+    public prepareStop(fast = false) {
         const symbolGap = this.symbolGap;
         const currentExcess = this.totalDistance % symbolGap;
         const remainingToNext = symbolGap - currentExcess;
-        const extraDistance = symbolGap * this.SPIN_EXTRA_SYMBOLS;
-
+        const extraDistance = symbolGap * (fast ? this.SPIN_EXTRA_SYMBOLS_FAST : this.SPIN_EXTRA_SYMBOLS);
+        this.stoppingPoint = this.totalDistance;
         this.actualTargetDistance = this.totalDistance + remainingToNext + extraDistance;
         this.targetStopDistance = this.actualTargetDistance + this.OVERSHOOT_DISTANCE;
 
         const remainingDistance = this.targetStopDistance - this.totalDistance;
         if (remainingDistance > 0) {
             this.deceleration = (this.currentSpeed * this.currentSpeed) / (2 * remainingDistance);
+            console.log("deceleration", this.deceleration);
             this.deceleration = Math.min(this.deceleration, this.SPIN_DECELERATION);
         }
 
@@ -261,6 +275,7 @@ export default class SlotReelNew extends SlotReel {
             this.currentSpeed = 0;
             this.isStoppingPhase = false;
             this.onSpinFinishCallback();
+            console.log("call stop doneeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
         }
     }
 

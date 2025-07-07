@@ -196,15 +196,20 @@ export default class SlotBoard extends Component {
             for (; i < this.reels.length; i++) {
                 const reel = this.reels[i];
 
+                const current = i;
+
+                console.time("spin reel " + current);
                 if (i > 0) {
                     await AnimationUtils.delayTime(this.startReelDelayTime);
                 }
                 if (i < minIndex) {
-                    reel.spinNormal(duration, columns[i]);
+                    reel.spinNormal(duration, columns[i]).then(() => {
+                        console.timeEnd("spin reel " + current);
+                    });
                 } else {
-                    const current = i;
                     const isEdgeItem = i === minIndex;
                     reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(() => {
+                        console.timeEnd("spin reel " + current);
                         if (current < this.reels.length - 1) {
                             const nextReelIndex = current + 1;
                             this.showPeekEffect(nextReelIndex);
