@@ -23,7 +23,7 @@ export default class SlotReel extends Component {
     items: SlotReelItem[] = [];
 
     public winningContainer: Node;
-    private layout: Layout;
+    protected layout: Layout;
     protected spacingY = 0;
     public gameId: number;
     protected itemHeight = 0;
@@ -35,7 +35,7 @@ export default class SlotReel extends Component {
         this.init();
     }
 
-    private init() {
+    protected init() {
         this.layout = this.node.getComponent(Layout);
         this.spacingY = this.layout.spacingY;
         this.initialized = true;

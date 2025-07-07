@@ -1,10 +1,8 @@
-import { _decorator } from "cc";
-import { SpecialSymbol } from "../../definitions";
+import { _decorator, Layout } from "cc";
+import { SLOT_ROW_MAX_INDEX, SpecialSymbol } from "../../definitions";
 import SlotReel from "./slot-reel";
 
 const { ccclass, property } = _decorator;
-
-export const SPIN_FOREVER = -1;
 
 @ccclass
 export default class SlotReelNew extends SlotReel {
@@ -52,8 +50,13 @@ export default class SlotReelNew extends SlotReel {
     // Data tracking
     private spinDuration = 0;
     private cachedData: number[] = [];
-    private lowestIndex = 17;
+    private lowestIndex = 0;
     private onSpinFinishCallback = () => {};
+
+    protected override init() {
+        super.init();
+        this.layout.verticalDirection = Layout.VerticalDirection.BOTTOM_TO_TOP;
+    }
 
     // Public API
     public spinNormal(spinDuration: number, data: number[]) {
@@ -65,8 +68,8 @@ export default class SlotReelNew extends SlotReel {
         });
     }
 
-    protected rowIndexToItemIndex(index: number) {
-        return (this.lowestIndex + index - 2 + this.items.length) % this.items.length;
+    protected rowIndexToItemIndex(rowIndex: number) {
+        return (this.lowestIndex - rowIndex + SLOT_ROW_MAX_INDEX) % this.items.length;
     }
 
     public showWinningEffect(rowIndex: number, symbol: number) {
@@ -243,9 +246,8 @@ export default class SlotReelNew extends SlotReel {
     }
 
     private updateLowestIndex() {
-        const totalSymbolsPassed = Math.round(this.actualTargetDistance / this.symbolGap);
-        const symbolOffset = Math.abs(totalSymbolsPassed) % this.items.length;
-        this.lowestIndex = (this.lowestIndex - symbolOffset + this.items.length) % this.items.length;
+        const totalSymbolsPassed = Math.round(this.actualTargetDistance / this.symbolGap) % this.items.length;
+        this.lowestIndex = (this.lowestIndex + totalSymbolsPassed) % this.items.length;
     }
 
     // Final position adjustment

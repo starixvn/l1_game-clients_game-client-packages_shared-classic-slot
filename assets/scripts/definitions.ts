@@ -32,6 +32,11 @@ export const paylines = [
 
 export const SLOT_LINES = 25;
 export const SLOT_BET_CHOICES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24];
+export const SLOT_COLUMN_COUNT = 5;
+export const SLOT_ROW_COUNT = 3;
+export const SLOT_ROW_MAX_INDEX = SLOT_ROW_COUNT - 1;
+
+export const SPIN_FOREVER = -1;
 
 export enum SpecialSymbol {
     FREESPIN = 7,

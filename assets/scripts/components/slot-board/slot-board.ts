@@ -5,11 +5,11 @@ import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
-import { LineData, paylines, SpecialSymbol } from "../../definitions";
+import { LineData, paylines, SpecialSymbol, SPIN_FOREVER } from "../../definitions";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReelItem from "./slot-reel-item";
-import SlotReelNew, { SPIN_FOREVER } from "./slot-reel-new";
+import SlotReelNew from "./slot-reel-new";
 
 const { ccclass, property } = _decorator;
 
