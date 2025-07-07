@@ -12,13 +12,15 @@ export default class SlotReelNew extends SlotReel {
     }
 
     // Configuration constants
-    private readonly ANTICIPATION_DISTANCE = 40;
-    private readonly ANTICIPATION_DURATION = 0.3;
+    private readonly ANTICIPATION_DISTANCE = 20;
     private readonly ANTICIPATION_MIN_SPEED = 20;
     private readonly ANTICIPATION_MAX_SPEED = 300;
 
-    private readonly SPIN_ACCELERATION = 1000;
-    private readonly SPIN_MAX_SPEED = 5000;
+    private readonly SPIN_ACCELERATION = 2000;
+    private readonly SPIN_ACCELERATION_2 = 4000;
+    private readonly SPIN_MAX_SPEED = 3000;
+    private readonly SPIN_MAX_SPEED_2 = 5000;
+    private readonly SPIN_DECELERATION = 10000;
     private readonly SPIN_STOP_THRESHOLD = 2;
     private readonly SPIN_EXTRA_SYMBOLS = 10;
 
@@ -27,6 +29,7 @@ export default class SlotReelNew extends SlotReel {
 
     // State tracking
     private isSpin = false;
+    private isFaster = false;
     private isStoppingPhase = false;
     private isAnticipating = false;
     private isOvershooting = false;
@@ -135,6 +138,7 @@ export default class SlotReelNew extends SlotReel {
     // Spin phase
     private startSpin(spinDuration: number) {
         this.isSpin = true;
+        this.isFaster = false;
         this.currentSpeed = 0;
         this.spinDuration = spinDuration;
         this.isStoppingPhase = false;
@@ -174,15 +178,38 @@ export default class SlotReelNew extends SlotReel {
                 return remainingDistance;
             }
 
-            const totalStopDistance = this.targetStopDistance - (this.totalDistance - this.currentSpeed * dt);
-            const progress = 1 - remainingDistance / totalStopDistance;
-            const adjustedDeceleration = progress > 0.7 ? this.deceleration * 2 : this.deceleration;
-            this.currentSpeed = Math.max(0, this.currentSpeed - adjustedDeceleration * dt);
+            this.currentSpeed = Math.max(this.SPIN_STOP_THRESHOLD, this.currentSpeed - this.deceleration * dt);
         } else {
-            this.currentSpeed = Math.min(this.SPIN_MAX_SPEED, this.currentSpeed + this.SPIN_ACCELERATION * dt);
+            this.currentSpeed = Math.min(this.maxSpeed, this.currentSpeed + this.acceleration * dt);
         }
 
         return this.currentSpeed * dt;
+    }
+
+    get acceleration() {
+        return this.isFaster ? this.SPIN_ACCELERATION_2 : this.SPIN_ACCELERATION;
+    }
+
+    get maxSpeed() {
+        return this.isFaster ? this.SPIN_MAX_SPEED_2 : this.SPIN_MAX_SPEED;
+    }
+
+    public stopSoon() {
+        this.isFaster = true;
+        this.blurSymbols();
+        this.scheduleOnce(() => {
+            this.isFaster = false;
+            this.scheduleOnce(() => {
+                this.normalSymbols();
+                this.prepareStop();
+            }, 1);
+        }, 1);
+    }
+
+    blurSymbols() {
+        this.items.forEach((item) => {
+            item.handleBlurAnim(true);
+        });
     }
 
     public prepareStop() {
@@ -197,6 +224,7 @@ export default class SlotReelNew extends SlotReel {
         const remainingDistance = this.targetStopDistance - this.totalDistance;
         if (remainingDistance > 0) {
             this.deceleration = (this.currentSpeed * this.currentSpeed) / (2 * remainingDistance);
+            this.deceleration = Math.min(this.deceleration, this.SPIN_DECELERATION);
         }
 
         this.syncReelData();
@@ -210,11 +238,11 @@ export default class SlotReelNew extends SlotReel {
         this.overshootProgress = 0;
 
         const currentOvershoot = Math.abs(this.totalDistance - this.actualTargetDistance);
-        this.overshootReturnSpeed = (currentOvershoot * 2) / this.OVERSHOOT_DURATION;
+        this.overshootReturnSpeed = currentOvershoot / this.OVERSHOOT_DURATION;
     }
 
     private updateOvershoot(dt: number) {
-        const currentOvershoot = Math.abs(this.totalDistance - this.actualTargetDistance);
+        const currentOvershoot = this.OVERSHOOT_DISTANCE; //  Math.abs(this.totalDistance - this.actualTargetDistance);
         this.overshootProgress += this.overshootReturnSpeed * dt;
 
         const progress = Math.min(1, this.overshootProgress / currentOvershoot);
@@ -253,7 +281,6 @@ export default class SlotReelNew extends SlotReel {
     // Final position adjustment
     private finalAdjustment() {
         const finalAdjustment = this.actualTargetDistance - this.totalDistance;
-
         if (Math.abs(this.totalDistance - this.actualTargetDistance) > 0.01) {
             this.items.forEach((item) => {
                 item.node.setPosition(item.node.position.x, item.node.position.y - finalAdjustment, item.node.position.z);

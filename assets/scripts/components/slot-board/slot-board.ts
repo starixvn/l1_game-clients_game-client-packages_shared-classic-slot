@@ -27,6 +27,9 @@ export default class SlotBoard extends Component {
     @property(PreviewOddsPopup)
     previewPopup: PreviewOddsPopup = null;
 
+    @property(Node)
+    peekEffectNode: Node = null;
+
     public reels: SlotReelNew[] = [];
 
     public get reelCount() {
@@ -55,8 +58,8 @@ export default class SlotBoard extends Component {
                 reel.gameId = this.gameId;
                 // reel.itemCount = this.getSymbolCountPerReel(index);
                 reel.createReel();
+                reel.winningContainer = this.winningSymbolsNode;
             }
-            reel.winningContainer = this.winningSymbolsNode;
         });
 
         this.previewPopup.addPreviewPopup(this.reels);
@@ -210,10 +213,9 @@ export default class SlotBoard extends Component {
                             log("peekEffects ", peekEffects);
                             this.showPeekEffectSymbols(Object.keys(peekEffects).map(Number));
                             //update symbols highlight
-                            this.scheduleOnce(() => {
-                                this.reels[nextReelIndex].prepareStop();
-                            }, 2);
+                            this.reels[nextReelIndex].stopSoon();
                         } else {
+                            this.hidePeekEffect();
                             resolve();
                         }
                     });
@@ -222,7 +224,14 @@ export default class SlotBoard extends Component {
         });
     }
 
-    showPeekEffect(reelIndex: number) {}
+    showPeekEffect(reelIndex: number) {
+        this.peekEffectNode.active = true;
+        this.peekEffectNode.setPosition(this.reels[reelIndex].node.position);
+    }
+
+    hidePeekEffect() {
+        this.peekEffectNode.active = false;
+    }
 
     showPeekEffectSymbols(symbols: number[]) {
         symbols.forEach((symbol) => {
