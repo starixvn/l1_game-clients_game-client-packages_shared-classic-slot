@@ -5,7 +5,7 @@ import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
-import { LineData, paylines, SpecialSymbol, SPIN_FOREVER } from "../../definitions";
+import { LineData, paylines, SLOT_COLUMN_MAX_INDEX, SpecialSymbol, SPIN_FOREVER } from "../../definitions";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReelItem from "./slot-reel-item";
@@ -159,27 +159,13 @@ export default class SlotBoard extends Component {
     async spin(duration: number, turbo: boolean) {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
+        // this.data = [2, 5, 10, 10, 2, 3, 2, 5, 10, 10, 3, 6, 7, 6, 10];
         const columns = this.convertDataToColumns(this.data);
-        // const columns = this.convertDataToColumns([
-        //     1,
-        //     SpecialSymbol.BONUS,
-        //     1,
-        //     1,
-        //     SpecialSymbol.BONUS,
-        //     SpecialSymbol.FREESPIN,
-        //     SpecialSymbol.FREESPIN,
-        //     SpecialSymbol.FREESPIN,
-        //     SpecialSymbol.BONUS,
-        //     1,
-        //     SpecialSymbol.FREESPIN,
-        //     1,
-        //     1,
-        // ]);
 
         if (turbo) {
             await this.spinTurbo(duration, columns);
         } else {
-            const specialEffect = this.checkSpecialEffect(columns);
+            const specialEffect = this.checkSpecialEffect(this.data, columns);
             if (Object.keys(specialEffect).length > 0) {
                 await this.spinNormal(duration, columns, specialEffect);
             } else {
@@ -193,6 +179,7 @@ export default class SlotBoard extends Component {
             let minIndex = this.reels.length - 1;
             if (specialEffect) {
                 minIndex = Object.values(specialEffect).sort((a, b) => a - b)[0];
+                minIndex = Math.min(minIndex, SLOT_COLUMN_MAX_INDEX - 1);
             }
             let i = 0;
             for (; i < this.reels.length; i++) {
@@ -216,9 +203,8 @@ export default class SlotBoard extends Component {
                             const nextReelIndex = current + 1;
                             this.showPeekEffect(nextReelIndex);
                             //calculate peek effect at current
-                            const peekEffects = this.checkSpecialEffect(columns.slice(0, nextReelIndex));
-                            log("peekEffects ", peekEffects);
-                            this.showPeekEffectSymbols(Object.keys(peekEffects).map(Number));
+                            const peekEffects = this.checkSpecialEffect(this.data, columns.slice(0, nextReelIndex));
+                            this.handleSymbolsPeekEffect(peekEffects);
                             //update symbols highlight
                             this.reels[nextReelIndex].stopSoon();
                         } else {
@@ -229,6 +215,17 @@ export default class SlotBoard extends Component {
                 }
             }
         });
+    }
+
+    handleSymbolsPeekEffect(peekEffects) {
+        log("peekEffects ", peekEffects);
+        const keys = Object.keys(peekEffects).map(Number);
+        if (keys.includes(SpecialSymbol.JACKPOT)) {
+            const lineIndex = peekEffects[SpecialSymbol.JACKPOT];
+            this.showWinningEffect(paylines[lineIndex], SpecialSymbol.JACKPOT);
+        }
+
+        this.showPeekEffectSymbols(keys.filter((key) => key !== SpecialSymbol.JACKPOT));
     }
 
     showPeekEffect(reelIndex: number) {
@@ -250,8 +247,9 @@ export default class SlotBoard extends Component {
         });
     }
 
-    checkSpecialEffect(columns: number[][]) {
+    checkSpecialEffect(rawData: number[], columns: number[][]) {
         log("columns ", columns);
+        const length = columns.length;
         //TODO: implement special effect
         const specialSymbols = [SpecialSymbol.BONUS, SpecialSymbol.FREESPIN];
         const result = {};
@@ -267,6 +265,19 @@ export default class SlotBoard extends Component {
                 }
             }
         });
+
+        if (columns[0].includes(SpecialSymbol.JACKPOT) && length >= SLOT_COLUMN_MAX_INDEX) {
+            const index = columns[0].indexOf(SpecialSymbol.JACKPOT);
+
+            const filterLines = paylines.filter((line) => line.includes(index));
+            const lineIndex = paylines.findIndex((line) => {
+                const notJackpot = line.some((position) => rawData[position] !== SpecialSymbol.JACKPOT);
+                return !notJackpot;
+            });
+            if (lineIndex !== -1) {
+                result[SpecialSymbol.JACKPOT] = lineIndex;
+            }
+        }
         log("result ", result);
         return result;
     }
