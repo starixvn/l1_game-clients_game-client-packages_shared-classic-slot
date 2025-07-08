@@ -186,7 +186,6 @@ export default class SlotReelNew extends SlotReel {
             this.scheduleOnce(() => {
                 this.prepareStop(true);
             }, spinDuration);
-            console.log("call prepareStop", spinDuration);
         }
     }
 
@@ -230,9 +229,6 @@ export default class SlotReelNew extends SlotReel {
             this.stoppingElapsedTime += dt;
             const progress = Math.min(1, this.stoppingElapsedTime / this.easingSlowDuration);
             const current = this.easeOutSine(progress) * distance;
-            if (progress >= 1) {
-                console.log("temp speed ", (current - prev) / dt);
-            }
             return current - prev;
         } else {
             this.currentSpeed = Math.min(this.maxSpeed, this.currentSpeed + this.acceleration * dt);
@@ -294,7 +290,6 @@ export default class SlotReelNew extends SlotReel {
         const remainingDistance = this.targetStopDistance - this.totalDistance;
         if (remainingDistance > 0) {
             this.deceleration = (this.currentSpeed * this.currentSpeed) / (2 * remainingDistance);
-            console.log("deceleration", this.deceleration);
             this.deceleration = Math.min(this.deceleration, this.SPIN_DECELERATION);
         }
 
