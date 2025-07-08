@@ -23,13 +23,16 @@ export default class SlotReelNew extends SlotReel {
     private readonly SPIN_DECELERATION = 3000;
     private readonly SPIN_STOP_THRESHOLD = 2;
 
-    private readonly SPIN_EXTRA_SYMBOLS = 10;
+    private readonly SPIN_EXTRA_SYMBOLS = 5;
     private readonly SPIN_EXTRA_SYMBOLS_FAST = 3;
 
-    private readonly OVERSHOOT_DISTANCE = 60;
+    private readonly OVERSHOOT_DISTANCE = 20;
     private readonly OVERSHOOT_DURATION = 0.1;
 
     private readonly TURBO_SPIN_ITEM_COUNT = 10;
+    private readonly BLUR_DURATION = 0.7;
+    private readonly SLOW_DOWN_DURATION = 2;
+    private readonly SLOW_DOWN_DURATION_FAST = 0.3;
 
     // State tracking
     private isSpin = false;
@@ -42,10 +45,13 @@ export default class SlotReelNew extends SlotReel {
     // Movement tracking
     private totalDistance = 0;
     private targetStopDistance = 0;
+    private stoppingDistance = 0;
     private actualTargetDistance = 0;
     private turboSpeed = 0;
     private currentSpeed = 0;
     private deceleration = 2000;
+    private stoppingElapsedTime = 0;
+    private easingSlowDuration = 0;
 
     // Anticipation state
     private anticipationProgress = 0;
@@ -192,7 +198,11 @@ export default class SlotReelNew extends SlotReel {
 
         if (this.isStoppingPhase) {
             const remainingDistance = Math.abs(this.targetStopDistance - this.totalDistance);
-            if (remainingDistance <= 0.1 || this.currentSpeed <= this.SPIN_STOP_THRESHOLD) {
+            if (
+                remainingDistance <= 0.1 ||
+                this.totalDistance >= this.targetStopDistance ||
+                this.currentSpeed <= this.SPIN_STOP_THRESHOLD
+            ) {
                 this.targetStopDistance = this.actualTargetDistance;
                 this.startOvershootEffect();
             }
@@ -209,16 +219,21 @@ export default class SlotReelNew extends SlotReel {
         });
     }
 
+    easeOutSine(x: number) {
+        return Math.sqrt(1 - Math.pow(x - 1, 2));
+    }
+
     private calculateSpinOffset(dt: number) {
         if (this.isStoppingPhase) {
-            const remainingDistance = this.targetStopDistance - this.totalDistance;
-            if (Math.abs(remainingDistance) < this.currentSpeed * dt) {
-                return remainingDistance;
+            const distance = this.stoppingDistance;
+            const prev = this.easeOutSine(this.stoppingElapsedTime / this.easingSlowDuration) * distance;
+            this.stoppingElapsedTime += dt;
+            const progress = Math.min(1, this.stoppingElapsedTime / this.easingSlowDuration);
+            const current = this.easeOutSine(progress) * distance;
+            if (progress >= 1) {
+                console.log("temp speed ", (current - prev) / dt);
             }
-            if (remainingDistance > 0) {
-                // Calculate deceleration based on remaining distance
-                this.currentSpeed = Math.max(this.SPIN_STOP_THRESHOLD, this.currentSpeed - this.deceleration * dt);
-            }
+            return current - prev;
         } else {
             this.currentSpeed = Math.min(this.maxSpeed, this.currentSpeed + this.acceleration * dt);
         }
@@ -240,12 +255,10 @@ export default class SlotReelNew extends SlotReel {
         this.blurSymbols();
         this.scheduleOnce(() => {
             this.isFaster = false;
-            console.log("call stop beginnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn");
+            this.normalSymbols();
+            console.time("stop in " + this.node.uuid);
             this.prepareStop();
-            this.scheduleOnce(() => {
-                this.normalSymbols();
-            }, 0.3);
-        }, 0.5);
+        }, this.BLUR_DURATION);
     }
 
     protected moveAllItemsToWinningLayer() {
@@ -274,6 +287,10 @@ export default class SlotReelNew extends SlotReel {
         this.actualTargetDistance = this.totalDistance + remainingToNext + extraDistance;
         this.targetStopDistance = this.actualTargetDistance + this.OVERSHOOT_DISTANCE;
 
+        this.stoppingDistance = this.targetStopDistance - this.totalDistance;
+        this.easingSlowDuration = fast ? this.SLOW_DOWN_DURATION_FAST : this.SLOW_DOWN_DURATION;
+        this.stoppingElapsedTime = 0;
+
         const remainingDistance = this.targetStopDistance - this.totalDistance;
         if (remainingDistance > 0) {
             this.deceleration = (this.currentSpeed * this.currentSpeed) / (2 * remainingDistance);
@@ -287,6 +304,8 @@ export default class SlotReelNew extends SlotReel {
 
     // Overshoot phase
     private startOvershootEffect() {
+        console.timeEnd("stop in " + this.node.uuid);
+        console.time("back in " + this.node.uuid);
         this.isOvershooting = true;
         this.isSpin = false;
         this.overshootProgress = 0;
@@ -316,7 +335,7 @@ export default class SlotReelNew extends SlotReel {
             this.isStoppingPhase = false;
             this.onSpinFinishCallback();
             this.moveAllItemsToReelNode();
-            console.log("call stop doneeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee");
+            console.timeEnd("back in " + this.node.uuid);
         }
     }
 
