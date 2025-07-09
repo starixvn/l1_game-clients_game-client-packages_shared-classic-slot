@@ -52,16 +52,16 @@ export default class SlotReelItem extends Component {
         this.blurSymbol.active = isShowBlurSymbol;
         this.effectSpine.node.active = !isShowBlurSymbol;
         if (isShowBlurSymbol) {
-            // AnimationUtils.setOpacityNode(this.blurSymbol, 255);
-            AnimationUtils.fadeIn(this.blurSymbol, 0.3);
+            AnimationUtils.setOpacityNode(this.blurSymbol, 255);
+            AnimationUtils.setOpacityNode(this.effectSpine.node, 1);
             this.blurSymbol.scale = v3(1 / 1.5, 1, 1).multiplyScalar(1.5);
-            // AnimationUtils.setOpacityNode(this.effectSpine.node, 1);
-            AnimationUtils.fadeOut(this.effectSpine.node, 0.3);
+            // AnimationUtils.fadeIn(this.blurSymbol, 0.3);
+            // AnimationUtils.fadeOut(this.effectSpine.node, 0.3);
         } else {
-            // AnimationUtils.setOpacityNode(this.blurSymbol, 1);
-            // AnimationUtils.setOpacityNode(this.effectSpine.node, 255);
-            AnimationUtils.fadeIn(this.effectSpine.node, 0.3);
-            AnimationUtils.fadeOut(this.blurSymbol, 0.3);
+            AnimationUtils.setOpacityNode(this.blurSymbol, 1);
+            AnimationUtils.setOpacityNode(this.effectSpine.node, 255);
+            // AnimationUtils.fadeIn(this.effectSpine.node, 0.3);
+            // AnimationUtils.fadeOut(this.blurSymbol, 0.3);
         }
     }
 

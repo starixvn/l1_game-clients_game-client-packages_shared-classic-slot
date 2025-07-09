@@ -235,6 +235,10 @@ export default class SlotReelNew extends SlotReel {
             this.currentSpeed = Math.min(this.maxSpeed, this.currentSpeed + this.acceleration * dt);
         }
 
+        if (this.currentSpeed > 1000) {
+            this.blurSymbols();
+        }
+
         return this.currentSpeed * dt;
     }
 
@@ -252,7 +256,6 @@ export default class SlotReelNew extends SlotReel {
         // this.blurSymbols();
         this.scheduleOnce(() => {
             this.isFaster = false;
-            // this.normalSymbols();
             console.time("stop in " + this.node.name);
             this.prepareStop();
         }, this.DELAY_SLOW_DOWN_DURATION);
@@ -277,6 +280,8 @@ export default class SlotReelNew extends SlotReel {
     }
 
     public prepareStop(fast = false) {
+        this.normalSymbols();
+
         const symbolGap = this.symbolGap;
         const currentExcess = this.totalDistance % symbolGap;
         const remainingToNext = symbolGap - currentExcess;
