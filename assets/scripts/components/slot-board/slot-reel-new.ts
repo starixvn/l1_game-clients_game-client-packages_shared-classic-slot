@@ -18,20 +18,20 @@ export default class SlotReelNew extends SlotReel {
 
     private readonly SPIN_ACCELERATION = 6000;
     private readonly SPIN_ACCELERATION_2 = 6000;
-    private readonly SPIN_MAX_SPEED = 3000;
-    private readonly SPIN_MAX_SPEED_2 = 3000;
-    private readonly SPIN_DECELERATION = 3000;
+    private readonly SPIN_MAX_SPEED = 2000;
+    private readonly SPIN_MAX_SPEED_2 = 2000;
     private readonly SPIN_STOP_THRESHOLD = 2;
 
-    private readonly SPIN_EXTRA_SYMBOLS = 5;
-    private readonly SPIN_EXTRA_SYMBOLS_FAST = 3;
+    private readonly SPIN_EXTRA_SYMBOLS = 20;
+    private readonly SPIN_EXTRA_SYMBOLS_FAST = 2;
 
     private readonly OVERSHOOT_DISTANCE = 20;
     private readonly OVERSHOOT_DURATION = 0.1;
 
     private readonly TURBO_SPIN_ITEM_COUNT = 10;
     private readonly BLUR_DURATION = 0.7;
-    private readonly SLOW_DOWN_DURATION = 2;
+    private readonly DELAY_SLOW_DOWN_DURATION = 2;
+    private readonly SLOW_DOWN_DURATION = 3;
     private readonly SLOW_DOWN_DURATION_FAST = 0.3;
 
     // State tracking
@@ -49,7 +49,6 @@ export default class SlotReelNew extends SlotReel {
     private actualTargetDistance = 0;
     private turboSpeed = 0;
     private currentSpeed = 0;
-    private deceleration = 2000;
     private stoppingElapsedTime = 0;
     private easingSlowDuration = 0;
 
@@ -219,7 +218,7 @@ export default class SlotReelNew extends SlotReel {
     }
 
     easeOutSine(x: number) {
-        return Math.sqrt(1 - Math.pow(x - 1, 2));
+        return Math.sin((x * Math.PI) / 2); //sineOut
     }
 
     private calculateSpinOffset(dt: number) {
@@ -229,8 +228,10 @@ export default class SlotReelNew extends SlotReel {
             this.stoppingElapsedTime += dt;
             const progress = Math.min(1, this.stoppingElapsedTime / this.easingSlowDuration);
             const current = this.easeOutSine(progress) * distance;
+            console.log(`slow speed ${this.node.name}`, (current - prev) / dt);
             return current - prev;
         } else {
+            console.log(`speed ${this.node.name}`, this.currentSpeed);
             this.currentSpeed = Math.min(this.maxSpeed, this.currentSpeed + this.acceleration * dt);
         }
 
@@ -248,13 +249,13 @@ export default class SlotReelNew extends SlotReel {
     public stopSoon() {
         this.moveAllItemsToWinningLayer();
         this.isFaster = true;
-        this.blurSymbols();
+        // this.blurSymbols();
         this.scheduleOnce(() => {
             this.isFaster = false;
-            this.normalSymbols();
-            console.time("stop in " + this.node.uuid);
+            // this.normalSymbols();
+            console.time("stop in " + this.node.name);
             this.prepareStop();
-        }, this.BLUR_DURATION);
+        }, this.DELAY_SLOW_DOWN_DURATION);
     }
 
     protected moveAllItemsToWinningLayer() {
@@ -287,20 +288,14 @@ export default class SlotReelNew extends SlotReel {
         this.easingSlowDuration = fast ? this.SLOW_DOWN_DURATION_FAST : this.SLOW_DOWN_DURATION;
         this.stoppingElapsedTime = 0;
 
-        const remainingDistance = this.targetStopDistance - this.totalDistance;
-        if (remainingDistance > 0) {
-            this.deceleration = (this.currentSpeed * this.currentSpeed) / (2 * remainingDistance);
-            this.deceleration = Math.min(this.deceleration, this.SPIN_DECELERATION);
-        }
-
         this.syncReelData();
         this.isStoppingPhase = true;
     }
 
     // Overshoot phase
     private startOvershootEffect() {
-        console.timeEnd("stop in " + this.node.uuid);
-        console.time("back in " + this.node.uuid);
+        console.timeEnd("stop in " + this.node.name);
+        console.time("back in " + this.node.name);
         this.isOvershooting = true;
         this.isSpin = false;
         this.overshootProgress = 0;
@@ -330,7 +325,7 @@ export default class SlotReelNew extends SlotReel {
             this.isStoppingPhase = false;
             this.onSpinFinishCallback();
             this.moveAllItemsToReelNode();
-            console.timeEnd("back in " + this.node.uuid);
+            console.timeEnd("back in " + this.node.name);
         }
     }
 

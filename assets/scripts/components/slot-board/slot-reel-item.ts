@@ -54,7 +54,7 @@ export default class SlotReelItem extends Component {
         if (isShowBlurSymbol) {
             // AnimationUtils.setOpacityNode(this.blurSymbol, 255);
             AnimationUtils.fadeIn(this.blurSymbol, 0.3);
-            this.blurSymbol.scale = v3(1, 1 / 1.5, 1).multiplyScalar(1.5);
+            this.blurSymbol.scale = v3(1 / 1.5, 1, 1).multiplyScalar(1.5);
             // AnimationUtils.setOpacityNode(this.effectSpine.node, 1);
             AnimationUtils.fadeOut(this.effectSpine.node, 0.3);
         } else {
