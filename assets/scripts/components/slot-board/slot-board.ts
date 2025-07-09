@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, log, Node, Prefab, v3, Vec2, Vec3 } from "cc";
+import { _decorator, Component, instantiate, log, Node, NodePool, Prefab, tween, v3, Vec2, Vec3 } from "cc";
 
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -33,6 +33,8 @@ export default class SlotBoard extends Component {
     @property(Node)
     peekEffectNode: Node = null;
 
+    protected peekEffectPool: NodePool = null;
+
     public reels: SlotReelNew[] = [];
 
     public get reelCount() {
@@ -49,8 +51,22 @@ export default class SlotBoard extends Component {
     symbolCountPerReel = 24;
     stepSymbolPerReel = 6;
 
+    private readonly PEEK_EFFECT_SCALE = 1.05;
+    private readonly PEEK_EFFECT_DURATION = 1.5;
+    private readonly PEEK_EFFECT_HIDE = 0.3;
+
     onLoad() {
         this.winningOverlayNode.active = false;
+        this.initPeekEffectPool();
+    }
+
+    protected initPeekEffectPool() {
+        this.peekEffectPool = new NodePool();
+        // Pre-instantiate a few nodes for the pool
+        for (let i = 0; i < 2; i++) {
+            const node = instantiate(this.peekEffectNode);
+            this.peekEffectPool.put(node);
+        }
     }
 
     initReels() {
@@ -59,7 +75,6 @@ export default class SlotBoard extends Component {
             if (reel) {
                 this.reels.push(reel);
                 reel.gameId = this.gameId;
-                // reel.itemCount = this.getSymbolCountPerReel(index);
                 reel.createReel();
                 reel.winningContainer = this.winningSymbolsNode;
             }
@@ -199,6 +214,7 @@ export default class SlotBoard extends Component {
                     const isEdgeItem = i === minIndex;
                     reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(() => {
                         console.timeEnd("spin reel " + current);
+                        this.hidePeekEffectAtIndex(current);
                         if (current < this.reels.length - 1) {
                             const nextReelIndex = current + 1;
                             this.showPeekEffect(nextReelIndex);
@@ -206,9 +222,12 @@ export default class SlotBoard extends Component {
                             const peekEffects = this.checkSpecialEffect(this.data, columns.slice(0, nextReelIndex));
                             this.handleSymbolsPeekEffect(peekEffects);
                             //update symbols highlight
+                            this.zoomPeekEffect(true);
                             this.reels[nextReelIndex].stopSoon();
                         } else {
                             this.hidePeekEffect();
+                            this.zoomPeekEffect(false);
+
                             resolve();
                         }
                     });
@@ -230,13 +249,33 @@ export default class SlotBoard extends Component {
 
     showPeekEffect(reelIndex: number) {
         this.peekEffectContainer.active = true;
-        this.peekEffectNode.active = true;
-        this.peekEffectNode.setPosition(this.reels[reelIndex].node.position);
+
+        const peekEffectNode = this.peekEffectPool.get();
+        peekEffectNode.active = true;
+
+        const position = this.reels[reelIndex].node.position;
+        peekEffectNode.setPosition(v3(position.x, 0));
+        peekEffectNode.name = reelIndex.toString();
+        this.peekEffectContainer.addChild(peekEffectNode);
+        AnimationUtils.fadeIn(peekEffectNode, 0.3);
+    }
+
+    async hidePeekEffectAtIndex(reelIndex: number) {
+        const node = this.peekEffectContainer.getChildByName(`${reelIndex}`);
+        if (node) {
+            await AnimationUtils.fadeOut(node, 0.3);
+            this.peekEffectPool.put(node);
+        }
     }
 
     hidePeekEffect() {
         this.peekEffectContainer.active = false;
-        this.peekEffectNode.active = false;
+
+        // Return all peek effect nodes to the pool
+        const peekEffectNodes = this.peekEffectContainer.children.slice(); // Create a copy to avoid modification during iteration
+        peekEffectNodes.forEach((node) => {
+            this.peekEffectPool.put(node);
+        });
     }
 
     showPeekEffectSymbols(symbols: number[]) {
@@ -250,7 +289,6 @@ export default class SlotBoard extends Component {
     checkSpecialEffect(rawData: number[], columns: number[][]) {
         log("columns ", columns);
         const length = columns.length;
-        //TODO: implement special effect
         const specialSymbols = [SpecialSymbol.BONUS, SpecialSymbol.FREESPIN];
         const result = {};
         specialSymbols.forEach((specialSymbol) => {
@@ -316,6 +354,20 @@ export default class SlotBoard extends Component {
                 this.previewSymbolRight = await bundleManager.loadResourcesAsset("prefabs/preview-odd-right", Prefab);
             }
             return this.previewSymbolRight;
+        }
+    }
+
+    zoomPeekEffect(zooming: boolean) {
+        const scale = zooming ? this.PEEK_EFFECT_SCALE : 1;
+        const duration = zooming ? this.PEEK_EFFECT_DURATION : this.PEEK_EFFECT_HIDE;
+        tween(this.node)
+            .to(duration, { scale: v3(1, 1, 1).multiplyScalar(scale) }, { easing: "sineInOut" })
+            .start();
+    }
+
+    onDestroy() {
+        if (this.peekEffectPool) {
+            this.peekEffectPool.clear();
         }
     }
 }
