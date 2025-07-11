@@ -253,7 +253,6 @@ export default class SlotReelNew extends SlotReel {
     public stopSoon() {
         this.moveAllItemsToWinningLayer();
         this.isFaster = true;
-        // this.blurSymbols();
         this.scheduleOnce(() => {
             this.isFaster = false;
             console.time("stop in " + this.node.name);
@@ -310,10 +309,9 @@ export default class SlotReelNew extends SlotReel {
     }
 
     private updateOvershoot(dt: number) {
-        const currentOvershoot = this.OVERSHOOT_DISTANCE; //  Math.abs(this.totalDistance - this.actualTargetDistance);
         this.overshootProgress += this.overshootReturnSpeed * dt;
 
-        const progress = Math.min(1, this.overshootProgress / currentOvershoot);
+        const progress = Math.min(1, this.overshootProgress / this.OVERSHOOT_DISTANCE);
         const easedSpeed = this.overshootReturnSpeed * (1 - Math.pow(progress, 2));
 
         const offset = easedSpeed * dt;

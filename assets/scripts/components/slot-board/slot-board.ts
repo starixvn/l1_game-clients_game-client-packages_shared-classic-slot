@@ -212,7 +212,7 @@ export default class SlotBoard extends Component {
 
     async spinNormal(duration: number, columns: number[][], specialEffect?: PeekEffectCheckData) {
         return new Promise<void>(async (resolve) => {
-            let minIndex = specialEffect ? specialEffect.position : SLOT_COLUMN_MAX_INDEX;
+            const minIndex = specialEffect ? specialEffect.position : SLOT_COLUMN_MAX_INDEX;
 
             let i = 0;
             for (; i < this.reels.length; i++) {
@@ -338,7 +338,8 @@ export default class SlotBoard extends Component {
         }
 
         if (positions.length > 0) {
-            result.position = positions.sort((a, b) => a - b)[0];
+            const sortedPositions = positions.sort((a, b) => a - b);
+            result.position = sortedPositions[0];
         }
 
         log("result ", result);
