@@ -327,7 +327,7 @@ export default class SlotBoard extends Component {
 
         if (columns[0].includes(SpecialSymbol.JACKPOT) && length >= SLOT_COLUMN_MAX_INDEX) {
             const lineIndex = paylines.findIndex((line) => {
-                const temp = line.slice(0, SLOT_COLUMN_MAX_INDEX - 1);
+                const temp = line.slice(0, SLOT_COLUMN_MAX_INDEX);
                 const notJackpot = temp.some((position) => rawData[position] !== SpecialSymbol.JACKPOT);
                 return !notJackpot;
             });
