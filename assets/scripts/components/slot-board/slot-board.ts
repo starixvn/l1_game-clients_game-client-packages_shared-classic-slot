@@ -13,6 +13,12 @@ import SlotReelNew from "./slot-reel-new";
 
 const { ccclass, property } = _decorator;
 
+interface PeekEffectCheckData {
+    position: number;
+    jackpotLine?: number;
+    symbols: number[];
+}
+
 @ccclass
 export default class SlotBoard extends Component {
     @property(Node)
@@ -175,13 +181,28 @@ export default class SlotBoard extends Component {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
         // this.data = [2, 5, 10, 10, 2, 3, 2, 5, 10, 10, 3, 6, 7, 6, 10];
+        // this.data = [
+        //     1,
+        //     SpecialSymbol.JACKPOT,
+        //     1,
+        //     1,
+        //     SpecialSymbol.JACKPOT,
+        //     1,
+        //     0,
+        //     SpecialSymbol.JACKPOT,
+        //     SpecialSymbol.JACKPOT,
+        //     1,
+        //     SpecialSymbol.JACKPOT,
+        //     1,
+        //     1,
+        // ];
         const columns = this.convertDataToColumns(this.data);
 
         if (turbo) {
             await this.spinTurbo(duration, columns);
         } else {
             const specialEffect = this.checkSpecialEffect(this.data, columns);
-            if (Object.keys(specialEffect).length > 0) {
+            if (specialEffect) {
                 await this.spinNormal(duration, columns, specialEffect);
             } else {
                 await this.spinNormal(duration, columns);
@@ -189,13 +210,10 @@ export default class SlotBoard extends Component {
         }
     }
 
-    async spinNormal(duration: number, columns: number[][], specialEffect?: { [symbol: number]: number }) {
+    async spinNormal(duration: number, columns: number[][], specialEffect?: PeekEffectCheckData) {
         return new Promise<void>(async (resolve) => {
-            let minIndex = this.reels.length - 1;
-            if (specialEffect) {
-                minIndex = Object.values(specialEffect).sort((a, b) => a - b)[0];
-                minIndex = Math.min(minIndex, SLOT_COLUMN_MAX_INDEX - 1);
-            }
+            let minIndex = specialEffect ? specialEffect.position : this.reels.length - 1;
+
             let i = 0;
             for (; i < this.reels.length; i++) {
                 const reel = this.reels[i];
@@ -238,13 +256,11 @@ export default class SlotBoard extends Component {
 
     handleSymbolsPeekEffect(peekEffects) {
         log("peekEffects ", peekEffects);
-        const keys = Object.keys(peekEffects).map(Number);
-        if (keys.includes(SpecialSymbol.JACKPOT)) {
-            const lineIndex = peekEffects[SpecialSymbol.JACKPOT];
-            this.showWinningEffect(paylines[lineIndex], SpecialSymbol.JACKPOT);
+        if (peekEffects.jackpotLine !== undefined) {
+            this.showWinningEffect(paylines[peekEffects.jackpotLine], SpecialSymbol.JACKPOT);
         }
 
-        this.showPeekEffectSymbols(keys.filter((key) => key !== SpecialSymbol.JACKPOT));
+        this.showPeekEffectSymbols(peekEffects.symbols);
     }
 
     showPeekEffect(reelIndex: number) {
@@ -286,11 +302,15 @@ export default class SlotBoard extends Component {
         });
     }
 
-    checkSpecialEffect(rawData: number[], columns: number[][]) {
+    checkSpecialEffect(rawData: number[], columns: number[][]): PeekEffectCheckData {
         log("columns ", columns);
         const length = columns.length;
         const specialSymbols = [SpecialSymbol.BONUS, SpecialSymbol.FREESPIN];
-        const result = {};
+        const result: PeekEffectCheckData = {
+            position: -1,
+            symbols: [],
+        };
+        const positions = [];
         specialSymbols.forEach((specialSymbol) => {
             let count = 0;
             for (const [index, column] of columns.entries()) {
@@ -298,26 +318,31 @@ export default class SlotBoard extends Component {
                     count++;
                 }
                 if (count === 2 && index < this.reelCount - 1) {
-                    result[specialSymbol] = index;
+                    positions.push(column);
+                    result.symbols.push(specialSymbol);
                     break;
                 }
             }
         });
 
         if (columns[0].includes(SpecialSymbol.JACKPOT) && length >= SLOT_COLUMN_MAX_INDEX) {
-            const index = columns[0].indexOf(SpecialSymbol.JACKPOT);
-
-            const filterLines = paylines.filter((line) => line.includes(index));
             const lineIndex = paylines.findIndex((line) => {
-                const notJackpot = line.some((position) => rawData[position] !== SpecialSymbol.JACKPOT);
+                const temp = line.slice(0, SLOT_COLUMN_MAX_INDEX - 1);
+                const notJackpot = temp.some((position) => rawData[position] !== SpecialSymbol.JACKPOT);
                 return !notJackpot;
             });
             if (lineIndex !== -1) {
-                result[SpecialSymbol.JACKPOT] = lineIndex;
+                positions.push(SLOT_COLUMN_MAX_INDEX - 1);
+                result.jackpotLine = lineIndex;
             }
         }
+
+        if (positions.length > 0) {
+            result.position = positions.sort((a, b) => a - b)[0];
+        }
+
         log("result ", result);
-        return result;
+        return result.position > -1 ? result : null;
     }
 
     async spinTurbo(duration: number, columns: number[][]) {
