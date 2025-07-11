@@ -182,7 +182,8 @@ export class SlotSettlementHandler {
     }
 
     protected handleSettleTween(bigWin: any, newFreeSpinCount: any, betWin: any, jackpot: any, winningLines: any, freeSpins: any) {
-        const bigWinOrGotFreeSpin = bigWin || newFreeSpinCount > 0;
+        const gotFreeSpin = newFreeSpinCount > 0;
+        const bigWinOrGotFreeSpin = bigWin || gotFreeSpin;
         if (!bigWinOrGotFreeSpin) {
             this.slotBoardStore.bottomMessageState = SlotNotification.SETTLED;
         }
@@ -190,10 +191,12 @@ export class SlotSettlementHandler {
             betWin > 0 && !bigWin ? this.slotDurationStore.winningDuration : this.slotDurationStore.noWinningDuration;
 
         const sequenceTweens = [];
-        sequenceTweens.push(tween().call(() => this.showWinningLines(betWin, bigWin, jackpot, winningLines)));
-        sequenceTweens.push(tween().delay(showResultBoardDuration));
-        if (bigWin) {
-            sequenceTweens.push(this.createTweenShowBigWin(betWin, bigWin));
+        if (!gotFreeSpin) {
+            sequenceTweens.push(tween().call(() => this.showWinningLines(betWin, bigWin, jackpot, winningLines)));
+            sequenceTweens.push(tween().delay(showResultBoardDuration));
+            if (bigWin) {
+                sequenceTweens.push(this.createTweenShowBigWin(betWin, bigWin));
+            }
         }
         if (bigWinOrGotFreeSpin) {
             sequenceTweens.push(
@@ -202,7 +205,7 @@ export class SlotSettlementHandler {
                 })
             );
         }
-        if (newFreeSpinCount > 0) {
+        if (gotFreeSpin) {
             sequenceTweens.push(this.createTweenShowFreeSpins(freeSpins));
         }
 
