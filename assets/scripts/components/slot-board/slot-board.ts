@@ -318,7 +318,7 @@ export default class SlotBoard extends Component {
                     count++;
                 }
                 if (count === 2 && index < this.reelCount - 1) {
-                    positions.push(column);
+                    positions.push(index);
                     result.symbols.push(specialSymbol);
                     break;
                 }
