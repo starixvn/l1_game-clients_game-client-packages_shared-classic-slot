@@ -212,7 +212,7 @@ export default class SlotBoard extends Component {
 
     async spinNormal(duration: number, columns: number[][], specialEffect?: PeekEffectCheckData) {
         return new Promise<void>(async (resolve) => {
-            let minIndex = specialEffect ? specialEffect.position : this.reels.length - 1;
+            let minIndex = specialEffect ? specialEffect.position : SLOT_COLUMN_MAX_INDEX;
 
             let i = 0;
             for (; i < this.reels.length; i++) {
@@ -233,7 +233,7 @@ export default class SlotBoard extends Component {
                     reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(() => {
                         console.timeEnd("spin reel " + current);
                         this.hidePeekEffectAtIndex(current);
-                        if (current < this.reels.length - 1) {
+                        if (current < SLOT_COLUMN_MAX_INDEX) {
                             const nextReelIndex = current + 1;
                             this.showPeekEffect(nextReelIndex);
                             //calculate peek effect at current
@@ -317,7 +317,7 @@ export default class SlotBoard extends Component {
                 if (column.includes(specialSymbol)) {
                     count++;
                 }
-                if (count === 2 && index < this.reelCount - 1) {
+                if (count === 2 && index < SLOT_COLUMN_MAX_INDEX) {
                     positions.push(index);
                     result.symbols.push(specialSymbol);
                     break;
@@ -348,7 +348,7 @@ export default class SlotBoard extends Component {
     async spinTurbo(duration: number, columns: number[][]) {
         for (let i = 0; i < this.reels.length; i++) {
             const reel = this.reels[i];
-            if (i < this.reels.length - 1) {
+            if (i < SLOT_COLUMN_MAX_INDEX) {
                 reel.spinTurbo(duration, columns[i]);
             } else {
                 await reel.spinTurbo(duration, columns[i]);
