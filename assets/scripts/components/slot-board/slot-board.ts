@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, log, Node, NodePool, Prefab, tween, v3, Vec2, Vec3 } from "cc";
+import { _decorator, Component, instantiate, log, Node, NodePool, Prefab, sp, v3, Vec2, Vec3 } from "cc";
 
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -32,6 +32,9 @@ export default class SlotBoard extends Component {
 
     @property(PreviewOddsPopup)
     previewPopup: PreviewOddsPopup = null;
+
+    @property(Node)
+    peekEffectOverlay: Node = null;
 
     @property(Node)
     peekEffectContainer: Node = null;
@@ -210,6 +213,14 @@ export default class SlotBoard extends Component {
         }
     }
 
+    makeReelsMoveFast(currentIndex: number) {
+        this.reels.forEach((reel, index) => {
+            if (index >= currentIndex) {
+                reel.moveFast();
+            }
+        });
+    }
+
     async spinNormal(duration: number, columns: number[][], specialEffect?: PeekEffectCheckData) {
         return new Promise<void>(async (resolve) => {
             const minIndex = specialEffect ? specialEffect.position : SLOT_COLUMN_MAX_INDEX;
@@ -240,6 +251,9 @@ export default class SlotBoard extends Component {
                         this.handleSymbolsPeekEffect(peekEffects);
 
                         if (current < SLOT_COLUMN_MAX_INDEX) {
+                            if (!this.reels[nextReelIndex].isFaster) {
+                                this.makeReelsMoveFast(current);
+                            }
                             this.showPeekEffect(nextReelIndex);
                             //update symbols highlight
                             this.zoomPeekEffect(true);
@@ -272,6 +286,7 @@ export default class SlotBoard extends Component {
     }
 
     showPeekEffect(reelIndex: number) {
+        this.peekEffectOverlay.active = true;
         this.peekEffectContainer.active = true;
 
         const peekEffectNode = this.peekEffectPool.get();
@@ -282,6 +297,8 @@ export default class SlotBoard extends Component {
         peekEffectNode.name = reelIndex.toString();
         this.peekEffectContainer.addChild(peekEffectNode);
         AnimationUtils.fadeIn(peekEffectNode, 0.3);
+        const spine = peekEffectNode.getComponentInChildren(sp.Skeleton);
+        spine.setAnimation(0, "show", true);
     }
 
     async hidePeekEffectAtIndex(reelIndex: number) {
@@ -293,6 +310,7 @@ export default class SlotBoard extends Component {
     }
 
     hidePeekEffect() {
+        this.peekEffectOverlay.active = false;
         this.peekEffectContainer.active = false;
 
         // Return all peek effect nodes to the pool
@@ -392,11 +410,11 @@ export default class SlotBoard extends Component {
     }
 
     zoomPeekEffect(zooming: boolean) {
-        const scale = zooming ? this.PEEK_EFFECT_SCALE : 1;
-        const duration = zooming ? this.PEEK_EFFECT_DURATION : this.PEEK_EFFECT_HIDE;
-        tween(this.node)
-            .to(duration, { scale: v3(1, 1, 1).multiplyScalar(scale) }, { easing: "sineInOut" })
-            .start();
+        // const scale = zooming ? this.PEEK_EFFECT_SCALE : 1;
+        // const duration = zooming ? this.PEEK_EFFECT_DURATION : this.PEEK_EFFECT_HIDE;
+        // tween(this.node)
+        //     .to(duration, { scale: v3(1, 1, 1).multiplyScalar(scale) }, { easing: "sineInOut" })
+        //     .start();
     }
 
     onDestroy() {

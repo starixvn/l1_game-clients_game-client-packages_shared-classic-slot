@@ -8,7 +8,7 @@ export class StandardSlotGameConfigs implements SlotGameBaseConfigs {
     jackpotTimeOut? = 60;
 
     normalMode = {
-        spinDuration: 1,
+        spinDuration: 1.2,
         winningDuration: 2,
         noWinningDuration: 0.75,
         freespinDuration: 2,

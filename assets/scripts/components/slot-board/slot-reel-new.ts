@@ -16,28 +16,27 @@ export default class SlotReelNew extends SlotReel {
     private readonly ANTICIPATION_MIN_SPEED = 200;
     private readonly ANTICIPATION_MAX_SPEED = 300;
 
-    private readonly SPIN_ACCELERATION = 6000;
-    private readonly SPIN_ACCELERATION_2 = 6000;
-    private readonly SPIN_MAX_SPEED = 2000;
-    private readonly SPIN_MAX_SPEED_2 = 2000;
+    private readonly SPIN_ACCELERATION = 5000;
+    private readonly SPIN_ACCELERATION_2 = 5000;
+    private readonly SPIN_MAX_SPEED = 1365;
+    private readonly SPIN_MAX_SPEED_2 = 2243;
     private readonly SPIN_STOP_THRESHOLD = 2;
 
-    private readonly SPIN_EXTRA_SYMBOLS = 20;
+    private readonly SPIN_EXTRA_SYMBOLS = 18;
     private readonly SPIN_EXTRA_SYMBOLS_FAST = 2;
 
-    private readonly OVERSHOOT_DISTANCE = 20;
-    private readonly OVERSHOOT_DURATION = 0.1;
+    private readonly OVERSHOOT_DISTANCE = 25;
+    private readonly OVERSHOOT_DURATION = 0.3;
 
     private readonly TURBO_SPIN_ITEM_COUNT = 10;
-    private readonly BLUR_DURATION = 0.7;
     private readonly DELAY_SLOW_DOWN_DURATION = 2;
     private readonly SLOW_DOWN_DURATION = 3;
-    private readonly SLOW_DOWN_DURATION_FAST = 0.3;
+    private readonly SLOW_DOWN_DURATION_FAST = 0.4;
 
     // State tracking
     private isSpin = false;
     private isTurbo = false;
-    private isFaster = false;
+    public isFaster = false;
     private isStoppingPhase = false;
     private isAnticipating = false;
     private isOvershooting = false;
@@ -184,7 +183,7 @@ export default class SlotReelNew extends SlotReel {
         if (spinDuration > 0) {
             this.scheduleOnce(() => {
                 this.prepareStop(true);
-            }, spinDuration);
+            }, spinDuration - this.SLOW_DOWN_DURATION_FAST);
         }
     }
 
@@ -250,12 +249,14 @@ export default class SlotReelNew extends SlotReel {
         return this.isFaster ? this.SPIN_MAX_SPEED_2 : this.SPIN_MAX_SPEED;
     }
 
+    public moveFast() {
+        this.isFaster = true;
+    }
+
     public stopSoon() {
         this.moveAllItemsToWinningLayer();
-        this.isFaster = true;
         this.scheduleOnce(() => {
             this.isFaster = false;
-            console.time("stop in " + this.node.name);
             this.prepareStop();
         }, this.DELAY_SLOW_DOWN_DURATION);
     }
@@ -279,6 +280,8 @@ export default class SlotReelNew extends SlotReel {
     }
 
     public prepareStop(fast = false) {
+        console.time("stop in " + this.node.name);
+        console.log("--------------- current speed ", this.currentSpeed);
         this.normalSymbols();
 
         const symbolGap = this.symbolGap;
