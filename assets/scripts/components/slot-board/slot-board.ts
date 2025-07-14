@@ -230,19 +230,24 @@ export default class SlotBoard extends Component {
                     });
                 } else {
                     const isEdgeItem = i === minIndex;
-                    reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(() => {
+                    reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(async () => {
                         console.timeEnd("spin reel " + current);
                         this.hidePeekEffectAtIndex(current);
+                        //calculate peek effect at current
+                        const nextReelIndex = current + 1;
+                        const currentColumns = current < SLOT_COLUMN_MAX_INDEX ? columns.slice(0, nextReelIndex) : columns;
+                        const peekEffects = this.checkSpecialEffect(this.data, currentColumns);
+                        this.handleSymbolsPeekEffect(peekEffects);
+
                         if (current < SLOT_COLUMN_MAX_INDEX) {
-                            const nextReelIndex = current + 1;
                             this.showPeekEffect(nextReelIndex);
-                            //calculate peek effect at current
-                            const peekEffects = this.checkSpecialEffect(this.data, columns.slice(0, nextReelIndex));
-                            this.handleSymbolsPeekEffect(peekEffects);
                             //update symbols highlight
                             this.zoomPeekEffect(true);
                             this.reels[nextReelIndex].stopSoon();
                         } else {
+                            if (peekEffects) {
+                                await AnimationUtils.delayTime(1);
+                            }
                             this.hidePeekEffect();
                             this.zoomPeekEffect(false);
 
@@ -255,6 +260,9 @@ export default class SlotBoard extends Component {
     }
 
     handleSymbolsPeekEffect(peekEffects) {
+        if (!peekEffects) {
+            return;
+        }
         log("peekEffects ", peekEffects);
         if (peekEffects.jackpotLine !== undefined) {
             this.showWinningEffect(paylines[peekEffects.jackpotLine], SpecialSymbol.JACKPOT);
