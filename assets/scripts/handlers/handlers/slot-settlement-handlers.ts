@@ -191,7 +191,7 @@ export class SlotSettlementHandler {
             betWin > 0 && !bigWin ? this.slotDurationStore.winningDuration : this.slotDurationStore.noWinningDuration;
 
         const sequenceTweens = [];
-        if (!gotFreeSpin) {
+        if (!gotFreeSpin || this.betControlStore.turboEnabledOnSpin) {
             sequenceTweens.push(tween().call(() => this.showWinningLines(betWin, bigWin, jackpot, winningLines)));
             sequenceTweens.push(tween().delay(showResultBoardDuration));
             if (bigWin) {
