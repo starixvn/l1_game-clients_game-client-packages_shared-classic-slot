@@ -225,9 +225,9 @@ export default class SlotReelNew extends SlotReel {
     private updateCurrentSpeed(dt: number) {
         if (this.isStoppingPhase) {
             const distance = this.stoppingDistance;
-            const prev = easing.sineOut(Math.min(1, this.deltaTime / this.stoppingDuration)) * distance;
+            const prev = easing.circOut(Math.min(1, this.deltaTime / this.stoppingDuration)) * distance;
             this.deltaTime += dt;
-            const current = easing.sineOut(Math.min(1, this.deltaTime / this.stoppingDuration)) * distance;
+            const current = easing.circOut(Math.min(1, this.deltaTime / this.stoppingDuration)) * distance;
             this.currentSpeed = (current - prev) / dt;
         } else {
             this.currentSpeed = Math.min(this.maxSpeed, this.currentSpeed + this.acceleration * dt);
