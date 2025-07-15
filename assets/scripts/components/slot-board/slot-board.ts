@@ -41,7 +41,7 @@ export default class SlotBoard extends Component {
 
     peekEffectPrefab: Prefab = null;
 
-    protected peekEffectPool: NodePool = null;
+    protected peekEffectPool: NodePool = new NodePool();
 
     public reels: SlotReelNew[] = [];
 
@@ -75,7 +75,6 @@ export default class SlotBoard extends Component {
     }
 
     protected initPeekEffectPool() {
-        this.peekEffectPool = new NodePool();
         // Pre-instantiate a few nodes for the pool
         for (let i = 0; i < 2; i++) {
             const node = instantiate(this.peekEffectPrefab);
@@ -279,6 +278,9 @@ export default class SlotBoard extends Component {
         this.peekEffectContainer.active = true;
 
         const peekEffectNode = this.peekEffectPool.get();
+        if (!peekEffectNode) {
+            return;
+        }
         peekEffectNode.active = true;
 
         const position = this.reels[reelIndex].node.position;
