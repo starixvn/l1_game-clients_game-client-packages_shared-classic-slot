@@ -40,7 +40,7 @@ export default class BonusDialog extends ObserverComponent {
     public onBonusFinished = () => {};
     public slotGameConfigs: SlotGameBaseConfigs;
     private configDuration: CustomDuration;
-
+    private receivedJackpot = false;
     private totalBonus = 0;
     private openedBonus = 0;
     private totalValue = 0;
@@ -96,6 +96,11 @@ export default class BonusDialog extends ObserverComponent {
     @render(SlotBoardStore, (store) => store.spinTime)
     renderSpinTime(spinTime: number) {
         this.spinTime = spinTime;
+    }
+
+    @render(SlotBoardStore, (store) => store.receivedJackpot)
+    renderReceivedJackpot(receivedJackpot: any) {
+        this.receivedJackpot = receivedJackpot !== null;
     }
 
     @render(SlotBoardStore, (store) => store.bonusChest, { fireImmediately: false })
@@ -159,7 +164,9 @@ export default class BonusDialog extends ObserverComponent {
 
     start() {
         const oldSpinDuration = 5;
-        const spinAndBonusDuration = this.spinTime + this.configDuration.bonusDuration;
+        const spinAndBonusDuration = this.receivedJackpot
+            ? this.configDuration.bonusDuration
+            : this.spinTime + this.configDuration.bonusDuration;
         const calculateDuration = this.slotGameConfigs.bonusTimeOut + oldSpinDuration - spinAndBonusDuration;
         const duration = Math.min(calculateDuration, this.slotGameConfigs.bonusTimeOut);
         this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
