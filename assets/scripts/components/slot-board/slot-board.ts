@@ -39,8 +39,7 @@ export default class SlotBoard extends Component {
     @property(Node)
     peekEffectContainer: Node = null;
 
-    @property(Node)
-    peekEffectNode: Node = null;
+    peekEffectPrefab: Prefab = null;
 
     protected peekEffectPool: NodePool = null;
 
@@ -66,14 +65,20 @@ export default class SlotBoard extends Component {
 
     onLoad() {
         this.winningOverlayNode.active = false;
-        this.initPeekEffectPool();
+        this.loadPeekEffectPrefab().then(() => {
+            this.initPeekEffectPool();
+        });
+    }
+
+    async loadPeekEffectPrefab() {
+        this.peekEffectPrefab = await bundleManager.loadResourcesAsset("prefabs/effects/peek-effect", Prefab);
     }
 
     protected initPeekEffectPool() {
         this.peekEffectPool = new NodePool();
         // Pre-instantiate a few nodes for the pool
         for (let i = 0; i < 2; i++) {
-            const node = instantiate(this.peekEffectNode);
+            const node = instantiate(this.peekEffectPrefab);
             this.peekEffectPool.put(node);
         }
     }
@@ -183,22 +188,6 @@ export default class SlotBoard extends Component {
     async spin(duration: number, turbo: boolean) {
         AudioUtils.playSFX(turbo ? AudioIds.SPINNING_TURBO : AudioIds.SPINNING_NORMAL);
         this.previewPopup.hideSymbolPreview();
-        // this.data = [2, 5, 10, 10, 2, 3, 2, 5, 10, 10, 3, 6, 7, 6, 10];
-        // this.data = [
-        //     1,
-        //     SpecialSymbol.JACKPOT,
-        //     1,
-        //     1,
-        //     SpecialSymbol.JACKPOT,
-        //     1,
-        //     0,
-        //     SpecialSymbol.JACKPOT,
-        //     SpecialSymbol.JACKPOT,
-        //     1,
-        //     SpecialSymbol.JACKPOT,
-        //     1,
-        //     1,
-        // ];
         const columns = this.convertDataToColumns(this.data);
 
         if (turbo) {
