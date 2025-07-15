@@ -5,7 +5,7 @@ import RawTimer from "db://shared-components/game/game-timer/scripts/raw-timer";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
-import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
+import { CustomDuration, SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
 import { SlotSettlementHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
@@ -41,9 +41,11 @@ export default class JackpotGame extends ObserverComponent {
     items: JackpotGameItem[] = [];
 
     public onJackpotGameFinished = () => {};
+    public prizes = 0;
     protected slotGameConfigs: SlotGameBaseConfigs;
+    private configDuration: CustomDuration;
     private timerTween: Tween;
-    prizes = 0;
+    private spinTime = 0;
 
     @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
     onItemClicked(index: number) {
@@ -85,6 +87,16 @@ export default class JackpotGame extends ObserverComponent {
     @render(SlotDurationStore, (store) => store.config)
     renderConfig(config: SlotGameBaseConfigs) {
         this.slotGameConfigs = config;
+    }
+
+    @render(SlotBoardStore, (store) => store.spinTime)
+    renderSpinTime(spinTime: number) {
+        this.spinTime = spinTime;
+    }
+
+    @render(SlotDurationStore, (store) => store.configDuration)
+    renderConfigDuration(configDuration: CustomDuration) {
+        this.configDuration = configDuration;
     }
 
     @render(SlotBoardStore, (store) => store.winningJackpot, { fireImmediately: false })
@@ -143,7 +155,10 @@ export default class JackpotGame extends ObserverComponent {
     }
 
     start() {
-        const duration = this.slotGameConfigs.jackpotTimeOut;
+        const oldSpinDuration = 5;
+        const spinTime = this.spinTime + this.configDuration.jackpotDuration;
+        const calculateDuration = this.slotGameConfigs.jackpotTimeOut + oldSpinDuration - spinTime;
+        const duration = Math.min(calculateDuration, this.slotGameConfigs.jackpotTimeOut);
         this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
     }
 }
