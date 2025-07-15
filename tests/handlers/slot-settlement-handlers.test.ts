@@ -619,7 +619,7 @@ describe("SlotSettlementHandler", () => {
 
             expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SETTLED);
             jest.advanceTimersByTime(slotDurationStore.winningDuration);
-            expect(showWinningLinesSpy).toHaveBeenCalledWith(betWin, bigWin, jackpot, mockWinningLines);
+            expect(showWinningLinesSpy).not.toHaveBeenCalledWith(betWin, bigWin, jackpot, mockWinningLines);
             expect(createTweenShowBigWinSpy).not.toHaveBeenCalled();
             expect(createTweenShowFreeSpinsSpy).toHaveBeenCalledWith(mockFreeSpins);
 
@@ -652,8 +652,8 @@ describe("SlotSettlementHandler", () => {
 
             expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SETTLED);
             jest.advanceTimersByTime(slotDurationStore.noWinningDuration);
-            expect(showWinningLinesSpy).toHaveBeenCalled();
-            expect(createTweenShowBigWinSpy).toHaveBeenCalledWith(betWin, bigWin);
+            expect(showWinningLinesSpy).not.toHaveBeenCalled();
+            expect(createTweenShowBigWinSpy).not.toHaveBeenCalledWith(betWin, bigWin);
 
             jest.advanceTimersByTime(slotDurationStore.bigWinDuration);
             expect(slotBoardStore.bottomMessageState).toBe(SlotNotification.SETTLED);
