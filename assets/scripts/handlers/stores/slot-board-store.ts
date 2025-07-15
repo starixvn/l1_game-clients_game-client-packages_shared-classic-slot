@@ -42,6 +42,7 @@ export class SlotBoardStore {
     forceStopSettle = null;
 
     winningBet = 0;
+    spinTime = 0;
 
     bottomMessageState = SlotNotification.READY;
 
@@ -71,5 +72,9 @@ export class SlotBoardStore {
 
         this.slotState = SlotState.BET;
         this.bottomMessageState = SlotNotification.SPINNING;
+    }
+
+    updateSpinTime(time: number) {
+        this.spinTime = time;
     }
 }

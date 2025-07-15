@@ -189,6 +189,7 @@ export default class SlotBoard extends Component {
         this.previewPopup.hideSymbolPreview();
         const columns = this.convertDataToColumns(this.data);
 
+        const beginTime = Date.now();
         if (turbo) {
             await this.spinTurbo(duration, columns);
         } else {
@@ -199,6 +200,9 @@ export default class SlotBoard extends Component {
                 await this.spinNormal(duration, columns);
             }
         }
+        const spinTime = (Date.now() - beginTime) / 1000;
+        log("spinTime ", spinTime);
+        return spinTime;
     }
 
     makeReelsMoveFast(currentIndex: number) {
