@@ -294,6 +294,7 @@ export default class SlotBoard extends Component {
         AnimationUtils.fadeIn(peekEffectNode, 0.3);
         const spine = peekEffectNode.getComponentInChildren(sp.Skeleton);
         spine.setAnimation(0, "show", true);
+        AudioUtils.playSFX(AudioIds.PEEK_EFFECT);
     }
 
     async hidePeekEffectAtIndex(reelIndex: number) {
