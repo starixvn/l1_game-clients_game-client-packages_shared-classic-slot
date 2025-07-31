@@ -6,6 +6,7 @@ import { bundleManager } from "db://shared-components/shared/common-components/b
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
 import { LineData, paylines, SLOT_COLUMN_MAX_INDEX, SpecialSymbol, SPIN_FOREVER } from "../../definitions";
+import { resourceCaches } from "../../utils/classic-slot-utils";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
 import SlotReelItem from "./slot-reel-item";
@@ -59,15 +60,14 @@ export default class SlotBoard extends Component {
     symbolCountPerReel = 24;
     stepSymbolPerReel = 6;
 
-    private readonly PEEK_EFFECT_SCALE = 1.05;
-    private readonly PEEK_EFFECT_DURATION = 1.5;
-    private readonly PEEK_EFFECT_HIDE = 0.3;
-
     onLoad() {
         this.winningOverlayNode.active = false;
-        this.loadPeekEffectPrefab().then(() => {
-            this.initPeekEffectPool();
-        });
+
+        if (resourceCaches.gameFeature?.enablePeekEffect) {
+            this.loadPeekEffectPrefab().then(() => {
+                this.initPeekEffectPool();
+            });
+        }
     }
 
     async loadPeekEffectPrefab() {
@@ -193,9 +193,9 @@ export default class SlotBoard extends Component {
         if (turbo) {
             await this.spinTurbo(duration, columns);
         } else {
-            const specialEffect = this.checkSpecialEffect(this.data, columns);
-            if (specialEffect) {
-                await this.spinNormal(duration, columns, specialEffect);
+            const peekEffect = this.checkPeekEffect(this.data, columns);
+            if (peekEffect) {
+                await this.spinNormal(duration, columns, peekEffect);
             } else {
                 await this.spinNormal(duration, columns);
             }
@@ -213,9 +213,9 @@ export default class SlotBoard extends Component {
         });
     }
 
-    async spinNormal(duration: number, columns: number[][], specialEffect?: PeekEffectCheckData) {
+    async spinNormal(duration: number, columns: number[][], peekEffect?: PeekEffectCheckData) {
         return new Promise<void>(async (resolve) => {
-            const minIndex = specialEffect ? specialEffect.position : SLOT_COLUMN_MAX_INDEX;
+            const minIndex = peekEffect ? peekEffect.position : SLOT_COLUMN_MAX_INDEX;
 
             let i = 0;
             for (; i < this.reels.length; i++) {
@@ -234,12 +234,11 @@ export default class SlotBoard extends Component {
                 } else {
                     const isEdgeItem = i === minIndex;
                     reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(async () => {
-                        console.timeEnd("spin reel " + current);
                         this.hidePeekEffectAtIndex(current);
                         //calculate peek effect at current
                         const nextReelIndex = current + 1;
                         const currentColumns = current < SLOT_COLUMN_MAX_INDEX ? columns.slice(0, nextReelIndex) : columns;
-                        const peekEffects = this.checkSpecialEffect(this.data, currentColumns);
+                        const peekEffects = this.checkPeekEffect(this.data, currentColumns);
                         this.handleSymbolsPeekEffect(peekEffects);
 
                         if (current < SLOT_COLUMN_MAX_INDEX) {
@@ -247,15 +246,12 @@ export default class SlotBoard extends Component {
                                 this.makeReelsMoveFast(current);
                             }
                             this.showPeekEffect(nextReelIndex);
-                            //update symbols highlight
-                            this.zoomPeekEffect(true);
                             this.reels[nextReelIndex].stopSoon();
                         } else {
                             if (peekEffects) {
                                 await AnimationUtils.delayTime(1);
                             }
                             this.hidePeekEffect();
-                            this.zoomPeekEffect(false);
 
                             resolve();
                         }
@@ -266,6 +262,9 @@ export default class SlotBoard extends Component {
     }
 
     handleSymbolsPeekEffect(peekEffects) {
+        if (!resourceCaches.gameFeature?.enablePeekEffect) {
+            return;
+        }
         if (!peekEffects) {
             return;
         }
@@ -278,6 +277,9 @@ export default class SlotBoard extends Component {
     }
 
     showPeekEffect(reelIndex: number) {
+        if (!resourceCaches.gameFeature?.enablePeekEffect) {
+            return;
+        }
         this.peekEffectOverlay.active = true;
         this.peekEffectContainer.active = true;
 
@@ -298,6 +300,9 @@ export default class SlotBoard extends Component {
     }
 
     async hidePeekEffectAtIndex(reelIndex: number) {
+        if (!resourceCaches.gameFeature?.enablePeekEffect) {
+            return;
+        }
         const node = this.peekEffectContainer.getChildByName(`${reelIndex}`);
         if (node) {
             await AnimationUtils.fadeOut(node, 0.3);
@@ -306,6 +311,9 @@ export default class SlotBoard extends Component {
     }
 
     hidePeekEffect() {
+        if (!resourceCaches.gameFeature?.enablePeekEffect) {
+            return;
+        }
         this.peekEffectOverlay.active = false;
         this.peekEffectContainer.active = false;
 
@@ -317,6 +325,9 @@ export default class SlotBoard extends Component {
     }
 
     showPeekEffectSymbols(symbols: number[]) {
+        if (!resourceCaches.gameFeature?.enablePeekEffect) {
+            return;
+        }
         symbols.forEach((symbol) => {
             this.reels.forEach((reel) => {
                 reel.showHighlightSpecialSymbols(symbol);
@@ -324,8 +335,10 @@ export default class SlotBoard extends Component {
         });
     }
 
-    checkSpecialEffect(rawData: number[], columns: number[][]): PeekEffectCheckData {
-        log("columns ", columns);
+    checkPeekEffect(rawData: number[], columns: number[][]): PeekEffectCheckData {
+        if (!resourceCaches.gameFeature?.enablePeekEffect) {
+            return null;
+        }
         const length = columns.length;
         const specialSymbols = [SpecialSymbol.BONUS, SpecialSymbol.FREESPIN];
         const result: PeekEffectCheckData = {
@@ -364,7 +377,6 @@ export default class SlotBoard extends Component {
             result.position = sortedPositions[0];
         }
 
-        log("result ", result);
         return result.position > -1 ? result : null;
     }
 
@@ -403,14 +415,6 @@ export default class SlotBoard extends Component {
             }
             return this.previewSymbolRight;
         }
-    }
-
-    zoomPeekEffect(zooming: boolean) {
-        // const scale = zooming ? this.PEEK_EFFECT_SCALE : 1;
-        // const duration = zooming ? this.PEEK_EFFECT_DURATION : this.PEEK_EFFECT_HIDE;
-        // tween(this.node)
-        //     .to(duration, { scale: v3(1, 1, 1).multiplyScalar(scale) }, { easing: "sineInOut" })
-        //     .start();
     }
 
     onDestroy() {

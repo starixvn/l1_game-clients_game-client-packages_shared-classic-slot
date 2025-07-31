@@ -19,6 +19,7 @@ import { SlotUIStore } from "../handlers/stores/slot-ui-store";
 import {
     ColorJson,
     DialogName,
+    GameFeatureJson,
     loadSlotSymbols,
     loadWinningSymbolAnimation,
     resourceCaches,
@@ -41,6 +42,9 @@ export default class ClassicSlot extends GameComponent {
 
     @property(JsonAsset)
     colorJson: JsonAsset = null;
+
+    @property(JsonAsset)
+    gameFeatureJson: JsonAsset = null;
 
     gameConfigOdds: any;
     jackpotEnabled = false;
@@ -74,6 +78,7 @@ export default class ClassicSlot extends GameComponent {
         resourceCaches.gameAtlas = this.gameAtlas;
         resourceCaches.sharedSlotAtlas = this.sharedSlotAtlas;
         resourceCaches.colorJson = this.colorJson.json as ColorJson;
+        resourceCaches.gameFeature = this.gameFeatureJson.json as GameFeatureJson;
     }
 
     updateBalanceColor() {
