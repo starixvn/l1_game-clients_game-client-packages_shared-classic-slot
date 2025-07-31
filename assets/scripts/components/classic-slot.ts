@@ -63,6 +63,7 @@ export default class ClassicSlot extends GameComponent {
     @render(JackpotPoolStore, (store) => store.jackpotEnabled, { fireImmediately: false })
     renderJackpotEnabled(jackpotEnabled: { enabled: boolean }) {
         this.jackpotEnabled = jackpotEnabled?.enabled;
+        resourceCaches.jackpotEnabled = this.jackpotEnabled;
         this.loadSymbols().then(() => {
             this.initSlotBoard();
         });

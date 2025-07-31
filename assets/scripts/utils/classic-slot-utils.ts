@@ -28,6 +28,7 @@ interface ResourceCaches {
     sharedSlotAtlas?: SpriteAtlas;
     colorJson?: ColorJson;
     gameFeature?: GameFeatureJson;
+    jackpotEnabled?: boolean;
 }
 
 export const resourceCaches: ResourceCaches = {};

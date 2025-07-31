@@ -268,7 +268,6 @@ export default class SlotBoard extends Component {
         if (!peekEffects) {
             return;
         }
-        log("peekEffects ", peekEffects);
         if (peekEffects.jackpotLine !== undefined) {
             this.showWinningEffect(paylines[peekEffects.jackpotLine], SpecialSymbol.JACKPOT);
         }
@@ -339,7 +338,6 @@ export default class SlotBoard extends Component {
         if (!resourceCaches.gameFeature?.enablePeekEffect) {
             return null;
         }
-        const length = columns.length;
         const specialSymbols = [SpecialSymbol.BONUS, SpecialSymbol.FREESPIN];
         const result: PeekEffectCheckData = {
             position: -1,
@@ -360,16 +358,10 @@ export default class SlotBoard extends Component {
             }
         });
 
-        if (columns[0].includes(SpecialSymbol.JACKPOT) && length >= SLOT_COLUMN_MAX_INDEX) {
-            const lineIndex = paylines.findIndex((line) => {
-                const temp = line.slice(0, SLOT_COLUMN_MAX_INDEX);
-                const notJackpot = temp.some((position) => rawData[position] !== SpecialSymbol.JACKPOT);
-                return !notJackpot;
-            });
-            if (lineIndex !== -1) {
-                positions.push(SLOT_COLUMN_MAX_INDEX - 1);
-                result.jackpotLine = lineIndex;
-            }
+        const peekEffectForJackpot = this.checkPeekEffectForJackpot(columns, rawData);
+        if (peekEffectForJackpot) {
+            positions.push(peekEffectForJackpot.position);
+            result.jackpotLine = peekEffectForJackpot.jackpotLine;
         }
 
         if (positions.length > 0) {
@@ -378,6 +370,26 @@ export default class SlotBoard extends Component {
         }
 
         return result.position > -1 ? result : null;
+    }
+
+    private checkPeekEffectForJackpot(columns: number[][], rawData: number[]) {
+        if (!resourceCaches.gameFeature?.enablePeekEffect || !resourceCaches.jackpotEnabled) {
+            return null;
+        }
+        const length = columns.length;
+        if (columns[0].includes(SpecialSymbol.JACKPOT) && length >= SLOT_COLUMN_MAX_INDEX) {
+            const lineIndex = paylines.findIndex((line) => {
+                const temp = line.slice(0, SLOT_COLUMN_MAX_INDEX);
+                const notJackpot = temp.some((position) => rawData[position] !== SpecialSymbol.JACKPOT);
+                return !notJackpot;
+            });
+            if (lineIndex !== -1) {
+                return {
+                    position: SLOT_COLUMN_MAX_INDEX - 1,
+                    jackpotLine: lineIndex,
+                };
+            }
+        }
     }
 
     async spinTurbo(duration: number, columns: number[][]) {
