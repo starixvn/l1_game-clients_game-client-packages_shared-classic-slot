@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, log, Node, NodePool, Prefab, sp, v3, Vec2, Vec3 } from "cc";
+import { _decorator, Component, instantiate, Node, NodePool, Prefab, sp, v3, Vec2, Vec3 } from "cc";
 
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -200,9 +200,7 @@ export default class SlotBoard extends Component {
                 await this.spinNormal(duration, columns);
             }
         }
-        const spinTime = (Date.now() - beginTime) / 1000;
-        log("spinTime ", spinTime);
-        return spinTime;
+        return (Date.now() - beginTime) / 1000;
     }
 
     makeReelsMoveFast(currentIndex: number) {
@@ -217,8 +215,7 @@ export default class SlotBoard extends Component {
         return new Promise<void>(async (resolve) => {
             const minIndex = peekEffect ? peekEffect.position : SLOT_COLUMN_MAX_INDEX;
 
-            let i = 0;
-            for (; i < this.reels.length; i++) {
+            for (let i = 0; i < this.reels.length; i++) {
                 const reel = this.reels[i];
 
                 const current = i;
@@ -234,31 +231,35 @@ export default class SlotBoard extends Component {
                 } else {
                     const isEdgeItem = i === minIndex;
                     reel.spinNormal(isEdgeItem ? duration : SPIN_FOREVER, columns[i]).then(async () => {
-                        this.hidePeekEffectAtIndex(current);
-                        //calculate peek effect at current
-                        const nextReelIndex = current + 1;
-                        const currentColumns = current < SLOT_COLUMN_MAX_INDEX ? columns.slice(0, nextReelIndex) : columns;
-                        const peekEffects = this.checkPeekEffect(this.data, currentColumns);
-                        this.handleSymbolsPeekEffect(peekEffects);
-
-                        if (current < SLOT_COLUMN_MAX_INDEX) {
-                            if (!this.reels[nextReelIndex].isFaster) {
-                                this.makeReelsMoveFast(current);
-                            }
-                            this.showPeekEffect(nextReelIndex);
-                            this.reels[nextReelIndex].stopSoon();
-                        } else {
-                            if (peekEffects) {
-                                await AnimationUtils.delayTime(1);
-                            }
-                            this.hidePeekEffect();
-
-                            resolve();
-                        }
+                        await this.handleSpinReelEnded(current, columns, resolve);
                     });
                 }
             }
         });
+    }
+
+    private async handleSpinReelEnded(current: number, columns: number[][], resolve: (value: void | PromiseLike<void>) => void) {
+        this.hidePeekEffectAtIndex(current);
+        //calculate peek effect at current
+        const nextReelIndex = current + 1;
+        const currentColumns = current < SLOT_COLUMN_MAX_INDEX ? columns.slice(0, nextReelIndex) : columns;
+        const peekEffects = this.checkPeekEffect(this.data, currentColumns);
+        this.handleSymbolsPeekEffect(peekEffects);
+
+        if (current < SLOT_COLUMN_MAX_INDEX) {
+            if (!this.reels[nextReelIndex].isFaster) {
+                this.makeReelsMoveFast(current);
+            }
+            this.showPeekEffect(nextReelIndex);
+            this.reels[nextReelIndex].stopSoon();
+        } else {
+            if (peekEffects) {
+                await AnimationUtils.delayTime(1);
+            }
+            this.hidePeekEffect();
+
+            resolve();
+        }
     }
 
     handleSymbolsPeekEffect(peekEffects) {
@@ -343,7 +344,7 @@ export default class SlotBoard extends Component {
             position: -1,
             symbols: [],
         };
-        const positions = [];
+        const positions: number[] = [];
         specialSymbols.forEach((specialSymbol) => {
             let count = 0;
             for (const [index, column] of columns.entries()) {
@@ -365,8 +366,8 @@ export default class SlotBoard extends Component {
         }
 
         if (positions.length > 0) {
-            const sortedPositions = positions.sort((a, b) => a - b);
-            result.position = sortedPositions[0];
+            positions.sort((a, b) => a - b);
+            result.position = positions[0];
         }
 
         return result.position > -1 ? result : null;
@@ -390,6 +391,7 @@ export default class SlotBoard extends Component {
                 };
             }
         }
+        return null;
     }
 
     async spinTurbo(duration: number, columns: number[][]) {

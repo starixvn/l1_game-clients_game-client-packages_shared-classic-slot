@@ -1,4 +1,4 @@
-import { _decorator, easing, Layout, log } from "cc";
+import { _decorator, easing, Layout } from "cc";
 import { SLOT_ROW_MAX_INDEX, SpecialSymbol } from "../../definitions";
 import SlotReel from "./slot-reel";
 
@@ -68,14 +68,12 @@ export default class SlotReelNew extends SlotReel {
         this.layout.verticalDirection = Layout.VerticalDirection.BOTTOM_TO_TOP;
     }
 
-    // Public API
     public spinNormal(spinDuration: number, data: number[]) {
         return new Promise<void>((resolve) => {
             this.onSpinFinishCallback = resolve;
             this.cachedData = data;
             this.clear();
             this.startBounceStart(spinDuration);
-            log("spinNormal", spinDuration);
         });
     }
 
@@ -210,7 +208,6 @@ export default class SlotReelNew extends SlotReel {
     }
 
     private calculateSpinOffset(dt: number) {
-        log(`speed ${this.node.name}`, this.currentSpeed);
         return this.currentSpeed * dt;
     }
 
