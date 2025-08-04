@@ -269,7 +269,6 @@ export default class SlotReelNew extends SlotReel {
     }
 
     public prepareStop(fast = false) {
-        console.time("stop in " + this.node.name);
         this.isFaster = false;
 
         const symbolGap = this.symbolGap;
@@ -286,8 +285,6 @@ export default class SlotReelNew extends SlotReel {
     }
 
     private startBounceStop() {
-        console.timeEnd("stop in " + this.node.name);
-        console.time("back in " + this.node.name);
         this.deltaTime = 0;
         this.isStoppingPhase = false;
         this.state = State.BounceStop;
@@ -309,7 +306,6 @@ export default class SlotReelNew extends SlotReel {
             this.onSpinFinishCallback();
             this.moveAllItemsToReelNode();
             this.clear();
-            console.timeEnd("back in " + this.node.name);
         }
     }
 
