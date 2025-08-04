@@ -17,13 +17,20 @@ export interface ColorJson {
     bonusCountItemTextColor: string;
 }
 
+export interface GameFeatureJson {
+    enablePeekEffect: boolean;
+}
+
 interface ResourceCaches {
     slotSymbols?: any;
     slotWinningAnimation?: any;
     gameAtlas?: SpriteAtlas;
     sharedSlotAtlas?: SpriteAtlas;
     colorJson?: ColorJson;
+    gameFeature?: GameFeatureJson;
+    jackpotEnabled?: boolean;
 }
+
 export const resourceCaches: ResourceCaches = {};
 
 let slotGameConfigs: SlotGameBaseConfigs;

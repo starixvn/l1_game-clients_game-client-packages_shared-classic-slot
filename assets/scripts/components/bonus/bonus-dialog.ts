@@ -6,7 +6,7 @@ import RawTimer from "db://shared-components/game/game-timer/scripts/raw-timer";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
-import { SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
+import { CustomDuration, SlotGameBaseConfigs } from "../../config/slot-game-base-configs";
 import { SlotSettlementHandler } from "../../handlers/handlers/slot-settlement-handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
@@ -39,12 +39,14 @@ export default class BonusDialog extends ObserverComponent {
 
     public onBonusFinished = () => {};
     public slotGameConfigs: SlotGameBaseConfigs;
-
+    private configDuration: CustomDuration;
+    private receivedJackpot = false;
     private totalBonus = 0;
     private openedBonus = 0;
     private totalValue = 0;
     private timerTween: Tween;
     private readonly bonusNumber = 10;
+    private spinTime = 0;
 
     initBonusItems() {
         this.createBonusItems();
@@ -84,6 +86,21 @@ export default class BonusDialog extends ObserverComponent {
     @render(SlotDurationStore, (store) => store.config)
     renderConfig(config: SlotGameBaseConfigs) {
         this.slotGameConfigs = config;
+    }
+
+    @render(SlotDurationStore, (store) => store.configDuration)
+    renderConfigDuration(configDuration: CustomDuration) {
+        this.configDuration = configDuration;
+    }
+
+    @render(SlotBoardStore, (store) => store.spinTime)
+    renderSpinTime(spinTime: number) {
+        this.spinTime = spinTime;
+    }
+
+    @render(SlotBoardStore, (store) => store.receivedJackpot)
+    renderReceivedJackpot(receivedJackpot: any) {
+        this.receivedJackpot = receivedJackpot !== null;
     }
 
     @render(SlotBoardStore, (store) => store.bonusChest, { fireImmediately: false })
@@ -146,7 +163,12 @@ export default class BonusDialog extends ObserverComponent {
     }
 
     start() {
-        const duration = this.slotGameConfigs.bonusTimeOut;
+        const oldSpinDuration = 5;
+        const spinAndBonusDuration = this.receivedJackpot
+            ? this.configDuration.bonusDuration
+            : this.spinTime + this.configDuration.bonusDuration;
+        const calculateDuration = this.slotGameConfigs.bonusTimeOut + oldSpinDuration - spinAndBonusDuration;
+        const duration = Math.min(calculateDuration, this.slotGameConfigs.bonusTimeOut);
         this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
     }
 }

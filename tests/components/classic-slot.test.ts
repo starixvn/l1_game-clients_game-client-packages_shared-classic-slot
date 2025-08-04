@@ -163,6 +163,7 @@ describe("ClassicSlot", () => {
     let mockGameAtlas: SpriteAtlas;
     let mockSharedSlotAtlas: SpriteAtlas;
     let mockColorJson: JsonAsset;
+    let mockGameJson: JsonAsset;
 
     beforeEach(() => {
         container = new Container();
@@ -188,6 +189,12 @@ describe("ClassicSlot", () => {
             },
         } as unknown as JsonAsset;
 
+        mockGameJson = {
+            json: {
+                enablePeekEffect: true,
+            },
+        } as unknown as JsonAsset;
+
         // Bind to container
         container.bind(BetControlStore).toConstantValue(mockBetControlStore);
         container.bind(SlotBoardStore).toConstantValue(mockSlotBoardStore);
@@ -201,6 +208,7 @@ describe("ClassicSlot", () => {
         component.gameAtlas = mockGameAtlas;
         component.sharedSlotAtlas = mockSharedSlotAtlas;
         component.colorJson = mockColorJson;
+        component.gameFeatureJson = mockGameJson;
         component.lblRoundId = new Label();
 
         // Add missing methods
@@ -224,6 +232,7 @@ describe("ClassicSlot", () => {
             expect(resourceCaches.gameAtlas).toBe(mockGameAtlas);
             expect(resourceCaches.sharedSlotAtlas).toBe(mockSharedSlotAtlas);
             expect(resourceCaches.colorJson).toBe(mockColorJson.json);
+            expect(resourceCaches.gameFeature).toBe(mockGameJson.json);
         });
     });
 

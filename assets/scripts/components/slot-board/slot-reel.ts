@@ -1,4 +1,4 @@
-import { _decorator, Component, instantiate, Layout, Node, Prefab, Tween, tween, v3, Vec3 } from "cc";
+import { _decorator, Component, instantiate, Layout, Node, Prefab, Tween, tween, v3 } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
@@ -23,18 +23,19 @@ export default class SlotReel extends Component {
     items: SlotReelItem[] = [];
 
     public winningContainer: Node;
-    private layout: Layout;
-    private itemHeight = 0;
-    private spacingY = 0;
+    protected layout: Layout;
+    protected spacingY = 0;
     public gameId: number;
+    protected itemHeight = 0;
+    protected reelHeight = 0;
 
     private initialized = false;
-    private cachePositions: Vec3[] = [];
+
     onLoad() {
         this.init();
     }
 
-    private init() {
+    protected init() {
         this.layout = this.node.getComponent(Layout);
         this.spacingY = this.layout.spacingY;
         this.initialized = true;
@@ -60,8 +61,7 @@ export default class SlotReel extends Component {
         this.itemHeight = transform.height;
         this.layout.updateLayout();
         this.layout.enabled = false;
-
-        this.cachePositions = this.items.map((item) => new Vec3(item.node.position));
+        this.reelHeight = this.items.length * (this.itemHeight + this.spacingY);
     }
 
     setReelData(items: number[]) {
@@ -112,15 +112,12 @@ export default class SlotReel extends Component {
     }
 
     moveToOtherNode(item: SlotReelItem, destNode: Node) {
-        const wPos = new Vec3(item.node.worldPosition);
-        item.node.parent = destNode;
-        item.node.worldPosition = wPos;
+        ComponentUtils.moveToOtherNode(item.node, destNode);
     }
 
     hideWinningEffect() {
         this.items.forEach((item, index) => {
-            item.node.parent = this.node;
-            item.node.position = this.cachePositions[index];
+            ComponentUtils.moveToOtherNode(item.node, this.node);
             item.showWinningEffect(false);
         });
     }

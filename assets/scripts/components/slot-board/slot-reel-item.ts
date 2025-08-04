@@ -1,5 +1,5 @@
 const { ccclass, property } = _decorator;
-import { _decorator, Component, Node, sp, Sprite, v3 } from "cc";
+import { _decorator, Component, Node, sp, Sprite, tween, v3 } from "cc";
 import { AnimationUtils } from "db://shared-components/shared/utils/utils";
 import { resourceCaches } from "../../utils/classic-slot-utils";
 @ccclass
@@ -53,11 +53,18 @@ export default class SlotReelItem extends Component {
         this.effectSpine.node.active = !isShowBlurSymbol;
         if (isShowBlurSymbol) {
             AnimationUtils.setOpacityNode(this.blurSymbol, 255);
-            this.blurSymbol.scale = v3(1, 1, 1).multiplyScalar(1.5);
             AnimationUtils.setOpacityNode(this.effectSpine.node, 1);
+
+            const scale = 1.5;
+            tween(this.blurSymbol)
+                .to(0.1, { scale: v3(1 / scale, 1, 1).multiplyScalar(scale) }, { easing: "sineInOut" })
+                .start();
         } else {
             AnimationUtils.setOpacityNode(this.blurSymbol, 1);
             AnimationUtils.setOpacityNode(this.effectSpine.node, 255);
+            tween(this.blurSymbol)
+                .to(0.1, { scale: v3(1, 1, 1) }, { easing: "sineInOut" })
+                .start();
         }
     }
 

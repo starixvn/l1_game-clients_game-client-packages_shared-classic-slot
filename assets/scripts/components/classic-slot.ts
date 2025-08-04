@@ -19,6 +19,7 @@ import { SlotUIStore } from "../handlers/stores/slot-ui-store";
 import {
     ColorJson,
     DialogName,
+    GameFeatureJson,
     loadSlotSymbols,
     loadWinningSymbolAnimation,
     resourceCaches,
@@ -42,6 +43,9 @@ export default class ClassicSlot extends GameComponent {
     @property(JsonAsset)
     colorJson: JsonAsset = null;
 
+    @property(JsonAsset)
+    gameFeatureJson: JsonAsset = null;
+
     gameConfigOdds: any;
     jackpotEnabled = false;
     isReadyBet = false;
@@ -59,6 +63,7 @@ export default class ClassicSlot extends GameComponent {
     @render(JackpotPoolStore, (store) => store.jackpotEnabled, { fireImmediately: false })
     renderJackpotEnabled(jackpotEnabled: { enabled: boolean }) {
         this.jackpotEnabled = jackpotEnabled?.enabled;
+        resourceCaches.jackpotEnabled = this.jackpotEnabled;
         this.loadSymbols().then(() => {
             this.initSlotBoard();
         });
@@ -74,6 +79,7 @@ export default class ClassicSlot extends GameComponent {
         resourceCaches.gameAtlas = this.gameAtlas;
         resourceCaches.sharedSlotAtlas = this.sharedSlotAtlas;
         resourceCaches.colorJson = this.colorJson.json as ColorJson;
+        resourceCaches.gameFeature = this.gameFeatureJson.json as GameFeatureJson;
     }
 
     updateBalanceColor() {
@@ -174,12 +180,18 @@ export default class ClassicSlot extends GameComponent {
         this.isReadyBet = isReadyBet;
     }
 
-    @render(SlotBoardStore, (store) => store.spinResult)
+    @render(SlotBoardStore, (store) => store.spinResult, { fireImmediately: false })
     async renderSpinResult(spinResult: { result: number[]; duration: number; turbo: boolean; onComplete: () => void }) {
         this.slotBoard.hideWinningEffect();
         this.slotBoard.setBoardData(spinResult.result);
-        await this.slotBoard.spin(spinResult.duration, spinResult.turbo);
+        const spinTime = await this.slotBoard.spin(spinResult.duration, spinResult.turbo);
+        this.updateSpinTime(spinTime);
         spinResult.onComplete();
+    }
+
+    @handle(SlotBoardStore, (store, spinTime: number) => store.updateSpinTime(spinTime))
+    updateSpinTime(spinTime: number) {
+        return spinTime;
     }
 
     @render(SlotBoardStore, (store) => store.highlightSpecialSymbols, { fireImmediately: false })
