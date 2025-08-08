@@ -23,22 +23,22 @@ export default class SlotReelNew extends SlotReel {
     protected readonly BOUNCE_START_DISTANCE = 20;
     protected readonly BOUNCE_START_DURATION = 0.15;
 
-    protected readonly SPIN_ACCELERATION = 5000;
-    protected readonly SPIN_ACCELERATION_2 = 5000;
+    protected readonly SPIN_ACCELERATION = 20000;
+    protected readonly SPIN_ACCELERATION_2 = 10000;
     protected readonly BLURRY_SPEED = 1000;
-    protected readonly SPIN_MAX_SPEED = 1365;
+    protected readonly SPIN_MAX_SPEED = 4000; //1365;
     protected readonly SPIN_MAX_SPEED_2 = 2243;
     protected readonly SPIN_STOP_THRESHOLD = 1;
 
     protected readonly SPIN_EXTRA_SYMBOLS = 18;
-    protected readonly SPIN_EXTRA_SYMBOLS_FAST = 2;
+    protected readonly SPIN_EXTRA_SYMBOLS_FAST = 10;
 
     protected readonly DELAY_SLOW_DOWN_DURATION = 2;
     protected readonly SLOW_DOWN_DURATION = 3;
     protected readonly SLOW_DOWN_DURATION_FAST = 0.4;
 
     protected readonly BOUNCE_STOP_DISTANCE = 25;
-    protected readonly BOUNCE_STOP_DURATION = 0.3;
+    protected readonly BOUNCE_STOP_DURATION = 0.2;
 
     protected readonly TURBO_SPIN_ITEM_COUNT = 10;
 
@@ -70,6 +70,7 @@ export default class SlotReelNew extends SlotReel {
 
     public spinNormal(spinDuration: number, data: number[]) {
         return new Promise<void>((resolve) => {
+            console.log("duration " + this.node.name, spinDuration);
             this.onSpinFinishCallback = resolve;
             this.cachedData = data;
             this.clear();
@@ -176,9 +177,12 @@ export default class SlotReelNew extends SlotReel {
         this.spinDuration = spinDuration;
 
         if (spinDuration > 0) {
+            console.time("time first phase " + this.node.name);
+
             this.scheduleOnce(() => {
+                console.timeEnd("time first phase " + this.node.name);
                 this.prepareStop(true);
-            }, spinDuration - this.SLOW_DOWN_DURATION_FAST);
+            }, spinDuration - this.SLOW_DOWN_DURATION_FAST - this.BOUNCE_STOP_DURATION);
         }
     }
 
@@ -282,6 +286,7 @@ export default class SlotReelNew extends SlotReel {
         this.isStoppingPhase = true;
 
         this.syncReelData();
+        console.time("time stopping " + this.node.name);
     }
 
     private startBounceStop() {
@@ -302,6 +307,7 @@ export default class SlotReelNew extends SlotReel {
 
         if (this.checkDistanceLessThan(this.movingDistance, this.finalMovingDistance)) {
             this.state = State.None;
+            console.log("spin item count ", this.movingDistance / this.symbolGap);
             this.finalAdjustment();
             this.onSpinFinishCallback();
             this.moveAllItemsToReelNode();
@@ -332,5 +338,6 @@ export default class SlotReelNew extends SlotReel {
         const finalAdjustment = this.finalMovingDistance - this.movingDistance;
         this.movingReelDown(finalAdjustment);
         this.movingDistance = this.finalMovingDistance;
+        console.timeEnd("time stopping " + this.node.name);
     }
 }
