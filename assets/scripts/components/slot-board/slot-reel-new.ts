@@ -300,7 +300,6 @@ export default class SlotReelNew extends SlotReel {
 
         if (this.checkDistanceLessThan(this.movingDistance, this.finalMovingDistance)) {
             this.state = State.None;
-            console.log("spin item count ", this.movingDistance / this.symbolGap);
             this.finalAdjustment();
             this.onSpinFinishCallback();
             this.moveAllItemsToReelNode();
