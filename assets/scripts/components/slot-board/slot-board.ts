@@ -217,7 +217,7 @@ export default class SlotBoard extends Component {
         return new Promise<void>(async (resolve) => {
             const minIndex = peekEffect ? peekEffect.position : SLOT_COLUMN_MAX_INDEX;
 
-            let duration = originalDuration;
+            let duration: number;
             for (let i = 0; i < this.reels.length; i++) {
                 const reel = this.reels[i];
                 duration = originalDuration + i * this.REEL_DURATION_OFFSET;
