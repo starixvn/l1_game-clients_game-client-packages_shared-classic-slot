@@ -20,18 +20,10 @@ export default class SlotReelNew extends SlotReel {
     }
 
     // Configuration constants
+    protected readonly BLURRY_SPEED = 1000;
+
     protected readonly BOUNCE_START_DISTANCE = 20;
     protected readonly BOUNCE_START_DURATION = 0.15;
-
-    protected readonly SPIN_ACCELERATION = 20000;
-    protected readonly SPIN_ACCELERATION_2 = 10000;
-    protected readonly BLURRY_SPEED = 1000;
-    protected readonly SPIN_MAX_SPEED = 4000; //1365;
-    protected readonly SPIN_MAX_SPEED_2 = 2243;
-    protected readonly SPIN_STOP_THRESHOLD = 1;
-
-    protected readonly SPIN_EXTRA_SYMBOLS = 18;
-    protected readonly SPIN_EXTRA_SYMBOLS_FAST = 10;
 
     protected readonly DELAY_SLOW_DOWN_DURATION = 2;
     protected readonly SLOW_DOWN_DURATION = 3;
@@ -39,6 +31,13 @@ export default class SlotReelNew extends SlotReel {
 
     protected readonly BOUNCE_STOP_DISTANCE = 25;
     protected readonly BOUNCE_STOP_DURATION = 0.2;
+
+    protected readonly SPIN_MAX_SPEED = 4000;
+    protected readonly SPIN_MAX_SPEED_2 = this.SPIN_MAX_SPEED + 500;
+    protected readonly SPIN_ACCELERATION = 20000;
+
+    protected readonly SPEED_STOP_THRESHOLD = 1;
+    protected readonly SPIN_EXTRA_SYMBOLS = 18;
 
     protected readonly TURBO_SPIN_ITEM_COUNT = 10;
 
@@ -70,7 +69,6 @@ export default class SlotReelNew extends SlotReel {
 
     public spinNormal(spinDuration: number, data: number[]) {
         return new Promise<void>((resolve) => {
-            console.log("duration " + this.node.name, spinDuration);
             this.onSpinFinishCallback = resolve;
             this.cachedData = data;
             this.clear();
@@ -177,12 +175,9 @@ export default class SlotReelNew extends SlotReel {
         this.spinDuration = spinDuration;
 
         if (spinDuration > 0) {
-            console.time("time first phase " + this.node.name);
-
             this.scheduleOnce(() => {
-                console.timeEnd("time first phase " + this.node.name);
                 this.prepareStop(true);
-            }, spinDuration - this.SLOW_DOWN_DURATION_FAST - this.BOUNCE_STOP_DURATION);
+            }, spinDuration - this.BOUNCE_START_DURATION - this.SLOW_DOWN_DURATION_FAST - this.BOUNCE_STOP_DURATION);
         }
     }
 
@@ -195,7 +190,7 @@ export default class SlotReelNew extends SlotReel {
         this.movingReelDown(offset);
 
         if (this.isStoppingPhase) {
-            if (this.currentSpeed <= this.SPIN_STOP_THRESHOLD) {
+            if (this.currentSpeed <= this.SPEED_STOP_THRESHOLD) {
                 this.startBounceStop();
             }
         }
@@ -236,7 +231,7 @@ export default class SlotReelNew extends SlotReel {
     }
 
     get acceleration() {
-        return this.isFaster ? this.SPIN_ACCELERATION_2 : this.SPIN_ACCELERATION;
+        return this.SPIN_ACCELERATION;
     }
 
     get maxSpeed() {
@@ -274,11 +269,10 @@ export default class SlotReelNew extends SlotReel {
 
     public prepareStop(fast = false) {
         this.isFaster = false;
-
         const symbolGap = this.symbolGap;
         const currentExcess = this.movingDistance % symbolGap;
         const remainingToNext = symbolGap - currentExcess;
-        const extraDistance = symbolGap * (fast ? this.SPIN_EXTRA_SYMBOLS_FAST : this.SPIN_EXTRA_SYMBOLS);
+        const extraDistance = symbolGap * this.SPIN_EXTRA_SYMBOLS;
         this.finalMovingDistance = this.movingDistance + remainingToNext + extraDistance;
         this.stoppingDistance = remainingToNext + extraDistance + this.BOUNCE_STOP_DISTANCE;
         this.stoppingDuration = fast ? this.SLOW_DOWN_DURATION_FAST : this.SLOW_DOWN_DURATION;
@@ -286,7 +280,6 @@ export default class SlotReelNew extends SlotReel {
         this.isStoppingPhase = true;
 
         this.syncReelData();
-        console.time("time stopping " + this.node.name);
     }
 
     private startBounceStop() {
@@ -338,6 +331,5 @@ export default class SlotReelNew extends SlotReel {
         const finalAdjustment = this.finalMovingDistance - this.movingDistance;
         this.movingReelDown(finalAdjustment);
         this.movingDistance = this.finalMovingDistance;
-        console.timeEnd("time stopping " + this.node.name);
     }
 }

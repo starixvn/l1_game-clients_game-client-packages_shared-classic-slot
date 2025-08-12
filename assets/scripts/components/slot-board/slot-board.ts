@@ -46,6 +46,8 @@ export default class SlotBoard extends Component {
 
     public reels: SlotReelNew[] = [];
 
+    private readonly REEL_DURATION_OFFSET = 0.25;
+
     public get reelCount() {
         return this.reels.length;
     }
@@ -214,12 +216,11 @@ export default class SlotBoard extends Component {
     async spinNormal(originalDuration: number, columns: number[][], peekEffect?: PeekEffectCheckData) {
         return new Promise<void>(async (resolve) => {
             const minIndex = peekEffect ? peekEffect.position : SLOT_COLUMN_MAX_INDEX;
-            console.log("spin delay each reel ", this.startReelDelayTime);
 
             let duration = originalDuration;
             for (let i = 0; i < this.reels.length; i++) {
                 const reel = this.reels[i];
-                duration = originalDuration + i * 0.25;
+                duration = originalDuration + i * this.REEL_DURATION_OFFSET;
 
                 const current = i;
 
