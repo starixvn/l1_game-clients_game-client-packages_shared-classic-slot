@@ -27,6 +27,7 @@ import {
 } from "../utils/classic-slot-utils";
 import { SymbolPreviewType } from "./others/symbol-preview";
 import SlotBoard from "./slot-board/slot-board";
+import { FSBPromotionUIManager } from "db://shared-common-slot/fsb-promotion/scripts/components/fsb-promotion-ui-manager";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
@@ -58,6 +59,7 @@ export default class ClassicSlot extends GameComponent {
         this.initSharedCaches();
         this.updateBalanceColor();
         super.onLoad();
+        this.addComponent(FSBPromotionUIManager);
     }
 
     @render(JackpotPoolStore, (store) => store.jackpotEnabled, { fireImmediately: false })
