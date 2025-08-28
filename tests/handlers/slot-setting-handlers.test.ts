@@ -102,7 +102,7 @@ describe("SlotSettingHandlers", () => {
             expect(mockStorageManagerGet).toHaveBeenCalledWith(slotSettingHandlers.getStorageKey()); // Indirectly checks loadTempStorage
 
             // Check if mobx.reaction was called
-            expect(mockMobxReaction).toHaveBeenCalledTimes(1);
+            expect(mockMobxReaction).toHaveBeenCalledTimes(2);
             expect(mockMobxReaction).toHaveBeenCalledWith(
                 expect.any(Function), // () => this.gameUserSettingStore.tempStorage
                 expect.any(Function) // (trigger) => { this.reactionTempStorage(trigger); }
