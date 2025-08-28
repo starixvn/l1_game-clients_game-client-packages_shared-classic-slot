@@ -17,15 +17,18 @@ interface IGameUserSetting {
 export class SlotSettingHandlers {
     @inject(gc.GameUserSettings.GameUserSettingStore) protected readonly gameUserSettingStore: gc.GameUserSettings.GameUserSettingStore;
     @inject(BetControlStore) protected readonly betControlStore: BetControlStore;
+    @inject(gc.Player.MainPlayerStore) protected readonly mainPlayerStore: gc.Player.MainPlayerStore;
     constructor() {
         setTimeout(() => {
-            this.loadTempStorage();
-            mobx.reaction(
-                () => this.gameUserSettingStore.tempStorage,
-                (trigger) => {
-                    this.reactionTempStorage(trigger);
-                }
-            );
+            mobx.when(() => this.mainPlayerStore.UID !== 0 && this.mainPlayerStore.currencyGroup !== "", () => {
+                this.loadTempStorage();
+                mobx.reaction(
+                    () => this.gameUserSettingStore.tempStorage,
+                    (trigger) => {
+                        this.reactionTempStorage(trigger);
+                    }
+                );
+            });
         }, 0);
     }
 
@@ -40,8 +43,12 @@ export class SlotSettingHandlers {
         }
     }
 
+    getStorageKey() {
+        return `${localStorageKeys.gameUserSetting}-${this.mainPlayerStore.UID}-${this.mainPlayerStore.currencyGroup}`;
+    }
+
     loadTempStorage() {
-        const data = StorageManager.get(localStorageKeys.gameUserSetting) as IGameUserSetting;
+        const data = StorageManager.get(this.getStorageKey()) as IGameUserSetting;
         if (data) {
             this.betControlStore.turboEnabled = data.turbo;
             this.betControlStore.setStake(data.stake);
@@ -56,6 +63,6 @@ export class SlotSettingHandlers {
             turbo: this.betControlStore.turboEnabled,
             stake: this.betControlStore.stake,
         };
-        StorageManager.set(localStorageKeys.gameUserSetting, currentSetting);
+        StorageManager.set(this.getStorageKey(), currentSetting);
     }
 }

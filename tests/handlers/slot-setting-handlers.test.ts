@@ -1,9 +1,9 @@
 import "reflect-metadata";
 //rest
-import { Container } from "inversify";
-import * as mobx from "mobx";
-
 import gc from "@sg/game-client-base";
+import { Container } from "inversify";
+import { stub } from "jest-auto-stub";
+import * as mobx from "mobx";
 import { SlotSettingHandlers } from "../../assets/scripts/handlers/handlers/slot-setting-handlers";
 import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
 
@@ -76,6 +76,10 @@ describe("SlotSettingHandlers", () => {
         // This helps if Inversify's property injection timing interacts unexpectedly with setTimeout/fake timers.
         (slotSettingHandlers as any).betControlStore = mockBetControlStore;
         (slotSettingHandlers as any).gameUserSettingStore = mockGameUserSettingStore;
+        (slotSettingHandlers as any).mainPlayerStore = stub<gc.Player.MainPlayerStore>({
+            UID: 123,
+            currencyGroup: "CASH_USD",
+        });
 
         // Spy on StorageManager methods
         mockStorageManagerGet = jest.spyOn(gc.StorageManager, "get");
@@ -95,7 +99,7 @@ describe("SlotSettingHandlers", () => {
 
             // Check if loadTempStorage was called (it's called inside the constructor's setTimeout)
             // We will spy on loadTempStorage directly if possible, or check its effects
-            expect(mockStorageManagerGet).toHaveBeenCalledWith(gc.localStorageKeys.gameUserSetting); // Indirectly checks loadTempStorage
+            expect(mockStorageManagerGet).toHaveBeenCalledWith(slotSettingHandlers.getStorageKey()); // Indirectly checks loadTempStorage
 
             // Check if mobx.reaction was called
             expect(mockMobxReaction).toHaveBeenCalledTimes(1);
@@ -162,7 +166,7 @@ describe("SlotSettingHandlers", () => {
             // @ts-ignore
             slotSettingHandlers.loadTempStorage();
 
-            expect(mockStorageManagerGet).toHaveBeenCalledWith(gc.localStorageKeys.gameUserSetting);
+            expect(mockStorageManagerGet).toHaveBeenCalledWith(slotSettingHandlers.getStorageKey());
             expect(mockBetControlStore.turboEnabled).toBe(true);
             expect(mockBetControlStore.setStake).toHaveBeenCalledWith(100);
         });
@@ -173,7 +177,7 @@ describe("SlotSettingHandlers", () => {
             // @ts-ignore
             slotSettingHandlers.loadTempStorage();
 
-            expect(mockStorageManagerGet).toHaveBeenCalledWith(gc.localStorageKeys.gameUserSetting);
+            expect(mockStorageManagerGet).toHaveBeenCalledWith(slotSettingHandlers.getStorageKey());
             expect(mockBetControlStore.turboEnabled).toBe(false);
             expect(mockBetControlStore.setStake).toHaveBeenCalledWith(0);
         });
@@ -191,7 +195,7 @@ describe("SlotSettingHandlers", () => {
                 turbo: true,
                 stake: 200,
             };
-            expect(mockStorageManagerSet).toHaveBeenCalledWith(gc.localStorageKeys.gameUserSetting, expectedSettings);
+            expect(mockStorageManagerSet).toHaveBeenCalledWith(slotSettingHandlers.getStorageKey(), expectedSettings);
         });
     });
 });
