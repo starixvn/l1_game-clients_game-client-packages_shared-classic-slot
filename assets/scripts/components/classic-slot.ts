@@ -28,6 +28,14 @@ import {
 import { SymbolPreviewType } from "./others/symbol-preview";
 import SlotBoard from "./slot-board/slot-board";
 import { FSBPromotionUIManager } from "db://shared-common-slot/fsb-promotion/scripts/components/fsb-promotion-ui-manager";
+import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
+import {
+    FreeSpinSignal,
+    FreeSpinSource,
+    FreeSpinsPromotionEvents,
+    FSBPromotionUIStore,
+} from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
+import { SlotBetHandler } from "../handlers";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
@@ -212,4 +220,47 @@ export default class ClassicSlot extends GameComponent {
             this.slotBoard.showWinningEffectOnLine(line);
         });
     }
+
+    @render(BetControlStore, (store) => store.freeSpinEnabled)
+    notifyFreeSpinFromGame(isActive: boolean) {
+        this.notifyFreeSpin({ source: FreeSpinSource.GAME, active: isActive });
+    }
+
+    @render(BetControlStore, (store) => store.isUsedFSBPromotionBonus)
+    notifyFreeSpinFromPromotion(isUsedFSBPromotionBonus: boolean) {
+        this.notifyFreeSpin({ source: FreeSpinSource.PROMOTION, active: isUsedFSBPromotionBonus });
+    }
+
+
+    @handle(FSBPromotionUIHandler, (handler, signal: FreeSpinSignal) => handler.handleFreeSpin(signal))
+    public notifyFreeSpin(signal: FreeSpinSignal) {
+        return signal;
+    }
+
+    @render(FSBPromotionUIStore, (store) => store.pendingUIEvent)
+    renderFSBPromotionInProgress(pendingUIEvent) {
+        if (!pendingUIEvent || pendingUIEvent.event !== FreeSpinsPromotionEvents.SPIN_ON_FSB_PROMOTION_FIRST_TIME) {
+            return;
+        }
+        const { delayMs = 0, isPlaceBet = false } = pendingUIEvent.data ?? {};
+        setTimeout(() => {
+            this.tryConsumeFSB();
+            isPlaceBet && this.callBet();
+        }, delayMs);
+    }
+
+    @render(FSBPromotionUIStore, (store) => [store.isEligibleForNextFSBSpin, store.hasServerFinishPromotion] as const)
+    renderIsEligibleForNextFSBSpinAndHasServerFinishPromotion([isEligibleForNextFSBSpin, hasServerFinishPromotion]) {
+        if (!isEligibleForNextFSBSpin || hasServerFinishPromotion) {
+            return;
+        }
+        this.tryConsumeFSB();
+        this.callBet();
+    }
+
+    @handle(FSBPromotionUIHandler, (handler) => handler.tryConsumeFSB())
+    tryConsumeFSB() {}
+
+    @handle(SlotBetHandler, (handler) => handler.callBet())
+    callBet() {}
 }

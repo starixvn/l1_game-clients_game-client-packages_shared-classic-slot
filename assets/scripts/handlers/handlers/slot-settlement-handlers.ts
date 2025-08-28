@@ -9,6 +9,8 @@ import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
 import { SlotBetHandler } from "./slot-bet-handlers";
 import { SlotErrorHandler } from "./slot-error-handler";
+import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
+import { FreeSpinSource, FreeSpinsPromotionEvents, FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotSettlementHandler {
@@ -22,6 +24,8 @@ export class SlotSettlementHandler {
     @inject(SlotErrorHandler) protected readonly slotErrorHandler: SlotErrorHandler;
     @inject(gc.Auth.AuthHandlers.GetBalance) protected readonly getBalanceHandler: gc.Auth.AuthHandlers.GetBalance;
     @inject(gc.Player.MainPlayerStore) protected readonly mainPlayerStore: gc.Player.MainPlayerStore;
+    @inject(FSBPromotionUIHandler) protected readonly fsbPromotionUIHandler: FSBPromotionUIHandler;
+    @inject(FSBPromotionUIStore) protected readonly fsbPromotionUIStore: FSBPromotionUIStore;
 
     eventHandleList = [
         {
@@ -213,6 +217,7 @@ export class SlotSettlementHandler {
             .sequence(...sequenceTweens)
             .call(() => {
                 this.finishSettlement();
+                this.fsbPromotionUIHandler.updateTotalWin({ win: betWin, totalFreeSpins: this.betControlStore.freeSpinCount });
                 this.slotBoardStore.resetToReady();
                 const isEndGameError = this.slotErrorHandler.handleEndGameApiError();
 
@@ -334,6 +339,10 @@ export class SlotSettlementHandler {
         if (this.betControlStore.triggerAutoSpin) {
             this.scheduleNextSpin(() => this.slotBetHandler.callBet());
         }
+        if (this.fsbPromotionUIStore.isShowFreeSpinMessage) {
+            this.fsbPromotionUIHandler.changeUIPendingEvent(FreeSpinsPromotionEvents.OPEN_PROMOTION_INFO);
+        }
+        this.betControlStore.isFreeSpinEffectCompleted = true;
     }
 
     protected scheduleNextSpin(action: () => void) {

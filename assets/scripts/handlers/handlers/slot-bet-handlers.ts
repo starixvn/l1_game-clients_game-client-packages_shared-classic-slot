@@ -6,14 +6,17 @@ import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotBetResponseHandler } from "./slot-bet-response-handlers";
 import { SlotUIHandler } from "./slot-ui-handler";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
+import { FSBPromotionStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store";
 const { injectable, inject } = inversify;
-
 @injectable()
 export class SlotBetHandler extends gc.Bet.BetHandler {
     @inject(BetControlStore) protected betControlStore: BetControlStore;
     @inject(SlotBoardStore) protected slotBoardStore: SlotBoardStore;
     @inject(SlotUIHandler) protected slotUIHandler: SlotUIHandler;
     @inject(SlotBetResponseHandler) protected slotBetResponseHandler: SlotBetResponseHandler;
+    @inject(FSBPromotionUIStore) protected fsbPromotionUIStore: FSBPromotionUIStore;
+    @inject(FSBPromotionStore) protected fsbPromotionStore: FSBPromotionStore;
 
     protected timeoutHolding: NodeJS.Timeout;
     protected readonly HOLDING_THRESHOLD = 1000;
@@ -29,13 +32,17 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         }
 
         this.betControlStore.didSpin = true;
+        this.betControlStore.isFreeSpinEffectCompleted = false;
         this.resetOnNewSpin();
 
+        const amount = this.fsbPromotionUIStore.isFSBPromotionInProgress
+            ? this.fsbPromotionStore.promotion.betLevel
+            : this.betControlStore.stake;
         const betData = this.createBetData({});
         Object.assign(betData, {
-            amount: this.betControlStore.stake,
+            amount: amount,
             betChoice: SLOT_BET_CHOICES,
-            freeSpin: this.betControlStore.freeSpinEnabled,
+            freeSpin: this.betControlStore.freeSpinEnabled || this.fsbPromotionUIStore.isFSBPromotionInProgress,
         });
         this.handleBetData(betData);
     }
@@ -64,6 +71,10 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         if (this.betStore.isProcessingBet) {
             this.showWarningProcessingBet();
             return false;
+        }
+
+        if (this.fsbPromotionUIStore.isFSBPromotionInProgress) {
+            return true;
         }
 
         if (!this.betControlStore.freeSpinEnabled && !this.isEnoughBalance()) {

@@ -74,6 +74,8 @@ export class BetControlStore {
 
     freeSpinCount = -1;
     freeSpinCountDisplay = -1;
+
+    isFreeSpinEffectCompleted = false;
     get freeSpinEnabled() {
         return this.freeSpinCount > 0;
     }
@@ -116,6 +118,10 @@ export class BetControlStore {
             this.slotBoardStore.slotState === SlotState.NOT_READY ||
             this.slotBoardStore.slotState === SlotState.SPIN_DONE
         );
+    }
+
+    get isUsedFSBPromotionBonus() {
+        return this.freeSpinCount <= 0 && this.isFreeSpinEffectCompleted;
     }
 
     setStake(stake: number) {

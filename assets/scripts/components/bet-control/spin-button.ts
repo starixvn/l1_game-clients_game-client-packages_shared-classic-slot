@@ -11,6 +11,7 @@ import { BetControlStore, SlotUIHandler } from "../../handlers";
 import { SlotBetHandler } from "../../handlers/handlers/slot-bet-handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { DialogName } from "../../utils/classic-slot-utils";
+import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
 
@@ -122,6 +123,7 @@ export default class SpinButton extends ObserverComponent {
     protected onTouchStart(event: EventTouch) {
         if (this.touchInPolygon(event)) {
             this.callTriggerAction();
+            this.triggerFSBManual();
         }
     }
 
@@ -147,6 +149,8 @@ export default class SpinButton extends ObserverComponent {
             this.clearTriggerAction();
         }
     }
+    @handle(FSBPromotionUIHandler, (handler) => handler.triggerFSBManual())
+    triggerFSBManual() {}
 
     @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.SPINNING }))
     @handle(SlotBetHandler, (handler) => handler.callTriggerAction())
