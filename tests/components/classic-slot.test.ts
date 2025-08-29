@@ -62,6 +62,9 @@ jest.mock("@sg/game-client-base", () => ({
     },
     StorageManager: {},
     localStorageKeys: {},
+    App: {
+        AppStore: class MockAppStore {},
+    },
 }));
 
 // Mock Observer
