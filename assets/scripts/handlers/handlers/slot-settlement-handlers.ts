@@ -10,7 +10,7 @@ import { SlotDurationStore } from "../stores/slot-duration-store";
 import { SlotBetHandler } from "./slot-bet-handlers";
 import { SlotErrorHandler } from "./slot-error-handler";
 import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
-import { FreeSpinSource, FreeSpinsPromotionEvents, FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
+import { FreeSpinsPromotionEvents, FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotSettlementHandler {
