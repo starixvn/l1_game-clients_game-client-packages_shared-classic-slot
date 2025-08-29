@@ -52,6 +52,13 @@ jest.mock("@sg/game-client-base", () => {
         },
     };
 });
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store", () => {
+    return {
+        FSBPromotionUIStore: jest.fn().mockImplementation(() => ({
+            isFSBPromotionInProgress: false,
+        })),
+    };
+});
 
 describe("BetControlStore", () => {
     let container: Container;
