@@ -5,6 +5,7 @@ const { injectable, inject } = inversify;
 import gc from "@sg/game-client-base";
 import { SLOT_LINES, SlotState } from "../../definitions";
 import { SlotBoardStore } from "./slot-board-store";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 
 @injectable()
 export class BetControlStore {
@@ -19,6 +20,7 @@ export class BetControlStore {
     protected readonly gameUserSettingHandler: gc.GameUserSettings.GameUserSettingHandler;
     @inject(gc.Notices.NoticeStore) protected readonly noticeStore: gc.Notices.NoticeStore;
     @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
+    @inject(FSBPromotionUIStore) protected readonly fsbPromotionUIStore: FSBPromotionUIStore;
 
     constructor() {
         mobx.makeAutoObservable(this);
@@ -102,12 +104,18 @@ export class BetControlStore {
     }
 
     get preventOpenAutoSpin() {
-        return (!this.isReadyBet && !this.autoSpinEnabled) || this.freeSpinEnabled;
+        return (!this.isReadyBet && !this.autoSpinEnabled) || this.freeSpinEnabled || this.fsbPromotionUIStore.isFSBPromotionInProgress;
     }
 
     get preventChangeBet() {
         const preventStates = [SlotState.SPINNING, SlotState.SPIN_DONE];
-        return !this.isReadyBet || preventStates.includes(this.slotBoardStore.slotState) || this.autoSpinEnabled || this.freeSpinEnabled;
+        return (
+            !this.isReadyBet ||
+            preventStates.includes(this.slotBoardStore.slotState) ||
+            this.autoSpinEnabled ||
+            this.freeSpinEnabled ||
+            this.fsbPromotionUIStore.isFSBPromotionInProgress
+        );
     }
 
     get disableSpinButton() {
