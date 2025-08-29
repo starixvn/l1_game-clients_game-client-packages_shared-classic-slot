@@ -84,6 +84,10 @@ jest.mock("db://shared-components/game/scripts/components/game-component", () =>
             return true;
         }
         renderRoundId() {}
+        addComponent(componentClass: any) {
+            // Mock addComponent method - returns a mock instance
+            return new componentClass();
+        }
     }
 
     return {
