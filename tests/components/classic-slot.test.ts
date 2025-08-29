@@ -274,6 +274,7 @@ describe("ClassicSlot", () => {
 
         // Add missing methods
         component.getComponent = jest.fn();
+        (component as any).addComponent = jest.fn().mockImplementation((componentClass: any) => new componentClass());
         component.node = { on: jest.fn(), off: jest.fn() } as any;
     });
 
