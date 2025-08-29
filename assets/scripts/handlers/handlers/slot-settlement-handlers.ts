@@ -144,16 +144,24 @@ export class SlotSettlementHandler {
         return new Promise<void>((resolve) => {
             this.betControlStore.decreaseFreeSpinCount();
             this.slotBoardStore.slotState = SlotState.SPINNING;
+            this.fsbPromotionUIStore.isSpinningFSB = true;
             this.slotBoardStore.spinResult = {
                 result,
                 duration: this.slotDurationStore.spinDuration,
                 turbo: this.betControlStore.turboEnabledOnSpin,
                 onComplete: () => {
                     this.slotBoardStore.slotState = SlotState.SPIN_DONE;
+                    this.fsbPromotionUIStore.isSpinningFSB = false;
                     resolve();
                 },
             };
         });
+    }
+
+    handleUpdateBalance(changeUserBalance: boolean) {
+        if (changeUserBalance) {
+            this.getBalanceHandler.handle();
+        }
     }
 
     async handleFinish(finish: any) {

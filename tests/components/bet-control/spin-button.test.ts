@@ -143,6 +143,13 @@ jest.mock("db://shared-components/shared/common-components/observer-component/sc
     },
 }));
 
+// Mock FSB Promotion dependencies - not available in current codebase
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler", () => ({
+    FSBPromotionUIHandler: class MockFSBPromotionUIHandler {
+        triggerFSBManual = jest.fn();
+    },
+}));
+
 // Mock CustomButton
 jest.mock("db://shared-components/shared/common-components/button/custom-button", () => ({
     CustomButton: class MockCustomButton {
@@ -158,6 +165,51 @@ jest.mock("db://shared-components/shared/common-components/button/button-state",
         HOVER: "hover",
         NORMAL: "normal",
     },
+}));
+
+// Mock cc module missing components
+jest.mock("cc", () => ({
+    ...jest.requireActual("cc"),
+    Intersection2D: {
+        pointInPolygon: jest.fn()
+    },
+    math: {
+        v2: jest.fn()
+    },
+    input: {
+        on: jest.fn(),
+        off: jest.fn()
+    },
+    game: {
+        canvas: {
+            addEventListener: jest.fn(),
+            removeEventListener: jest.fn(),
+            focus: jest.fn()
+        }
+    },
+    Input: {
+        EventType: {
+            KEY_DOWN: "keydown",
+            KEY_UP: "keyup"
+        }
+    },
+    Node: class MockNode {
+        static EventType = {
+            TOUCH_START: "touch-start",
+            TOUCH_MOVE: "touch-move", 
+            TOUCH_CANCEL: "touch-cancel",
+            TOUCH_END: "touch-end"
+        };
+        on = jest.fn();
+        off = jest.fn();
+    },
+    KeyCode: {
+        ENTER: 13,
+        NONE: 0
+    },
+    EventTouch: class MockEventTouch {},
+    PolygonCollider2D: class MockPolygonCollider2D {},
+    Vec2: class MockVec2 {}
 }));
 
 // Import after mocking

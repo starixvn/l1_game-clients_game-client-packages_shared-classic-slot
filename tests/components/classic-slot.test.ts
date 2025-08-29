@@ -27,11 +27,41 @@ jest.mock("@sg/game-client-base", () => ({
     },
     Bet: {
         BetStore: class MockBetStore {},
+        BetHandler: class MockBetHandler {},
+    },
+    Connection: {
+        ConnectionHandlers: {
+            RetryGameHandler: class MockRetryGameHandler {},
+        },
+    },
+    DisabledGame: {
+        DisableGameHandlers: class MockDisableGameHandlers {},
+    },
+    JoinGame: {
+        JoinGameStore: class MockJoinGameStore {},
+    },
+    Error: {
+        ErrorHandlers: class MockErrorHandlers {},
+        ErrorStore: class MockErrorStore {},
+    },
+    Auth: {
+        AuthHandlers: {
+            GetBalance: class MockGetBalance {},
+        },
+    },
+    GameUserSettings: {
+        GameUserSettingAction: {},
+    },
+    Rounds: {
+        RoundTimeStore: class MockRoundTimeStore {},
+        RoundStore: class MockRoundStore {},
     },
     FormatUtils: {
         numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
         truncateFixedDecimals: jest.fn((num: number) => num.toFixed(2)),
     },
+    StorageManager: {},
+    localStorageKeys: {},
 }));
 
 // Mock Observer
@@ -150,6 +180,33 @@ jest.mock("../../assets/scripts/components/slot-board/slot-board", () => ({
         showPreviewPopup = jest.fn();
         setItemWinningEffect = jest.fn();
         applyData = jest.fn();
+    },
+}));
+
+// Mock FSB Promotion dependencies - not available in current codebase
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/components/fsb-promotion-ui-manager", () => ({
+    FSBPromotionUIManager: class MockFSBPromotionUIManager {
+        
+    },
+}));
+
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler", () => ({
+    FSBPromotionUIHandler: class MockFSBPromotionUIHandler {
+        handleFreeSpin = jest.fn();
+        tryConsumeFSB = jest.fn();
+    },
+}));
+
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store", () => ({
+    FreeSpinSignal: {},
+    FreeSpinSource: {
+        MANUAL: "MANUAL"
+    },
+    FreeSpinsPromotionEvents: {
+        FREE_SPIN: "FREE_SPIN"
+    },
+    FSBPromotionUIStore: class MockFSBPromotionUIStore {
+        
     },
 }));
 

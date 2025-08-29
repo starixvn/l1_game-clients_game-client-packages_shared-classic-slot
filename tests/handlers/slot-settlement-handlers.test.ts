@@ -124,6 +124,25 @@ jest.mock("../../assets/scripts/handlers/handlers/slot-error-handler", () => ({
     })),
 }));
 
+// Mock FSB Promotion dependencies - not available in current codebase
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler", () => ({
+    FSBPromotionUIHandler: class MockFSBPromotionUIHandler {
+        updateTotalWin = jest.fn();
+    },
+}));
+
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store", () => ({
+    FreeSpinSource: {
+        BONUS: "BONUS"
+    },
+    FreeSpinsPromotionEvents: {
+        FREE_SPIN: "FREE_SPIN"
+    },
+    FSBPromotionUIStore: class MockFSBPromotionUIStore {
+        
+    },
+}));
+
 jest.mock("@sg/game-client-base", () => {
     const actualGc = jest.requireActual("@sg/game-client-base");
     return {

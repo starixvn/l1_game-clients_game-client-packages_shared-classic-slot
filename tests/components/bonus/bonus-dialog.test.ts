@@ -1,5 +1,5 @@
 import { Button, Label, Node, Prefab } from "cc";
-import { resourceCaches } from "db://shared-classic-slot/scripts/utils/classic-slot-utils";
+import { resourceCaches } from "../../../assets/scripts/utils/classic-slot-utils";
 import { Container } from "inversify";
 import "reflect-metadata";
 import BonusDialog from "../../../assets/scripts/components/bonus/bonus-dialog";
@@ -116,7 +116,7 @@ jest.mock("cc", () => {
     };
 });
 
-jest.mock("db://shared-classic-slot/scripts/utils/classic-slot-utils", () => ({
+jest.mock("../../../assets/scripts/utils/classic-slot-utils", () => ({
     resourceCaches: {
         gameAtlas: null,
         sharedSlotAtlas: null,

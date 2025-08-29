@@ -67,6 +67,19 @@ jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
     }),
 }));
 
+// Mock FSB Promotion dependencies - not available in current codebase
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store", () => ({
+    FSBPromotionUIStore: class MockFSBPromotionUIStore {
+        
+    },
+}));
+
+jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store", () => ({
+    FSBPromotionStore: class MockFSBPromotionStore {
+        
+    },
+}));
+
 // Mock gc.Bet.BetHandler parent class and BetStore
 jest.mock("@sg/game-client-base", () => {
     const actualGc = jest.requireActual("@sg/game-client-base");

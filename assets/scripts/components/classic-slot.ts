@@ -35,7 +35,7 @@ import {
     FreeSpinsPromotionEvents,
     FSBPromotionUIStore,
 } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
-import { SlotBetHandler } from "../handlers";
+import { SlotBetHandler, SlotSettlementHandler } from "../handlers";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
@@ -77,6 +77,16 @@ export default class ClassicSlot extends GameComponent {
         this.loadSymbols().then(() => {
             this.initSlotBoard();
         });
+    }
+
+    @render(FSBPromotionUIStore, (store) => store.changeUserBalance)
+    renderChangeUserBalance(changeUserBalance: boolean) {
+        this.handleUpdateBalance(changeUserBalance);
+    }
+
+    @handle(SlotSettlementHandler, (handler, changeUserBalance: boolean) => handler.handleUpdateBalance(changeUserBalance))
+    handleUpdateBalance(changeUserBalance: boolean) {
+        return changeUserBalance;
     }
 
     @render(gc.GameConfigs.GameConfigStore, (store) => store.odds)
