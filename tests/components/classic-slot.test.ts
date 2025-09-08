@@ -135,8 +135,12 @@ jest.mock("../../assets/scripts/utils/classic-slot-utils", () => ({
             previewOddsWinValueColor: "#ffff00",
             previewOddsBorderColor: "#ff0000",
         },
+        jackpotEnabled: false,
     },
     setSlotGameConfigs: jest.fn(),
+    DialogName: {
+        PREVIEW_ODDS: "PREVIEW_ODDS",
+    },
 }));
 
 // Mock ComponentUtils
@@ -164,6 +168,33 @@ jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
 jest.mock("../../assets/scripts/handlers/stores/slot-duration-store", () => ({
     SlotDurationStore: jest.fn().mockImplementation(() => ({
         setConfig: jest.fn(),
+    })),
+}));
+
+jest.mock("../../assets/scripts/handlers/stores/slot-ui-store", () => ({
+    SlotUIStore: jest.fn().mockImplementation(() => ({
+        dialogOpenEvent: null,
+    })),
+}));
+
+jest.mock("../../assets/scripts/handlers/stores/jackpot-pool-store", () => ({
+    JackpotPoolStore: jest.fn().mockImplementation(() => ({
+        jackpotEnabled: { enabled: false },
+    })),
+}));
+
+jest.mock("../../assets/scripts/handlers/handlers/slot-ui-handler", () => ({
+    SlotUIHandler: jest.fn().mockImplementation(() => ({
+        triggerDialogOpen: jest.fn(),
+    })),
+}));
+
+jest.mock("../../assets/scripts/handlers", () => ({
+    SlotBetHandler: jest.fn().mockImplementation(() => ({
+        callBet: jest.fn(),
+    })),
+    SlotSettlementHandler: jest.fn().mockImplementation(() => ({
+        handleUpdateBalance: jest.fn(),
     })),
 }));
 
@@ -207,13 +238,19 @@ jest.mock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-
 jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store", () => ({
     FreeSpinSignal: {},
     FreeSpinSource: {
+        GAME: "GAME",
+        PROMOTION: "PROMOTION",
         MANUAL: "MANUAL"
     },
     FreeSpinsPromotionEvents: {
-        FREE_SPIN: "FREE_SPIN"
+        FREE_SPIN: "FREE_SPIN",
+        SPIN_ON_FSB_PROMOTION_FIRST_TIME: "SPIN_ON_FSB_PROMOTION_FIRST_TIME"
     },
     FSBPromotionUIStore: class MockFSBPromotionUIStore {
-        
+        changeUserBalance = false;
+        pendingUIEvent = null;
+        isEligibleForNextFSBSpin = false;
+        hasServerFinishPromotion = false;
     },
 }));
 
@@ -684,6 +721,211 @@ describe("ClassicSlot", () => {
                 component.renderReadyBet(expectedValue);
                 expect(component.isReadyBet).toBe(expectedValue);
             });
+        });
+    });
+
+    describe("renderChangeUserBalance", () => {
+        it("should call handleUpdateBalance with the changeUserBalance parameter", () => {
+            const handleUpdateBalanceSpy = jest.spyOn(component, "handleUpdateBalance").mockImplementation();
+            const changeUserBalance = true;
+            
+            component.renderChangeUserBalance(changeUserBalance);
+            
+            expect(handleUpdateBalanceSpy).toHaveBeenCalledWith(changeUserBalance);
+        });
+    });
+
+    describe("handleUpdateBalance", () => {
+        it("should return the changeUserBalance parameter", () => {
+            const changeUserBalance = true;
+            
+            const result = component.handleUpdateBalance(changeUserBalance);
+            
+            expect(result).toBe(changeUserBalance);
+        });
+    });
+
+
+    describe("triggerOpenPreviewOdds", () => {
+        it("should be callable without errors", () => {
+            expect(() => component.triggerOpenPreviewOdds()).not.toThrow();
+        });
+    });
+
+    describe("updateSpinTime", () => {
+        it("should return the spinTime parameter", () => {
+            const spinTime = 1500;
+            
+            const result = component.updateSpinTime(spinTime);
+            
+            expect(result).toBe(spinTime);
+        });
+    });
+
+    describe("notifyFreeSpinFromGame", () => {
+        it("should call notifyFreeSpin with GAME source", () => {
+            const { FreeSpinSource } = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store");
+            const notifyFreeSpinSpy = jest.spyOn(component, "notifyFreeSpin").mockImplementation();
+            const isActive = true;
+            
+            component.notifyFreeSpinFromGame(isActive);
+            
+            expect(notifyFreeSpinSpy).toHaveBeenCalledWith({ source: FreeSpinSource.GAME, active: isActive });
+        });
+    });
+
+    describe("notifyFreeSpinFromPromotion", () => {
+        it("should call notifyFreeSpin with PROMOTION source", () => {
+            const { FreeSpinSource } = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store");
+            const notifyFreeSpinSpy = jest.spyOn(component, "notifyFreeSpin").mockImplementation();
+            const isUsedFSBPromotionBonus = true;
+            
+            component.notifyFreeSpinFromPromotion(isUsedFSBPromotionBonus);
+            
+            expect(notifyFreeSpinSpy).toHaveBeenCalledWith({ source: FreeSpinSource.PROMOTION, active: isUsedFSBPromotionBonus });
+        });
+    });
+
+    describe("notifyFreeSpin", () => {
+        it("should return the signal parameter", () => {
+            const { FreeSpinSource } = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store");
+            const signal = { source: FreeSpinSource.GAME, active: true };
+            
+            const result = component.notifyFreeSpin(signal);
+            
+            expect(result).toBe(signal);
+        });
+    });
+
+    describe("renderFSBPromotionInProgress", () => {
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
+        afterEach(() => {
+            jest.useRealTimers();
+        });
+
+        it("should not do anything when pendingUIEvent is null", () => {
+            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
+            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
+            
+            component.renderFSBPromotionInProgress(null);
+            
+            expect(tryConsumeFSBSpy).not.toHaveBeenCalled();
+            expect(callBetSpy).not.toHaveBeenCalled();
+        });
+
+        it("should not do anything when event is not SPIN_ON_FSB_PROMOTION_FIRST_TIME", () => {
+            const { FreeSpinsPromotionEvents } = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store");
+            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
+            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
+            const pendingUIEvent = { event: "OTHER_EVENT" };
+            
+            component.renderFSBPromotionInProgress(pendingUIEvent);
+            
+            expect(tryConsumeFSBSpy).not.toHaveBeenCalled();
+            expect(callBetSpy).not.toHaveBeenCalled();
+        });
+
+        it("should call tryConsumeFSB and callBet after delay when event is SPIN_ON_FSB_PROMOTION_FIRST_TIME", () => {
+            const { FreeSpinsPromotionEvents } = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store");
+            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
+            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
+            const pendingUIEvent = { 
+                event: FreeSpinsPromotionEvents.SPIN_ON_FSB_PROMOTION_FIRST_TIME, 
+                data: { delayMs: 1000, isPlaceBet: true } 
+            };
+            
+            component.renderFSBPromotionInProgress(pendingUIEvent);
+            
+            expect(tryConsumeFSBSpy).not.toHaveBeenCalled();
+            expect(callBetSpy).not.toHaveBeenCalled();
+            
+            jest.advanceTimersByTime(1000);
+            
+            expect(tryConsumeFSBSpy).toHaveBeenCalled();
+            expect(callBetSpy).toHaveBeenCalled();
+        });
+
+        it("should not call callBet when isPlaceBet is false", () => {
+            const { FreeSpinsPromotionEvents } = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store");
+            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
+            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
+            const pendingUIEvent = { 
+                event: FreeSpinsPromotionEvents.SPIN_ON_FSB_PROMOTION_FIRST_TIME, 
+                data: { delayMs: 500, isPlaceBet: false } 
+            };
+            
+            component.renderFSBPromotionInProgress(pendingUIEvent);
+            
+            jest.advanceTimersByTime(500);
+            
+            expect(tryConsumeFSBSpy).toHaveBeenCalled();
+            expect(callBetSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("renderIsEligibleForNextFSBSpinAndHasServerFinishPromotion", () => {
+        it("should call tryConsumeFSB and callBet when eligible and not finished", () => {
+            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
+            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
+            const params: [boolean, boolean] = [true, false]; // [isEligibleForNextFSBSpin, hasServerFinishPromotion]
+            
+            component.renderIsEligibleForNextFSBSpinAndHasServerFinishPromotion(params);
+            
+            expect(tryConsumeFSBSpy).toHaveBeenCalled();
+            expect(callBetSpy).toHaveBeenCalled();
+        });
+
+        it("should not call methods when not eligible", () => {
+            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
+            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
+            const params: [boolean, boolean] = [false, false]; // [isEligibleForNextFSBSpin, hasServerFinishPromotion]
+            
+            component.renderIsEligibleForNextFSBSpinAndHasServerFinishPromotion(params);
+            
+            expect(tryConsumeFSBSpy).not.toHaveBeenCalled();
+            expect(callBetSpy).not.toHaveBeenCalled();
+        });
+
+        it("should not call methods when server has finished promotion", () => {
+            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
+            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
+            const params: [boolean, boolean] = [true, true]; // [isEligibleForNextFSBSpin, hasServerFinishPromotion]
+            
+            component.renderIsEligibleForNextFSBSpinAndHasServerFinishPromotion(params);
+            
+            expect(tryConsumeFSBSpy).not.toHaveBeenCalled();
+            expect(callBetSpy).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("tryConsumeFSB", () => {
+        it("should be callable without errors", () => {
+            expect(() => component.tryConsumeFSB()).not.toThrow();
+        });
+    });
+
+    describe("callBet", () => {
+        it("should be callable without errors", () => {
+            expect(() => component.callBet()).not.toThrow();
+        });
+    });
+
+    describe("onLoad", () => {
+        it("should call initSharedCaches, updateBalanceColor, super.onLoad, and addComponent", () => {
+            const initSharedCachesSpy = jest.spyOn(component, "initSharedCaches").mockImplementation();
+            const updateBalanceColorSpy = jest.spyOn(component, "updateBalanceColor").mockImplementation();
+            const superOnLoadSpy = jest.spyOn(Object.getPrototypeOf(Object.getPrototypeOf(component)), "onLoad").mockImplementation();
+            const addComponentSpy = jest.spyOn(component, "addComponent").mockImplementation();
+            
+            component.onLoad();
+            
+            expect(initSharedCachesSpy).toHaveBeenCalled();
+            expect(updateBalanceColorSpy).toHaveBeenCalled();
+            expect(superOnLoadSpy).toHaveBeenCalled();
+            expect(addComponentSpy).toHaveBeenCalled();
         });
     });
 });

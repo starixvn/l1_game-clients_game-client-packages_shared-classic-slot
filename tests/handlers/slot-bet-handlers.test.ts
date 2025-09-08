@@ -7,6 +7,8 @@ import { SlotBetResponseHandler } from "../../assets/scripts/handlers/handlers/s
 import { SlotUIHandler } from "../../assets/scripts/handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
+import { FSBPromotionStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store";
 
 // Mock BetControlStore
 jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
@@ -45,6 +47,8 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
                 this._freeSpinEnabled = value;
             },
         });
+        this.didSpin = false;
+        this.isFreeSpinEffectCompleted = false;
         this.acceptAutoSpinValue = jest.fn();
         this.decreaseAutoSpinCount = jest.fn();
         this.cancelAutoSpin = jest.fn();
@@ -67,17 +71,29 @@ jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
     }),
 }));
 
-// Mock FSB Promotion dependencies - not available in current codebase
+// Mock FSB Promotion dependencies
 jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store", () => ({
-    FSBPromotionUIStore: class MockFSBPromotionUIStore {
-        
-    },
+    FSBPromotionUIStore: jest.fn().mockImplementation(function (this: any) {
+        this._isFSBPromotionInProgress = false;
+        Object.defineProperty(this, "isFSBPromotionInProgress", {
+            get() {
+                return this._isFSBPromotionInProgress;
+            },
+            set(value) {
+                this._isFSBPromotionInProgress = value;
+            },
+        });
+        return this;
+    }),
 }));
 
 jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store", () => ({
-    FSBPromotionStore: class MockFSBPromotionStore {
-        
-    },
+    FSBPromotionStore: jest.fn().mockImplementation(function (this: any) {
+        this.promotion = {
+            betLevel: 200,
+        };
+        return this;
+    }),
 }));
 
 // Mock gc.Bet.BetHandler parent class and BetStore
@@ -133,6 +149,8 @@ describe("SlotBetHandler", () => {
     let betControlStore: jest.Mocked<BetControlStore>;
     let slotBoardStore: jest.Mocked<SlotBoardStore>;
     let betStore: jest.Mocked<gc.Bet.BetStore>;
+    let fsbPromotionUIStore: jest.Mocked<FSBPromotionUIStore>;
+    let fsbPromotionStore: jest.Mocked<FSBPromotionStore>;
 
     beforeEach(() => {
         jest.useFakeTimers();
@@ -164,11 +182,20 @@ describe("SlotBetHandler", () => {
         const mockSlotUIHandlerInstance = new (jest.requireMock("../../assets/scripts/handlers/handlers/slot-ui-handler").SlotUIHandler)();
         container.bind(SlotUIHandler).toConstantValue(mockSlotUIHandlerInstance);
 
+        // Bind FSB Promotion stores
+        const mockFSBPromotionUIStoreInstance = new (jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store").FSBPromotionUIStore)();
+        container.bind(FSBPromotionUIStore).toConstantValue(mockFSBPromotionUIStoreInstance);
+
+        const mockFSBPromotionStoreInstance = new (jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store").FSBPromotionStore)();
+        container.bind(FSBPromotionStore).toConstantValue(mockFSBPromotionStoreInstance);
+
         // Get instances
         slotBetHandler = container.get(SlotBetHandler);
         betControlStore = container.get(BetControlStore) as jest.Mocked<BetControlStore>;
         slotBoardStore = container.get(SlotBoardStore) as jest.Mocked<SlotBoardStore>;
         betStore = container.get(gc.Bet.BetStore) as jest.Mocked<gc.Bet.BetStore>;
+        fsbPromotionUIStore = container.get(FSBPromotionUIStore) as jest.Mocked<FSBPromotionUIStore>;
+        fsbPromotionStore = container.get(FSBPromotionStore) as jest.Mocked<FSBPromotionStore>;
 
         // Assign betStore to slotBetHandler for proper inheritance from BetHandler
         Object.assign(slotBetHandler, {
@@ -221,7 +248,39 @@ describe("SlotBetHandler", () => {
                 ...mockBetData,
                 amount: 50,
                 betChoice: SLOT_BET_CHOICES,
+                freeSpin: false,
             });
+        });
+
+        it("should use FSB promotion bet level when FSB promotion is in progress", () => {
+            (betControlStore as any)._isReadyBet = true;
+            (fsbPromotionUIStore as any)._isFSBPromotionInProgress = true;
+            betControlStore.stake = 50;
+            fsbPromotionStore.promotion.betLevel = 200;
+            const createBetDataSpy = jest.spyOn(slotBetHandler, "createBetData");
+            const handleBetDataSpy = jest.spyOn(slotBetHandler, "handleBetData");
+
+            const mockBetData = { baseAmount: 100 };
+            createBetDataSpy.mockReturnValue(mockBetData);
+
+            slotBetHandler.callBet();
+
+            expect(handleBetDataSpy).toHaveBeenCalledWith({
+                ...mockBetData,
+                amount: 200, // Should use FSB promotion bet level
+                betChoice: SLOT_BET_CHOICES,
+                freeSpin: true, // Should be true when FSB promotion is active
+            });
+        });
+
+        it("should set didSpin and isFreeSpinEffectCompleted correctly", () => {
+            (betControlStore as any)._isReadyBet = true;
+            betControlStore.stake = 50;
+
+            slotBetHandler.callBet();
+
+            expect(betControlStore.didSpin).toBe(true);
+            expect(betControlStore.isFreeSpinEffectCompleted).toBe(false);
         });
     });
 
@@ -327,6 +386,49 @@ describe("SlotBetHandler", () => {
 
             expect(result).toBe(true);
         });
+
+        it("should return true when FSB promotion is in progress", () => {
+            betStore.isProcessingBet = false;
+            (fsbPromotionUIStore as any)._isFSBPromotionInProgress = true;
+            (betControlStore as any)._freeSpinEnabled = false;
+            (betControlStore as any)._totalBet = 15000;
+            (betStore as any)._availableBalance = 10000;
+
+            const result = slotBetHandler.isValidBet(100);
+
+            expect(result).toBe(true);
+        });
+    });
+
+    describe("isEnoughBalance", () => {
+        it("should return false when total bet exceeds available balance", () => {
+            (betControlStore as any)._totalBet = 15000;
+            (betStore as any)._availableBalance = 10000;
+            const showNoticePlaceBetFailureSpy = jest.spyOn(slotBetHandler, "showNoticePlaceBetFailure");
+
+            const result = slotBetHandler.isEnoughBalance();
+
+            expect(result).toBe(false);
+            expect(showNoticePlaceBetFailureSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("should return true when total bet is within available balance", () => {
+            (betControlStore as any)._totalBet = 5000;
+            (betStore as any)._availableBalance = 10000;
+
+            const result = slotBetHandler.isEnoughBalance();
+
+            expect(result).toBe(true);
+        });
+
+        it("should return true when total bet equals available balance", () => {
+            (betControlStore as any)._totalBet = 10000;
+            (betStore as any)._availableBalance = 10000;
+
+            const result = slotBetHandler.isEnoughBalance();
+
+            expect(result).toBe(true);
+        });
     });
 
     describe("confirmAutoSpin", () => {
@@ -410,10 +512,25 @@ describe("SlotBetHandler", () => {
     });
 
     describe("openAutoSpinDialog", () => {
-        it("should set auto spin dialog open event", () => {
+        it("should set auto spin dialog open event when balance is sufficient", () => {
+            (betControlStore as any)._totalBet = 5000;
+            (betStore as any)._availableBalance = 10000;
+            const triggerDialogOpenSpy = jest.spyOn(slotBetHandler["slotUIHandler"], "triggerDialogOpen");
+
             slotBetHandler.openAutoSpinDialog();
 
             expect(betControlStore.autoSpinDialogOpenEvent).toEqual({});
+        });
+
+        it("should not open dialog when balance is insufficient", () => {
+            (betControlStore as any)._totalBet = 15000;
+            (betStore as any)._availableBalance = 10000;
+            const triggerDialogOpenSpy = jest.spyOn(slotBetHandler["slotUIHandler"], "triggerDialogOpen");
+
+            slotBetHandler.openAutoSpinDialog();
+
+            expect(betControlStore.autoSpinDialogOpenEvent).toBeNull();
+            expect(triggerDialogOpenSpy).not.toHaveBeenCalled();
         });
     });
 
@@ -426,21 +543,85 @@ describe("SlotBetHandler", () => {
     });
 
     describe("handlePlaceBetFailed", () => {
-        it("should cancel auto spin, clear trigger action, reset board and clear free spins", () => {
+        it("should cancel auto spin, clear trigger action, reset board when clearFreeSpins is false", () => {
             const cancelAutoSpinSpy = jest.spyOn(slotBetHandler, "cancelAutoSpin");
             const clearTriggerActionSpy = jest.spyOn(slotBetHandler, "clearTriggerAction");
+            const stopProcessingBetAndClearIntervalSpy = jest.spyOn(slotBetHandler["slotBetResponseHandler"], "stopProcessingBetAndClearInterval");
 
             slotBetHandler.handlePlaceBetFailed(false);
 
+            expect(stopProcessingBetAndClearIntervalSpy).toHaveBeenCalledTimes(1);
             expect(cancelAutoSpinSpy).toHaveBeenCalledTimes(1);
             expect(clearTriggerActionSpy).toHaveBeenCalledTimes(1);
             expect(slotBoardStore.clearSettlement).toHaveBeenCalledTimes(1);
+            expect(slotBoardStore.resetToReady).toHaveBeenCalledTimes(1);
+            expect(betControlStore.clearFreeSpins).not.toHaveBeenCalled();
+            expect(betControlStore.didSpin).toBe(false);
         });
 
         it("should clear free spins when clearFreeSpins is true", () => {
             slotBetHandler.handlePlaceBetFailed(true);
 
             expect(betControlStore.clearFreeSpins).toHaveBeenCalledTimes(1);
+            expect(betControlStore.didSpin).toBe(false);
+        });
+    });
+
+    describe("Edge cases and error scenarios", () => {
+        it("should handle timeoutHolding being undefined in clearTriggerAction", () => {
+            slotBetHandler["timeoutHolding"] = undefined;
+            
+            expect(() => slotBetHandler.clearTriggerAction()).not.toThrow();
+            expect(betControlStore.triggerAutoSpin).toBe(false);
+        });
+
+        it("should handle timeoutStartAutoSpin being undefined in cancelAutoSpin", () => {
+            slotBetHandler["timeoutStartAutoSpin"] = undefined;
+            
+            expect(() => slotBetHandler.cancelAutoSpin()).not.toThrow();
+            expect(betControlStore.cancelAutoSpin).toHaveBeenCalledTimes(1);
+        });
+
+        it("should handle freeSpinEnabled with FSB promotion correctly", () => {
+            (betControlStore as any)._isReadyBet = true;
+            (betControlStore as any)._freeSpinEnabled = true;
+            (fsbPromotionUIStore as any)._isFSBPromotionInProgress = true;
+            betControlStore.stake = 50;
+            fsbPromotionStore.promotion.betLevel = 200;
+            const createBetDataSpy = jest.spyOn(slotBetHandler, "createBetData");
+            const handleBetDataSpy = jest.spyOn(slotBetHandler, "handleBetData");
+
+            const mockBetData = { baseAmount: 100 };
+            createBetDataSpy.mockReturnValue(mockBetData);
+
+            slotBetHandler.callBet();
+
+            expect(handleBetDataSpy).toHaveBeenCalledWith({
+                ...mockBetData,
+                amount: 200,
+                betChoice: SLOT_BET_CHOICES,
+                freeSpin: true, // Should be true because either freeSpinEnabled OR FSB promotion is active
+            });
+        });
+
+        it("should handle zero balance correctly in isEnoughBalance", () => {
+            (betControlStore as any)._totalBet = 100;
+            (betStore as any)._availableBalance = 0;
+            const showNoticePlaceBetFailureSpy = jest.spyOn(slotBetHandler, "showNoticePlaceBetFailure");
+
+            const result = slotBetHandler.isEnoughBalance();
+
+            expect(result).toBe(false);
+            expect(showNoticePlaceBetFailureSpy).toHaveBeenCalledTimes(1);
+        });
+
+        it("should handle zero total bet correctly in isEnoughBalance", () => {
+            (betControlStore as any)._totalBet = 0;
+            (betStore as any)._availableBalance = 10000;
+
+            const result = slotBetHandler.isEnoughBalance();
+
+            expect(result).toBe(true);
         });
     });
 

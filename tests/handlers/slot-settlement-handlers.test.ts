@@ -8,6 +8,8 @@ import { SlotSettlementHandler } from "../../assets/scripts/handlers/handlers/sl
 import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
 import { SlotDurationStore } from "../../assets/scripts/handlers/stores/slot-duration-store";
+import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 
 // Define an enhanced type for the BetControlStore mock instance
 interface EnhancedMockedBetControlStore extends jest.Mocked<BetControlStore> {
@@ -124,10 +126,11 @@ jest.mock("../../assets/scripts/handlers/handlers/slot-error-handler", () => ({
     })),
 }));
 
-// Mock FSB Promotion dependencies - not available in current codebase
+// Mock FSB Promotion dependencies
 jest.mock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler", () => ({
     FSBPromotionUIHandler: class MockFSBPromotionUIHandler {
         updateTotalWin = jest.fn();
+        changeUIPendingEvent = jest.fn();
     },
 }));
 
@@ -136,10 +139,12 @@ jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui
         BONUS: "BONUS"
     },
     FreeSpinsPromotionEvents: {
-        FREE_SPIN: "FREE_SPIN"
+        FREE_SPIN: "FREE_SPIN",
+        OPEN_PROMOTION_INFO: "OPEN_PROMOTION_INFO"
     },
     FSBPromotionUIStore: class MockFSBPromotionUIStore {
-        
+        isSpinningFSB = false;
+        isShowFreeSpinMessage = false;
     },
 }));
 
@@ -260,6 +265,8 @@ describe("SlotSettlementHandler", () => {
     let errorStore: jest.Mocked<gc.Error.ErrorStore>;
     let mainPlayerStore: jest.Mocked<gc.Player.MainPlayerStore>;
     let getBalanceHandler: jest.Mocked<gc.Auth.AuthHandlers.GetBalance>;
+    let fsbPromotionUIHandler: jest.Mocked<FSBPromotionUIHandler>;
+    let fsbPromotionUIStore: jest.Mocked<FSBPromotionUIStore>;
 
     beforeEach(() => {
         container = new Container();
@@ -307,6 +314,14 @@ describe("SlotSettlementHandler", () => {
         getBalanceHandler = new MockedGetBalanceHandler();
         container.bind(gc.Auth.AuthHandlers.GetBalance).toConstantValue(getBalanceHandler);
 
+        const MockedFSBPromotionUIHandler = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler").FSBPromotionUIHandler;
+        fsbPromotionUIHandler = new MockedFSBPromotionUIHandler();
+        container.bind(FSBPromotionUIHandler).toConstantValue(fsbPromotionUIHandler);
+
+        const MockedFSBPromotionUIStore = jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store").FSBPromotionUIStore;
+        fsbPromotionUIStore = new MockedFSBPromotionUIStore();
+        container.bind(FSBPromotionUIStore).toConstantValue(fsbPromotionUIStore);
+
         settlementHandler = container.get(SlotSettlementHandler);
 
         jest.useFakeTimers();
@@ -324,6 +339,8 @@ describe("SlotSettlementHandler", () => {
         betControlStore.setFreeSpinStake.mockClear();
         getBalanceHandler.handle.mockClear();
         (gc.NumberUtils.getValueByCurrency as jest.Mock).mockClear();
+        fsbPromotionUIHandler.updateTotalWin.mockClear();
+        fsbPromotionUIHandler.changeUIPendingEvent.mockClear();
 
         slotBoardStore.slotState = SlotState.NOT_READY;
         slotBoardStore.highlightSpecialSymbols = [];
@@ -338,13 +355,15 @@ describe("SlotSettlementHandler", () => {
         betStore.lastReceivedBet = null;
         errorStore.apiError = null;
         mainPlayerStore.rate = 1;
+        fsbPromotionUIStore.isSpinningFSB = false;
+        fsbPromotionUIStore.isShowFreeSpinMessage = false;
     });
 
     afterEach(() => {
         jest.clearAllTimers();
         jest.clearAllMocks();
     });
-
+ 
     describe("reset", () => {
         it("should clear timeouts and reset board store", () => {
             const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
@@ -581,6 +600,10 @@ describe("SlotSettlementHandler", () => {
             jest.runAllTimers();
 
             expect(finishSettlementSpy).toHaveBeenCalled();
+            expect(fsbPromotionUIHandler.updateTotalWin).toHaveBeenCalledWith({ 
+                win: betWin, 
+                totalFreeSpins: betControlStore.freeSpinCount 
+            });
             expect(slotBoardStore.resetToReady).toHaveBeenCalled();
             expect(slotErrorHandler.handleEndGameApiError).toHaveBeenCalled();
             expect(checkSpinNextRoundSpy).toHaveBeenCalled();
@@ -616,6 +639,10 @@ describe("SlotSettlementHandler", () => {
 
             jest.runAllTimers();
             expect(finishSettlementSpy).toHaveBeenCalled();
+            expect(fsbPromotionUIHandler.updateTotalWin).toHaveBeenCalledWith({ 
+                win: betWin, 
+                totalFreeSpins: betControlStore.freeSpinCount 
+            });
         });
 
         it("should handle free spins awarded scenario", () => {
@@ -648,6 +675,10 @@ describe("SlotSettlementHandler", () => {
 
             jest.runAllTimers();
             expect(finishSettlementSpy).toHaveBeenCalled();
+            expect(fsbPromotionUIHandler.updateTotalWin).toHaveBeenCalledWith({ 
+                win: betWin, 
+                totalFreeSpins: betControlStore.freeSpinCount 
+            });
         });
 
         it("should handle both big win and free spins awarded", () => {
@@ -679,6 +710,10 @@ describe("SlotSettlementHandler", () => {
             expect(createTweenShowFreeSpinsSpy).toHaveBeenCalledWith({ ...mockFreeSpins, count: newFreeSpinCount });
 
             jest.runAllTimers();
+            expect(fsbPromotionUIHandler.updateTotalWin).toHaveBeenCalledWith({ 
+                win: betWin, 
+                totalFreeSpins: betControlStore.freeSpinCount 
+            });
         });
 
         it("should handle no win scenario (betWin = 0)", () => {
@@ -704,6 +739,10 @@ describe("SlotSettlementHandler", () => {
             expect(createTweenShowFreeSpinsSpy).not.toHaveBeenCalled();
 
             jest.runAllTimers();
+            expect(fsbPromotionUIHandler.updateTotalWin).toHaveBeenCalledWith({ 
+                win: betWin, 
+                totalFreeSpins: betControlStore.freeSpinCount 
+            });
         });
     });
 
@@ -941,6 +980,104 @@ describe("SlotSettlementHandler", () => {
 
             expect(betControlStore.clearFreeSpins).toHaveBeenCalled();
             expect(slotBetHandler.callBet).toHaveBeenCalled();
+        });
+
+        it("should handle FSB promotion when isShowFreeSpinMessage is true", () => {
+            betControlStore.freeSpinEnabled = false;
+            betControlStore.autoSpinEnabled = false;
+            betControlStore.triggerAutoSpin = false;
+            fsbPromotionUIStore.isShowFreeSpinMessage = true;
+
+            // @ts-ignore
+            settlementHandler.checkSpinNextRound();
+
+            expect(fsbPromotionUIHandler.changeUIPendingEvent).toHaveBeenCalledWith("OPEN_PROMOTION_INFO");
+            expect(betControlStore.isFreeSpinEffectCompleted).toBe(true);
+        });
+    });
+
+    describe("handleUpdateBalance", () => {
+        it("should call getBalanceHandler when changeUserBalance is true", () => {
+            settlementHandler.handleUpdateBalance(true);
+            expect(getBalanceHandler.handle).toHaveBeenCalled();
+        });
+
+        it("should not call getBalanceHandler when changeUserBalance is false", () => {
+            settlementHandler.handleUpdateBalance(false);
+            expect(getBalanceHandler.handle).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("spinResultSpecialCase", () => {
+        it("should set roundId and call spin", async () => {
+            const data = { roundId: 123, result: [1, 2, 3] };
+            
+            // @ts-ignore
+            const spinSpy = jest.spyOn(settlementHandler, "spin").mockResolvedValue(undefined);
+            
+            // @ts-ignore
+            await settlementHandler.spinResultSpecialCase(data);
+            
+            expect(betControlStore.roundId).toBe(123);
+            expect(spinSpy).toHaveBeenCalledWith([1, 2, 3]);
+            
+            spinSpy.mockRestore();
+        });
+    });
+
+    describe("scheduleNextSpin", () => {
+        it("should schedule action after delay", () => {
+            const mockAction = jest.fn();
+            
+            // @ts-ignore
+            settlementHandler.scheduleNextSpin(mockAction);
+            
+            expect(settlementHandler.timeoutNextSpin).toBeDefined();
+            expect(mockAction).not.toHaveBeenCalled();
+            
+            // Advance timers to trigger the setTimeout callback
+            jest.advanceTimersByTime(1000);
+            
+            expect(mockAction).toHaveBeenCalled();
+        });
+    });
+
+    describe("spin", () => {
+        it("should set FSB spinning state and call onComplete", async () => {
+            const result = [1, 2, 3];
+            
+            // @ts-ignore
+            const promise = settlementHandler.spin(result);
+            
+            expect(fsbPromotionUIStore.isSpinningFSB).toBe(true);
+            expect(slotBoardStore.slotState).toBe(SlotState.SPINNING);
+            expect(betControlStore.decreaseFreeSpinCount).toHaveBeenCalled();
+            expect(slotBoardStore.spinResult).toEqual({
+                result,
+                duration: slotDurationStore.spinDuration,
+                turbo: betControlStore.turboEnabledOnSpin,
+                onComplete: expect.any(Function)
+            });
+            
+            // Trigger onComplete callback
+            slotBoardStore.spinResult.onComplete();
+            await promise;
+            
+            expect(slotBoardStore.slotState).toBe(SlotState.SPIN_DONE);
+            expect(fsbPromotionUIStore.isSpinningFSB).toBe(false);
+        });
+    });
+
+    describe("finishSettlement", () => {
+        it("should call clearSettlement", () => {
+            const clearSettlementSpy = jest.spyOn(settlementHandler, "clearSettlement");
+            
+            // @ts-ignore
+            settlementHandler.finishSettlement();
+            
+            expect(clearSettlementSpy).toHaveBeenCalled();
+            
+            clearSettlementSpy.mockRestore();
         });
     });
 });
