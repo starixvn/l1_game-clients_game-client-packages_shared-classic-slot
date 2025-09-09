@@ -360,12 +360,15 @@ export class SlotSettlementHandler {
         }, delayDuration);
     }
 
-    handleFreeSpins(freeSpins: { total: number; bet: number }) {
+    handleFreeSpins(freeSpins: { total: number; bet: number; promotionId?: string }) {
         const total = freeSpins.total;
         if (total > 0) {
             this.betControlStore.setFreeSpinStake(freeSpins.bet);
             this.betControlStore.setTotalFreeSpins(total);
             this.betControlStore.syncFreeSpinCount();
+            if (freeSpins.promotionId) {
+                this.fsbPromotionUIStore.resumedFSBPromotion = true;
+            }
         }
     }
 }
