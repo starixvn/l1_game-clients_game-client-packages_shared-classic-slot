@@ -241,7 +241,6 @@ export default class ClassicSlot extends GameComponent {
         this.notifyFreeSpin({ source: FreeSpinSource.PROMOTION, active: isUsedFSBPromotionBonus });
     }
 
-
     @handle(FSBPromotionUIHandler, (handler, signal: FreeSpinSignal) => handler.handleFreeSpin(signal))
     public notifyFreeSpin(signal: FreeSpinSignal) {
         return signal;
@@ -259,13 +258,12 @@ export default class ClassicSlot extends GameComponent {
         }, delayMs);
     }
 
-    @render(FSBPromotionUIStore, (store) => [store.isEligibleForNextFSBSpin, store.hasServerFinishPromotion] as const)
-    renderIsEligibleForNextFSBSpinAndHasServerFinishPromotion([isEligibleForNextFSBSpin, hasServerFinishPromotion]) {
-        if (!isEligibleForNextFSBSpin || hasServerFinishPromotion) {
-            return;
+    @render(FSBPromotionUIStore, (store) => store.canSpinNextFSB)
+    autoSpinFSB(canSpinNextFSB: boolean) {
+        if (canSpinNextFSB) {
+            this.tryConsumeFSB();
+            this.callBet();
         }
-        this.tryConsumeFSB();
-        this.callBet();
     }
 
     @handle(FSBPromotionUIHandler, (handler) => handler.tryConsumeFSB())
