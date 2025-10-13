@@ -67,11 +67,16 @@ export default class BetControl extends ObserverComponent {
             }
         });
 
-        ComponentUtils.setNodeColor(this.lblTotalWin.node, bottomAreaWinAmountColor);
+        if (this.lblTotalWin) {
+            ComponentUtils.setNodeColor(this.lblTotalWin.node, bottomAreaWinAmountColor);
+        }
     }
 
     @render(BetControlStore, (store) => store.totalBet)
     renderTotalBet(totalBet: number) {
+        if (!this.lblTotalBet) {
+            return;
+        }
         this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 2, true);
     }
 
@@ -82,6 +87,9 @@ export default class BetControl extends ObserverComponent {
 
     @render(SlotBoardStore, (store) => store.winningBet)
     renderTotalWin(totalWin: number) {
+        if (!this.lblTotalWin) {
+            return;
+        }
         this.tweenFloatNumber && this.tweenFloatNumber.stop();
         if (totalWin === 0) {
             this.lblTotalWin.string = "0";

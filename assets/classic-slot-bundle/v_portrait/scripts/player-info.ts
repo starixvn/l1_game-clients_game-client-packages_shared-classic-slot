@@ -1,0 +1,57 @@
+import gc from "@sg/game-client-base";
+import { _decorator, Label, Tween } from 'cc';
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { BetControlStore } from "db://shared-classic-slot/scripts/handlers/stores/bet-control-store";
+import { SlotBoardStore } from "db://shared-classic-slot/scripts/handlers/stores/slot-board-store";
+import { floatToNumber } from "db://shared-classic-slot/scripts/utils/classic-slot-utils";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
+import { ObserverComponent } from 'db://shared-components/shared/common-components/observer-component/scripts/observer-component';
+import Observer from "observer";
+const { ccclass, property } = _decorator;
+const { render, handle } = Observer;
+@ccclass('PlayerInfo')
+export class PlayerInfo extends ObserverComponent {
+    @property(Label)
+    lblBalance: Label = null;
+
+    @property(Label)
+    lblTotalBet: Label = null;
+
+    @property(Label)
+    lblTotalWin: Label = null;
+
+    private tweenFloatNumber: Tween = null;
+
+    @render(gc.Player.MainPlayerStore, (store) => store.balance)
+    setBalance(value: number) {
+        this.lblBalance && (this.lblBalance.string = gc.FormatUtils.truncateFixedDecimals(value, 2).toString());
+    }
+
+    @render(BetControlStore, (store) => store.totalBet)
+    renderTotalBet(totalBet: number) {
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 2, true);
+    }
+
+    @render(SlotBoardStore, (store) => store.winningBet)
+    renderTotalWin(totalWin: number) {
+        this.tweenFloatNumber && this.tweenFloatNumber.stop();
+        if (totalWin === 0) {
+            this.lblTotalWin.string = "0";
+            // this.hideWinEffect();
+            return;
+        }
+
+        AudioUtils.playSFX(AudioIds.WIN);
+        // this.playWinEffect();
+        this.tweenFloatNumber = floatToNumber({
+            from: 0,
+            to: totalWin,
+            duration: 0.6,
+            progress: (value) => {
+                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2, true);
+            },
+        });
+    }
+}
+
+
