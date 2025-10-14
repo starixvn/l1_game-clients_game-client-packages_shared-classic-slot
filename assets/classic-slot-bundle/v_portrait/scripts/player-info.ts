@@ -37,12 +37,10 @@ export class PlayerInfo extends ObserverComponent {
         this.tweenFloatNumber && this.tweenFloatNumber.stop();
         if (totalWin === 0) {
             this.lblTotalWin.string = "0";
-            // this.hideWinEffect();
             return;
         }
 
         AudioUtils.playSFX(AudioIds.WIN);
-        // this.playWinEffect();
         this.tweenFloatNumber = floatToNumber({
             from: 0,
             to: totalWin,
