@@ -23,8 +23,8 @@ export default class BetLevelsContainer extends ObserverComponent {
     private stakeIndex = -1;
 
     onClickListener = {
-        onStakeToggleChanged: (event, param) => {},
-        onHideStakeContainer: () => {},
+        onStakeToggleChanged: (event, param) => { },
+        onHideStakeContainer: () => { },
     };
 
     onLoad() {
@@ -99,8 +99,12 @@ export default class BetLevelsContainer extends ObserverComponent {
 
     protected onStakeToggleChanged(index: number) {
         this.setStake(this.betLevels[index]);
+        this.triggerTotalBetChange();
         this.closeStakeSelector();
     }
+
+    @handle(BetControlStore, (store) => store.triggerTotalBetChange())
+    triggerTotalBetChange() { }
 
     @handle(BetControlStore, (store, stake: number) => store.setStake(stake))
     setStake(stake: number) {
@@ -135,5 +139,5 @@ export default class BetLevelsContainer extends ObserverComponent {
     }
 
     @handle(BetControlStore, (store) => store.setStakeSelectorShow(false))
-    closeStakeSelector() {}
+    closeStakeSelector() { }
 }

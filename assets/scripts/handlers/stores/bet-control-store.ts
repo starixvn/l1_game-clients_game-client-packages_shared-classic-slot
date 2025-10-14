@@ -3,9 +3,9 @@ import mobx from "mobx";
 const { injectable, inject } = inversify;
 
 import gc from "@sg/game-client-base";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import { SLOT_LINES, SlotState } from "../../definitions";
 import { SlotBoardStore } from "./slot-board-store";
-import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 
 @injectable()
 export class BetControlStore {
@@ -43,6 +43,8 @@ export class BetControlStore {
     stake = 0;
     freeSpinStake = -1;
     defaultStake = 0;
+
+    totalBetChanged: { value: number } = null;
 
     get displayStake() {
         if (this.freeSpinEnabled && this.freeSpinStake !== -1) {
@@ -136,6 +138,10 @@ export class BetControlStore {
         this.stake = stake;
     }
 
+    triggerTotalBetChange() {
+        this.totalBetChanged = { value: this.totalBet };
+    }
+
     setFreeSpinStake(stake: number) {
         this.freeSpinStake = stake;
     }
@@ -151,11 +157,13 @@ export class BetControlStore {
                 return;
             }
             this.stake = this.betLevels[index + 1];
+            this.triggerTotalBetChange();
         } else {
             if (index === 0) {
                 return;
             }
             this.stake = this.betLevels[index - 1];
+            this.triggerTotalBetChange();
         }
     }
 
