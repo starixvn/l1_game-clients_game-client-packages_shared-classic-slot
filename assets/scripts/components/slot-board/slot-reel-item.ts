@@ -85,7 +85,7 @@ export default class SlotReelItem extends Component {
             let spriteFrame = gameAtlasCache.getSpriteFrame(`symbol-${index}-blur`);
 
             if (symbolsCache[index].isJackpot) {
-                spriteFrame = gameAtlasCache.getSpriteFrame(`symbol-${index}.jackpot-blur`);
+                spriteFrame = gameAtlasCache.getSpriteFrame(`symbol-${index}-jackpot-blur`);
             }
 
             this.blurSymbol.getComponent(Sprite).spriteFrame = spriteFrame;

@@ -82,7 +82,7 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         const gameAtlas = resourceCaches.gameAtlas;
         const sprite = this.jackpotIcon.getComponent(Sprite);
         const lang = AppUtils.getLocale();
-        const suffix = lang === "vi-VN" ? `.${lang}` : "";
+        const suffix = lang === "vi-VN" ? `-${lang}` : "";
         gameAtlas && (sprite.spriteFrame = gameAtlas.getSpriteFrame(`history-jackpot${suffix}`));
     }
 }

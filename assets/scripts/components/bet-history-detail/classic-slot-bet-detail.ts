@@ -179,7 +179,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         if (symbolNumber === SpecialSymbol.JACKPOT && this.enableJackpot) {
             const language = AppUtils.getLocale();
             const suffix = language === "vi-VN" ? `.${language}` : "";
-            spriteFrame = this.symbolAtlas.getSpriteFrame(`symbol-${symbolNumber}.jackpot${suffix}`);
+            spriteFrame = this.symbolAtlas.getSpriteFrame(`symbol-${symbolNumber}-jackpot${suffix}`);
         } else {
             spriteFrame = this.symbolAtlas.getSpriteFrame(`symbol-${symbolNumber}`);
         }

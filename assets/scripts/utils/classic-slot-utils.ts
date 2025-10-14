@@ -83,8 +83,8 @@ const addSymbolCache = (index: number, jackpotEnabled: boolean) => {
 const getSymbolName = (index: number, jackpotEnabled: boolean) => {
     if (index === SpecialSymbol.JACKPOT && jackpotEnabled) {
         const locale = AppUtils.getLocale();
-        const language = locale === "vi-VN" ? `.${locale}` : "";
-        return `spines/symbols/symbol-${index}.jackpot${language}`;
+        const language = locale === "vi-VN" ? `-${locale}` : "";
+        return `spines/symbols/symbol-${index}-jackpot${language}`;
     }
     return `spines/symbols/symbol-${index}`;
 };
