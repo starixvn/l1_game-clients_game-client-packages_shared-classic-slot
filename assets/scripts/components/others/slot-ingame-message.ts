@@ -39,7 +39,8 @@ export class SlotIngameMessage extends ObserverComponent {
 
     private scheduleChangeMessages() {
         const delay = this.intervalChangeMessage();
-        this.scheduleOnce(this.intervalChangeMessage, delay);
+        this.unschedule(this.scheduleChangeMessages);
+        this.scheduleOnce(this.scheduleChangeMessages, delay);
     }
 
     generateImageKeys() {
@@ -63,12 +64,11 @@ export class SlotIngameMessage extends ObserverComponent {
 
     @render(gc.GameConfigs.GameConfigStore, (store) => store.odds)
     renderGameOdd(odds: any) {
-        if (!odds) {
+        if (!odds[SpecialSymbol.BONUS] || !odds[SpecialSymbol.FREESPIN]) {
             return;
         }
         this.gameConfigOdds = odds;
 
-        this.unschedule(this.intervalChangeMessage);
         this.scheduleChangeMessages();
     }
 
@@ -112,10 +112,10 @@ export class SlotIngameMessage extends ObserverComponent {
             .start()
     }
 
-    @render(SlotBoardStore, (store) => store.winningBet)
+    @render(SlotBoardStore, (store) => store.winningBet, { fireImmediately: false })
     renderWinningBet(winningBet: number) {
         if (winningBet > 0) {
-            this.unschedule(this.intervalChangeMessage);
+            this.unschedule(this.scheduleChangeMessages);
             this.showTotalWin(winningBet);
         } else {
             this.scheduleChangeMessages();
