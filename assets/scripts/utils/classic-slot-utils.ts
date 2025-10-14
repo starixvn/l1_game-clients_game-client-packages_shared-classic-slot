@@ -89,6 +89,12 @@ const getSymbolName = (index: number, jackpotEnabled: boolean) => {
     return `spines/symbols/symbol-${index}`;
 };
 
+export const getSymbolJackpotName = () => {
+    const locale = AppUtils.getLocale();
+    const language = locale === "vi-VN" ? `-${locale}` : "";
+    return `symbol-${SpecialSymbol.JACKPOT}-jackpot${language}`;
+}
+
 export const loadWinningSymbolAnimation = async () => {
     const prefabCache = resourceCaches.slotWinningAnimation || {};
 
