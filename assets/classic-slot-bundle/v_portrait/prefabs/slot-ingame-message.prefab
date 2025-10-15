@@ -341,7 +341,7 @@
     },
     "scrollingSpeed": 200,
     "delayAtBegining": 1,
-    "delayAtEnding": 1,
+    "delayAtEnding": 0,
     "_id": ""
   },
   {
@@ -357,6 +357,7 @@
       "__id__": 0
     },
     "fileId": "36BITJxKZJ+4epP9aRjaBi",
+    "instance": null,
     "targetOverrides": null
   }
 ]
