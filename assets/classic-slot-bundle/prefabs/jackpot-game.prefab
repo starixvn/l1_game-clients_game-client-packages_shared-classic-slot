@@ -2288,10 +2288,6 @@
     "winningNode": {
       "__id__": 78
     },
-    "jackpotItem": {
-      "__uuid__": "627eaa16-64ab-416d-bedd-3a83a4852192",
-      "__expectedType__": "cc.Prefab"
-    },
     "jackpotWinningAmountPrefab": {
       "__uuid__": "9b363e5a-0118-47e9-a15b-5a918786f12e",
       "__expectedType__": "cc.Prefab"

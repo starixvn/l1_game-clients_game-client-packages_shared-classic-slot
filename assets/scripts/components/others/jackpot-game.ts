@@ -2,6 +2,7 @@ import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import RawTimer from "db://shared-components/game/game-timer/scripts/raw-timer";
+import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
@@ -33,14 +34,12 @@ export default class JackpotGame extends ObserverComponent {
     winningNode: Node = null;
 
     @property(Prefab)
-    jackpotItem: Prefab = null;
-
-    @property(Prefab)
     jackpotWinningAmountPrefab: Prefab = null;
 
     items: JackpotGameItem[] = [];
 
-    public onJackpotGameFinished = () => {};
+    protected jackpotItem: Prefab = null;
+    public onJackpotGameFinished = () => { };
     public prizes = 0;
     protected slotGameConfigs: SlotGameBaseConfigs;
     private configDuration: CustomDuration;
@@ -52,22 +51,30 @@ export default class JackpotGame extends ObserverComponent {
         return index;
     }
 
-    initJackpotItems() {
-        this.createJackpotItems();
-        this.content.children.forEach((child, index) => {
-            const item = child.getComponent(JackpotGameItem);
-            item && this.items.push(item);
+    async loadPrefabJackpotItem() {
+        const path = `prefabs/dialogs/jackpot-item`;
+        this.jackpotItem = await bundleManager.loadResourcesAsset<Prefab>(path, Prefab);
+    }
 
-            child.on("click", () => {
-                AudioUtils.playSFX(AudioIds.JACKPOT_ITEM);
-                this.onItemClicked(index);
-                item.open();
-                this.items.forEach((item) => {
-                    const button = item.getComponent(Button);
-                    button.interactable = false;
+    async initJackpotItems() {
+        try {
+            await this.loadPrefabJackpotItem();
+            this.createJackpotItems();
+            this.content.children.forEach((child, index) => {
+                const item = child.getComponent(JackpotGameItem);
+                item && this.items.push(item);
+
+                child.on("click", () => {
+                    AudioUtils.playSFX(AudioIds.JACKPOT_ITEM);
+                    this.onItemClicked(index);
+                    item.open();
+                    this.items.forEach((item) => {
+                        const button = item.getComponent(Button);
+                        button.interactable = false;
+                    });
                 });
             });
-        });
+        } catch (error) { }
     }
 
     createJackpotItems() {

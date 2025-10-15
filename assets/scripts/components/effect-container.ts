@@ -14,6 +14,9 @@ const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
 export default class EffectContainer extends ObserverComponent {
+    @property
+    portraitMode = false;
+
     protected effectTransition: Prefab = null;
     protected effectJackpot: Prefab = null;
     protected effectBonus: Prefab = null;
@@ -44,7 +47,7 @@ export default class EffectContainer extends ObserverComponent {
             animation.setDuration(duration);
             await this.showEffect(effect);
             transtition?.destroy();
-        } catch (e) {}
+        } catch (e) { }
     }
 
     async loadEffectBigWin() {
@@ -78,7 +81,7 @@ export default class EffectContainer extends ObserverComponent {
             bigWinAnimation.setAmount({ amount, duration: showBigWinValue, delayTime: delayShowBigWinValue });
             await this.showEffect(effect);
             transtition?.destroy();
-        } catch (e) {}
+        } catch (e) { }
     }
 
     async loadEffectJackpot() {
@@ -93,7 +96,7 @@ export default class EffectContainer extends ObserverComponent {
         if (this.jackpotGamePrefab) {
             return;
         }
-        const path = `prefabs/jackpot-game`;
+        const path = this.portraitMode ? `v-portrait/prefabs/jackpot-game-portrait` : `prefabs/jackpot-game`;
 
         this.jackpotGamePrefab = await bundleManager.loadAssetsFromBundle<Prefab>(CLASSIC_SLOT_BUNDLE, path, Prefab, null);
     }
@@ -115,7 +118,7 @@ export default class EffectContainer extends ObserverComponent {
             transtition?.destroy();
             await this.loadJackpotGame();
             await this.showJackpotGame(jackpot.prizes);
-        } catch (e) {}
+        } catch (e) { }
     }
 
     protected showJackpotGame(prizes: number) {
@@ -164,7 +167,7 @@ export default class EffectContainer extends ObserverComponent {
             this.showBonusDialog(bonus, () => {
                 transtition?.destroy();
             });
-        } catch (e) {}
+        } catch (e) { }
     }
 
     showBonusDialog(bonus: any, onBonusFinished: () => void) {
