@@ -28,6 +28,9 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
     jackpotIcon: Node = null;
 
     @property({ override: true, visible: false })
+    lblWin: Label = null;
+
+    @property({ override: true, visible: false })
     lblDate: Label = null;
 
     @property({ override: true, visible: false })
@@ -44,7 +47,7 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
 
     betHistoryLog: gc.BetHistory.BetHistoryLog = null;
 
-    setData(data: any) {
+    override setData(data: any) {
         const { betHistoryLog, index } = data;
         this.betHistoryLog = betHistoryLog;
 
@@ -58,15 +61,21 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
         this.lblRound.string = id.toString();
-        this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2, true);
-        this.lblLine.string = "25";
         this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : gc.FormatUtils.numberWithCommas(totalAmount, 2);
         this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(win, 2, false);
 
         const color = win > 0 ? this.textHighlightColor : this.textNormalColor;
         ComponentUtils.setNodeColor(this.lblTime.node, color);
-        ComponentUtils.setNodeColor(this.lblBet.node, color);
-        ComponentUtils.setNodeColor(this.lblLine.node, color);
+
+        if (this.lblBet) {
+            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2, true);
+            ComponentUtils.setNodeColor(this.lblBet.node, color);
+        }
+
+        if (this.lblLine) {
+            this.lblLine.string = "25";
+            ComponentUtils.setNodeColor(this.lblLine.node, color);
+        }
 
         this.showJackpotIcon(settlementResult.jackpot);
     }

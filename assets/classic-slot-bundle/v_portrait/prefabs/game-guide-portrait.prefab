@@ -643,6 +643,8 @@
       "__id__": 0
     },
     "fileId": "c7YIGYsJRFrKSbkkMyohdw",
+    "instance": null,
+    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -672,7 +674,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": -27,
+      "y": -33,
       "z": 0
     },
     "_lrot": {
@@ -713,7 +715,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 766,
-      "height": 1264
+      "height": 1252
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -762,7 +764,7 @@
     "_target": null,
     "_left": 10,
     "_right": 10,
-    "_top": 94,
+    "_top": 106,
     "_bottom": 40,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
@@ -824,8 +826,8 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 363.8,
-      "y": 669.8,
+      "x": 318,
+      "y": 649,
       "z": 0
     },
     "_lrot": {
@@ -865,8 +867,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 48,
-      "height": 48
+      "width": 45,
+      "height": 45
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -902,7 +904,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "274b102a-9505-4157-90c4-cc537af86c68@b643e",
+      "__uuid__": "112fa8bd-6bd6-4804-8bde-00279c46ce76@f894b",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 0,
@@ -918,7 +920,7 @@
     "_isTrimmedMode": true,
     "_useGrayscale": false,
     "_atlas": {
-      "__uuid__": "274b102a-9505-4157-90c4-cc537af86c68",
+      "__uuid__": "112fa8bd-6bd6-4804-8bde-00279c46ce76",
       "__expectedType__": "cc.SpriteAtlas"
     },
     "_id": ""
@@ -1014,8 +1016,8 @@
     "_alignFlags": 33,
     "_target": null,
     "_left": 0,
-    "_right": 10,
-    "_top": 10,
+    "_right": 57,
+    "_top": 32,
     "_bottom": 0,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
@@ -1079,7 +1081,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 623.5,
+      "y": 603.5,
       "z": 0
     },
     "_lrot": {
@@ -1138,7 +1140,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 12.784,
+      "y": 20.405,
       "z": 0
     },
     "_lrot": {
@@ -1178,7 +1180,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 202.4679412841797,
+      "width": 289.23992919921875,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1217,8 +1219,8 @@
     "_string": "GAME GUIDES",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 28,
-    "_fontSize": 28,
+    "_actualFontSize": 40,
+    "_fontSize": 40,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -1350,7 +1352,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 1100,
+      "width": 786,
       "height": 1
     },
     "_anchorPoint": {
@@ -1428,7 +1430,7 @@
     "_target": null,
     "_left": 0,
     "_right": 0,
-    "_top": 75,
+    "_top": 95,
     "_bottom": 0,
     "_horizontalCenter": 0,
     "_verticalCenter": 0,
