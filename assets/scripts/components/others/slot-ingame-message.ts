@@ -100,7 +100,8 @@ export class SlotIngameMessage extends ObserverComponent {
 
     showTotalWin(value: number) {
         const color = "FFFC00";
-        const msg = `${gc.Translator.t(`Common.total_win`)}: <color=${color}>${value}</color>`;
+        const caption = gc.Translator.t(`Common.total_win`);
+        const msg = `${caption}: <color=${color}>${value}</color>`;
         this.updateMessageContent(msg);
         this.updateScrolling();
 
