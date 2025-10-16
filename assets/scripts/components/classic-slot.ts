@@ -1,6 +1,14 @@
 import gc from "@sg/game-client-base";
 import { _decorator, JsonAsset, SpriteAtlas, Vec3 } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { FSBPromotionUIManager } from "db://shared-common-slot/fsb-promotion/scripts/components/fsb-promotion-ui-manager";
+import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
+import {
+    FreeSpinSignal,
+    FreeSpinSource,
+    FreeSpinsPromotionEvents,
+    FSBPromotionUIStore,
+} from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import MainPlayerProfile from "db://shared-components/game/main-player-profile/scripts/components/main-player-profile";
 import GameComponent from "db://shared-components/game/scripts/components/game-component";
@@ -10,6 +18,7 @@ import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
 import { LineData } from "../definitions";
+import { SlotBetHandler, SlotSettlementHandler } from "../handlers";
 import { SlotUIHandler } from "../handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { JackpotPoolStore } from "../handlers/stores/jackpot-pool-store";
@@ -27,15 +36,6 @@ import {
 } from "../utils/classic-slot-utils";
 import { SymbolPreviewType } from "./others/symbol-preview";
 import SlotBoard from "./slot-board/slot-board";
-import { FSBPromotionUIManager } from "db://shared-common-slot/fsb-promotion/scripts/components/fsb-promotion-ui-manager";
-import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
-import {
-    FreeSpinSignal,
-    FreeSpinSource,
-    FreeSpinsPromotionEvents,
-    FSBPromotionUIStore,
-} from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
-import { SlotBetHandler, SlotSettlementHandler } from "../handlers";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
@@ -131,6 +131,9 @@ export default class ClassicSlot extends GameComponent {
 
     @render(BetControlStore, (store) => store.roundId)
     renderSpinRoundId(roundId: number) {
+        if (!this.lblRoundId) {
+            return;
+        }
         if (roundId !== -1) {
             this.lblRoundId.string = `#${roundId}`;
         }
@@ -193,7 +196,7 @@ export default class ClassicSlot extends GameComponent {
     }
 
     @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.PREVIEW_ODDS }))
-    triggerOpenPreviewOdds() {}
+    triggerOpenPreviewOdds() { }
 
     @render(BetControlStore, (store) => store.isReadyBet)
     renderReadyBet(isReadyBet: boolean) {
@@ -267,8 +270,8 @@ export default class ClassicSlot extends GameComponent {
     }
 
     @handle(FSBPromotionUIHandler, (handler) => handler.tryConsumeFSB())
-    tryConsumeFSB() {}
+    tryConsumeFSB() { }
 
     @handle(SlotBetHandler, (handler) => handler.callBet())
-    callBet() {}
+    callBet() { }
 }
