@@ -1,6 +1,7 @@
 import { _decorator, Button } from "cc";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { BetHistoryCacheStore } from "db://shared-components/game/bet-history/scripts/components/bet-detail/bet-history-cache-store";
+import TouchSwipeBase from "db://shared-components/shared/common-components/touch-swipe-base";
 import Observer from "observer";
 import { ClassicSlotBetDetail } from "./classic-slot-bet-detail";
 const { ccclass, property } = _decorator;
@@ -13,6 +14,20 @@ export class ClassicSlotBetDetailPortrait extends ClassicSlotBetDetail {
 
     @property(Button)
     btnNext: Button = null;
+
+    onLoad(): void {
+        this.setupTouchHandler();
+        super.onLoad();
+    }
+
+    private setupTouchHandler() {
+        const touchSwipeHandler = this.node.getComponentsInChildren(TouchSwipeBase)[0];
+        if (touchSwipeHandler) {
+            touchSwipeHandler.swipeCallback = (isLeft: boolean) => {
+                this.requestDetail(isLeft);
+            }
+        }
+    }
 
     @handle(BetHistoryCacheStore, (store, next: boolean) => store.requestDetail(next))
     requestDetail(next: boolean) {
