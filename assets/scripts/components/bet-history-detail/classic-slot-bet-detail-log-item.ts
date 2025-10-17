@@ -32,13 +32,17 @@ export class ClassicSlotBaseBetDetailLogItem extends Component {
 
     setData(data: any) {
         const { order, paylineSprite, symbolsSprite, amount, payout, bet, win } = data;
-        this.order.string = order.toString();
+        if (this.order) {
+            this.order.string = order.toString();
+        }
         this.payline.spriteFrame = paylineSprite;
         this.symbol.spriteFrame = symbolsSprite;
         this.amount.string = amount;
         this.payout.string = payout;
-        this.bet.string = bet !== "" ? gc.FormatUtils.numberWithCommas(bet, 2) : "";
+        if (this.bet) {
+            this.bet.string = bet !== "" ? gc.FormatUtils.numberWithCommas(bet, 2) : "";
+        }
         this.win.string = win !== "" ? gc.FormatUtils.numberWithCommas(win, 2) : "";
-        this.bg.active = (order - 1) % 2 > 0;
+        this.bg.active = order % 2 > 0;
     }
 }

@@ -30,6 +30,21 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     @property(Node)
     nodeNoWinningLines: Node = null;
 
+    @property(Label)
+    lblTime: Label = null;
+
+    @property(Label)
+    lblBet: Label = null;
+
+    @property(Label)
+    lblPaylines: Label = null;
+
+    @property(Label)
+    lblTotalAmount: Label = null;
+
+    @property(Label)
+    lblBetWin: Label = null;
+
     protected enableJackpot = false;
     protected symbolAtlas: SpriteAtlas = null;
 
@@ -43,22 +58,35 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     }
 
     showBetDetail(model: gc.BetHistory.BetDetailModel) {
-        const { result, id, freeSpin, enableJackpot } = model.betHistoryLog as any;
+        const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time } = model.betHistoryLog as any;
         this.enableJackpot = enableJackpot;
         this.lblRound.string = freeSpin ? `${id.toString()} (Free Spin)` : id.toString();
         this.initResultBoard(result);
         this.createBetLogs(model.betHistoryLog);
         this.showNoWinningPaylinesText(model.betHistoryLog);
+
+        if (this.lblBet) {
+            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2);
+        }
+        if (this.lblPaylines) {
+            this.lblPaylines.string = paylines.length.toString();
+        }
+        if (this.lblTotalAmount) {
+            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount, 2);
+        }
+        if (this.lblBetWin) {
+            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(betWin, 2);
+        }
+        if (this.lblTime) {
+            this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
+        }
     }
 
     showNoWinningPaylinesText(data) {
         const { settlementResult } = data;
 
-        if (settlementResult.winningPaylines.length > 0 || settlementResult.bonus.odds > 0 || settlementResult.freeSpins.odds > 0) {
-            return;
-        }
-
-        this.nodeNoWinningLines.active = true;
+        const isWinning = (settlementResult.winningPaylines.length > 0 || settlementResult.bonus.odds > 0 || settlementResult.freeSpins.odds > 0);
+        this.nodeNoWinningLines.active = !isWinning;
     }
 
     private createBetLogs(data) {
