@@ -1,5 +1,5 @@
 import gc from "@sg/game-client-base";
-import { _decorator, instantiate, Node, Prefab, tween, v3 } from "cc";
+import { _decorator, instantiate, Label, Node, Prefab, tween, v3 } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
@@ -17,6 +17,15 @@ export default class BetLevelsContainer extends ObserverComponent {
     @property(Node)
     containerNode: Node = null;
 
+    @property(Label)
+    lblStake: Label = null;
+
+    @property(Label)
+    lblTotalBet: Label = null;
+
+    @property
+    hideWhenSelected: boolean = true;
+
     private betLevels: number[] = [];
     private readonly itemHeight = 60;
     private readonly itemsOfColumnMax = 5;
@@ -31,6 +40,22 @@ export default class BetLevelsContainer extends ObserverComponent {
         this.containerNode.destroyAllChildren();
         this.onHidden();
         super.onLoad();
+    }
+
+    @render(BetControlStore, (store) => store.stake)
+    renderStake(stake: number) {
+        if (!this.lblStake) {
+            return
+        }
+        this.lblStake.string = gc.FormatUtils.numberWithCommas(stake, 2);
+    }
+
+    @render(BetControlStore, (store) => store.totalBet)
+    renderTotalBet(totalBet: number) {
+        if (!this.lblTotalBet) {
+            return
+        }
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 2);
     }
 
     @render(BetControlStore, (store) => store.betLevels)
@@ -100,7 +125,7 @@ export default class BetLevelsContainer extends ObserverComponent {
     protected onStakeToggleChanged(index: number) {
         this.setStake(this.betLevels[index]);
         this.triggerTotalBetChange();
-        this.closeStakeSelector();
+        this.hideWhenSelected && this.closeStakeSelector();
     }
 
     @handle(BetControlStore, (store) => store.triggerTotalBetChange())
