@@ -2,6 +2,7 @@ import gc from "@sg/game-client-base";
 import { _decorator, instantiate, Label, Node, Prefab, Sprite, SpriteAtlas, SpriteFrame } from "cc";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
+import { ComponentUtils } from "db://shared-components/shared/utils";
 import { AppUtils } from "db://shared-components/shared/utils/app-utils";
 import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
@@ -90,6 +91,8 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     }
 
     private createBetLogs(data) {
+        this.content.destroyAllChildren();
+
         const { paylines, settlementResult, bet } = data;
         let order = 1;
         const winningLines = [];
@@ -190,6 +193,8 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     }
 
     protected initResultBoard(board) {
+        ComponentUtils.moveToOtherNode(this.symbolSample, this.node);
+        this.result.destroyAllChildren();
         for (let row = 0; row < 3; row++) {
             for (let column = 0; column < 5; column++) {
                 const node = instantiate(this.symbolSample);

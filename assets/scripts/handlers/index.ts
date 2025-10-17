@@ -15,4 +15,6 @@ export * from "./stores/slot-board-store";
 export * from "./stores/slot-duration-store";
 export * from "./stores/top-winners-store";
 
+export * from "db://shared-components/game/bet-history/scripts/components/bet-detail/bet-history-cache-store";
+
 export const FEATURE_NAME = "classic-slot";

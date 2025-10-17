@@ -8373,8 +8373,8 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "77922a3GrNIEqBf49/LXtre",
-    "handler": "onClickNextHistoryDetail",
+    "_componentId": "2c31byo1lRGE5Hdfgly8wKL",
+    "handler": "onClickNext",
     "customEventData": ""
   },
   {
@@ -8440,7 +8440,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btn-pev-history-detail",
+    "_name": "btn-prev-history-detail",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -8585,8 +8585,8 @@
       "__id__": 1
     },
     "component": "",
-    "_componentId": "77922a3GrNIEqBf49/LXtre",
-    "handler": "onClickPreviousHistoryDetail",
+    "_componentId": "2c31byo1lRGE5Hdfgly8wKL",
+    "handler": "onClickPrev",
     "customEventData": ""
   },
   {
@@ -9329,6 +9329,12 @@
     },
     "lblBetWin": {
       "__id__": 231
+    },
+    "btnPrev": {
+      "__id__": 420
+    },
+    "btnNext": {
+      "__id__": 411
     },
     "_id": ""
   },
