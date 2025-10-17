@@ -24,7 +24,7 @@ export default class BetLevelsContainer extends ObserverComponent {
     lblTotalBet: Label = null;
 
     @property
-    hideWhenSelected: boolean = true;
+    hideWhenSelected = true;
 
     private betLevels: number[] = [];
     private readonly itemHeight = 60;
