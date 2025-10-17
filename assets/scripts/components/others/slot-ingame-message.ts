@@ -16,6 +16,9 @@ export class SlotIngameMessage extends ObserverComponent {
     @property(RichText)
     msgRichText: RichText = null;
 
+    @property
+    symbolSize = 75;
+
     protected keys = [
         "show_msg_when_spin_desktop",
         "show_msg_when_spin_phone",
@@ -53,7 +56,7 @@ export class SlotIngameMessage extends ObserverComponent {
         };
         const keys = {}
         Object.keys(spriteMap).forEach(key => {
-            keys[key] = `<img src='${spriteMap[key]}' />`;
+            keys[key] = `<img src='${spriteMap[key]}' height=${this.symbolSize} />`;
         });
         return keys;
     }
