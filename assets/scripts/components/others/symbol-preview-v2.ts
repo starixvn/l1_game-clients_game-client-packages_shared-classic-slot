@@ -40,10 +40,11 @@ export default class SymbolPreviewV2 extends SymbolPreview {
 
     protected getSymbolText(symbol: number) {
         const dict = {
-            [SpecialSymbol.BONUS]: "symbol_bonus",
-            [SpecialSymbol.FREESPIN]: "symbol_freespin",
+            [SpecialSymbol.BONUS]: "bonus",
+            [SpecialSymbol.FREESPIN]: "free_spins",
             [SpecialSymbol.JACKPOT]: "jackpot",
         }
-        return dict[symbol] ?? "";
+        const key = dict[symbol] ?? "";
+        return `Classicslot.${key}`;
     }
 }
