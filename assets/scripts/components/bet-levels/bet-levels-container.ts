@@ -76,7 +76,6 @@ export default class BetLevelsContainer extends ObserverComponent {
             node.name = `bet-level-${value}`;
 
             const itemComp = node.getComponent(BetLevelItem);
-
             const valueStr = gc.FormatUtils.numberWithCommas(value, 2, true);
             itemComp.setData(valueStr, index);
             itemComp.onStakeChanged = (param: number) => {
