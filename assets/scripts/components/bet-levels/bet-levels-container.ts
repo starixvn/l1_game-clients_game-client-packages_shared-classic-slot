@@ -73,6 +73,7 @@ export default class BetLevelsContainer extends ObserverComponent {
         this.betLevels.forEach((value, index) => {
             const node = instantiate(this.itemPrefab);
             this.containerNode.addChild(node);
+            node.name = `bet-level-${value}`;
 
             const itemComp = node.getComponent(BetLevelItem);
 
