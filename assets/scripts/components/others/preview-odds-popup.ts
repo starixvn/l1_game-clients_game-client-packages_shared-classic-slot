@@ -15,7 +15,7 @@ export default class PreviewOddsPopup extends Component {
     protected previewNodes: { [key: string]: Node } = {};
 
     private currentPreviewItem: Node = null;
-    onSymbolPreview = (symbol, worldPosition: Vec3, isInfoOnLeft: boolean) => {};
+    onSymbolPreview = (symbol, worldPosition: Vec3, isInfoOnLeft: boolean) => { };
 
     addPreviewPopup(reels: SlotReel[]) {
         reels.forEach((reel, index) => {
@@ -51,6 +51,7 @@ export default class PreviewOddsPopup extends Component {
         this.addPreviewNode(previewNode);
         const transform = ComponentUtils.getTransform(this.previewOverlay);
         previewNode.position = transform.convertToNodeSpaceAR(worldPosition);
+        ComponentUtils.setOpacityNode(previewNode, 1);
         AnimationUtils.fadeIn(previewNode, 0.3);
     }
 
