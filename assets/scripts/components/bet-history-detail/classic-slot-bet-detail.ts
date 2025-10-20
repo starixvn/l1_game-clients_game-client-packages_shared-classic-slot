@@ -3,10 +3,9 @@ import { _decorator, instantiate, Label, Node, Prefab, Sprite, SpriteAtlas, Spri
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
-import { AppUtils } from "db://shared-components/shared/utils/app-utils";
 import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
-import { formatNamePool, getSpriteLine, resourceCaches } from "../../utils/classic-slot-utils";
+import { formatNamePool, getSpriteLine, getSymbolName, resourceCaches } from "../../utils/classic-slot-utils";
 import { ClassicSlotBaseBetDetailLogItem } from "./classic-slot-bet-detail-log-item";
 const { ccclass, property } = _decorator;
 const { handle } = Observer;
@@ -209,13 +208,8 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     protected setSymbolFrame(symbolNumber: number) {
         let spriteFrame: SpriteFrame;
 
-        if (symbolNumber === SpecialSymbol.JACKPOT && this.enableJackpot) {
-            const language = AppUtils.getLocale();
-            const suffix = language === "vi-VN" ? `.${language}` : "";
-            spriteFrame = this.symbolAtlas.getSpriteFrame(`symbol-${symbolNumber}-jackpot${suffix}`);
-        } else {
-            spriteFrame = this.symbolAtlas.getSpriteFrame(`symbol-${symbolNumber}`);
-        }
+        const symbolName = getSymbolName(symbolNumber, this.enableJackpot);
+        spriteFrame = this.symbolAtlas.getSpriteFrame(symbolName);
 
         return spriteFrame;
     }

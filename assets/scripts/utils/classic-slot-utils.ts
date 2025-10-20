@@ -71,7 +71,7 @@ export const loadSlotSymbols = async (jackpotEnabled: boolean) => {
 };
 
 const addSymbolCache = (index: number, jackpotEnabled: boolean) => {
-    const path = getSymbolName(index, jackpotEnabled);
+    const path = getSpineSymbolName(index, jackpotEnabled);
 
     if (bundleManager.cachedAssets[path]) {
         return Promise.resolve(bundleManager.cachedAssets[path]);
@@ -80,14 +80,17 @@ const addSymbolCache = (index: number, jackpotEnabled: boolean) => {
     return bundleManager.loadResourcesAsset<sp.SkeletonData>(path, sp.SkeletonData);
 };
 
-const getSymbolName = (index: number, jackpotEnabled: boolean) => {
-    if (index === SpecialSymbol.JACKPOT && jackpotEnabled) {
-        const locale = AppUtils.getLocale();
-        const language = locale === "vi-VN" ? `-${locale}` : "";
-        return `spines/symbols/symbol-${index}-jackpot${language}`;
-    }
-    return `spines/symbols/symbol-${index}`;
+const getSpineSymbolName = (index: number, jackpotEnabled: boolean) => {
+    const prefix = "spines/symbols/";
+    return `${prefix}${getSymbolName(index, jackpotEnabled)}`;
 };
+
+export const getSymbolName = (index: number, jackpotEnabled: boolean) => {
+    if (index === SpecialSymbol.JACKPOT && jackpotEnabled) {
+        return getSymbolJackpotName();
+    }
+    return `symbol-${index}`;
+}
 
 export const getSymbolJackpotName = () => {
     const locale = AppUtils.getLocale();
