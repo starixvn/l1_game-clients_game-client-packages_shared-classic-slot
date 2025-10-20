@@ -7,9 +7,9 @@ import { DialogName } from "../../utils/classic-slot-utils";
 const { ccclass, property, requireComponent } = _decorator;
 const { render } = Observer;
 
-@ccclass("ClassicSlotHistoryItem")
+@ccclass("ClassicSlotHistoryContainer")
 @requireComponent(BetHistoryContainer)
-export class ClassicSlotHistoryItem extends ObserverComponent {
+export class ClassicSlotHistoryContainer extends ObserverComponent {
     container: BetHistoryContainer = null;
 
     onLoad() {
