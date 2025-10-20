@@ -206,11 +206,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     }
 
     protected setSymbolFrame(symbolNumber: number) {
-        let spriteFrame: SpriteFrame;
-
         const symbolName = getSymbolName(symbolNumber, this.enableJackpot);
-        spriteFrame = this.symbolAtlas.getSpriteFrame(symbolName);
-
-        return spriteFrame;
+        return this.symbolAtlas.getSpriteFrame(symbolName);
     }
 }
