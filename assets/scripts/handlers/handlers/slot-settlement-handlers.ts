@@ -1,5 +1,7 @@
 import gc from "@sg/game-client-base";
 import { tween } from "cc";
+import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
+import { FreeSpinsPromotionEvents, FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import inversify from "inversify";
 import mobx from "mobx";
@@ -9,8 +11,6 @@ import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
 import { SlotBetHandler } from "./slot-bet-handlers";
 import { SlotErrorHandler } from "./slot-error-handler";
-import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
-import { FreeSpinsPromotionEvents, FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotSettlementHandler {
@@ -369,6 +369,8 @@ export class SlotSettlementHandler {
             if (freeSpins.promotionId) {
                 this.fsbPromotionUIStore.resumedFSBPromotion = true;
             }
+
+            this.slotBetHandler.callTriggerAction();
         }
     }
 }

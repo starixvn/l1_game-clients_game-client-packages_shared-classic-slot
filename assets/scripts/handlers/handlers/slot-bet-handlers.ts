@@ -1,4 +1,6 @@
 import gc from "@sg/game-client-base";
+import { FSBPromotionStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import inversify from "inversify";
 import { SLOT_BET_CHOICES } from "../../definitions";
 import { DialogName } from "../../utils/classic-slot-utils";
@@ -6,8 +8,6 @@ import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotBetResponseHandler } from "./slot-bet-response-handlers";
 import { SlotUIHandler } from "./slot-ui-handler";
-import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
-import { FSBPromotionStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotBetHandler extends gc.Bet.BetHandler {
