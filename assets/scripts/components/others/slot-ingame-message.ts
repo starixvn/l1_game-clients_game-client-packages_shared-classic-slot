@@ -56,7 +56,7 @@ export class SlotIngameMessage extends ObserverComponent {
         };
         const keys = {}
         Object.keys(spriteMap).forEach(key => {
-            keys[key] = `<img src='${spriteMap[key]}' height=${this.symbolSize} />`;
+            keys[key] = `<img src='${spriteMap[key]}' height=${this.symbolSize} align=center />`;
         });
         return keys;
     }
