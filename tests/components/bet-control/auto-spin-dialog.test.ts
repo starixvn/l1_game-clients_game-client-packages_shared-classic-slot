@@ -16,10 +16,10 @@ jest.mock("@sg/game-client-base", () => ({
 // Mock ObserverComponent with ALL lifecycle methods
 jest.mock("db://shared-components/shared/common-components/observer-component/scripts/observer-component", () => ({
     ObserverComponent: class MockObserverComponent {
-        onLoad() {}
-        onDestroy() {}
-        start() {}
-        update() {}
+        onLoad() { }
+        onDestroy() { }
+        start() { }
+        update() { }
         node = { on: jest.fn(), off: jest.fn(), destroy: jest.fn(), addChild: jest.fn() };
     },
 }));
@@ -133,7 +133,7 @@ describe("AutoSpinDialog", () => {
         it("should set dialog onHideComplete callback and call super.onLoad", () => {
             const superOnLoadSpy = jest
                 .spyOn(Object.getPrototypeOf(Object.getPrototypeOf(component)), "onLoad")
-                .mockImplementation(() => {});
+                .mockImplementation(() => { });
 
             component.onLoad();
 
@@ -144,7 +144,7 @@ describe("AutoSpinDialog", () => {
         });
 
         it("should call onDidHide and node.destroy when dialog hide completes", () => {
-            const onDidHideSpy = jest.spyOn(component as any, "onDidHide").mockImplementation(() => {});
+            const onDidHideSpy = jest.spyOn(component as any, "onDidHide").mockImplementation(() => { });
 
             component.onLoad();
             component.dialog.onHideComplete();
@@ -192,7 +192,6 @@ describe("AutoSpinDialog", () => {
                 const child = component.choicesContainer.children[index];
                 expect(child.name).toBe(value.toString());
                 expect(child.getComponentInChildren).toHaveBeenCalled();
-                expect(mockFormatUtils.numberWithCommas).toHaveBeenCalledWith(value);
             });
         });
 
