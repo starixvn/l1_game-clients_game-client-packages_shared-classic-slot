@@ -1,4 +1,4 @@
-import { _decorator, Node } from "cc";
+import { _decorator, Label, Node } from "cc";
 import LocalizedLabelWithFormat from "db://i18n/LocalizedLabelWithFormat";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
 import { SpecialSymbol } from "../../definitions";
@@ -21,6 +21,14 @@ export default class SymbolPreviewV2 extends SymbolPreview {
             label.key = key;
             ComponentUtils.setNodeColor(node, textColor);
         });
+    }
+
+    protected hideNumberLabel(label: Label) {
+        label.node.active = false;
+    }
+
+    protected getJackpotNode(node: Node) {
+        return node.getChildByName("text-jackpot");
     }
 
     protected showJackpotText(jackpotNode: Node, textColor: string) {

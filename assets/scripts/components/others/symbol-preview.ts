@@ -97,23 +97,24 @@ export default class SymbolPreview extends Component {
             }
 
             const values = [key, odds[key]];
-            node.children.forEach((child, childIndex) => {
+            [0, 1].forEach((childIndex) => {
                 const isShowJackpotText =
                     symbol.index === SpecialSymbol.JACKPOT &&
                     jackpotEnabled &&
                     index === keys.length - 1 &&
-                    childIndex === node.children.length - 1;
+                    childIndex === 1;
 
+
+                const child = node.children[childIndex];
                 const label = child.getComponent(Label);
-                const jackpotNode = child.children[0];
+                const jackpotNode = this.getJackpotNode(node);
+                child.active = true;
                 if (isShowJackpotText) {
                     jackpotNode.active = true;
                     this.showJackpotText(jackpotNode, colorList[childIndex]);
-
-                    label.string = "";
-                    label.overflow = Label.Overflow.SHRINK;
+                    this.hideNumberLabel(label);
                     const transform = ComponentUtils.getTransform(jackpotNode);
-                    ComponentUtils.setNodeTransform(child, { width: transform.width });
+                    ComponentUtils.setNodeTransform(jackpotNode, { width: transform.width });
                 } else {
                     label.string = values[childIndex];
                     jackpotNode && (jackpotNode.active = false);
@@ -121,6 +122,15 @@ export default class SymbolPreview extends Component {
                 ComponentUtils.setNodeColor(child, colorList[childIndex]);
             });
         });
+    }
+
+    protected hideNumberLabel(label: Label) {
+        label.string = "";
+        label.overflow = Label.Overflow.SHRINK;
+    }
+
+    protected getJackpotNode(node: Node) {
+        return node.children[1].children[0];
     }
 
     protected showJackpotText(jackpotNode: Node, textColor: string) {
