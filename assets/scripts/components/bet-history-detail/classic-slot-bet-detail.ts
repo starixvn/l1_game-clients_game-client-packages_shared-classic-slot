@@ -58,7 +58,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     }
 
     showBetDetail(model: gc.BetHistory.BetDetailModel) {
-        const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time } = model.betHistoryLog as any;
+        const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult } = model.betHistoryLog as any;
         this.enableJackpot = enableJackpot;
         this.lblRound.string = freeSpin ? `${id.toString()} (Free Spin)` : id.toString();
         this.initResultBoard(result);
@@ -72,10 +72,14 @@ export class ClassicSlotBetDetail extends ObserverComponent {
             this.lblPaylines.string = paylines.length.toString();
         }
         if (this.lblTotalAmount) {
-            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount, 2);
+            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount, 2, false);
         }
         if (this.lblBetWin) {
-            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(betWin, 2);
+            let win = betWin;
+            if (settlementResult.jackpot) {
+                win += settlementResult.jackpot.winningAmount;
+            }
+            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(win, 2, false);
         }
         if (this.lblTime) {
             this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
