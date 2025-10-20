@@ -12179,7 +12179,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 62.54998779296875,
+      "width": 170.39996337890625,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -12215,7 +12215,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "BET",
+    "_string": "BET LEVEL",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 30,
@@ -12276,7 +12276,7 @@
     "__prefab": {
       "__id__": 569
     },
-    "key": "Classicslot.bet",
+    "key": "Classicslot.bet_level",
     "format": 1,
     "prefix": "",
     "suffix": "",
@@ -13188,7 +13188,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 41.11997985839844,
+      "width": 111.159912109375,
       "height": 37.8
     },
     "_anchorPoint": {
@@ -13224,7 +13224,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "BET",
+    "_string": "BET LEVEL",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 20,
@@ -13285,7 +13285,7 @@
     "__prefab": {
       "__id__": 613
     },
-    "key": "Classicslot.bet",
+    "key": "Classicslot.bet_level",
     "format": 1,
     "prefix": "",
     "suffix": "",
