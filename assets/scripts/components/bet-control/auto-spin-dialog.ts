@@ -1,4 +1,3 @@
-import gc from "@sg/game-client-base";
 import { _decorator, Event, Label, Node, Toggle } from "cc";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
@@ -59,7 +58,7 @@ export default class AutoSpinDialog extends ObserverComponent {
             child.name = value.toString();
             const label = child.getComponentInChildren(Label);
             if (label) {
-                label.string = gc.FormatUtils.numberWithCommas(value);
+                label.string = value.toString();
             }
         });
     }

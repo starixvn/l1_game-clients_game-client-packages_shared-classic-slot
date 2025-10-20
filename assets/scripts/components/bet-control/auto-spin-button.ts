@@ -1,4 +1,3 @@
-import gc from "@sg/game-client-base";
 import { _decorator, Label, Node } from "cc";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
@@ -18,7 +17,7 @@ export default class AutoSpinButton extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.autoSpinCount)
     rendeAutoSpinCount(autoSpinCount: number) {
-        this.lblAutoSpin.string = gc.FormatUtils.numberWithCommas(autoSpinCount);
+        this.lblAutoSpin.string = autoSpinCount.toString();
     }
 
     @render(BetControlStore, (store) => store.autoSpinEnabled)
