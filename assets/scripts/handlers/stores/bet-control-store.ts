@@ -84,6 +84,10 @@ export class BetControlStore {
         return this.freeSpinCount > 0;
     }
 
+    get freeSpinEnabledDisplay() {
+        return this.freeSpinEnabled && this.freeSpinCountDisplay > -1;
+    }
+
     turboEnabled = false;
     get turboEnabledOnSpin() {
         return this.turboEnabled || this.triggerAutoSpin;

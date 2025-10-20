@@ -35,7 +35,7 @@ export class FreespinMessage extends ObserverComponent {
         this.lastNode.active = isLast;
     }
 
-    @render(BetControlStore, (store) => store.freeSpinEnabled)
+    @render(BetControlStore, (store) => store.freeSpinEnabledDisplay)
     renderFreeSpinEnabled(freeSpinEnabled: boolean) {
         if (freeSpinEnabled) {
             AnimationUtils.fadeIn(this.container, 0.3);
