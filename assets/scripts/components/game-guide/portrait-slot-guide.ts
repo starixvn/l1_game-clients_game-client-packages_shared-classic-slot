@@ -4,7 +4,7 @@ const { ccclass } = _decorator;
 
 @ccclass
 export class PortraitSlotGuide extends ClassicSlotGuide {
-    loadGameGuide(url: string) {
-        super.loadGameGuide(url + "&mode=portrait");
-    }
+    // loadGameGuide(url: string) {
+    //     super.loadGameGuide(url + "&mode=portrait");
+    // }
 }
