@@ -108,11 +108,7 @@ export default class SymbolPreview extends Component {
                 const jackpotNode = child.children[0];
                 if (isShowJackpotText) {
                     jackpotNode.active = true;
-                    const atlas = resourceCaches.gameAtlas;
-                    const jackpotSprite = jackpotNode.getComponent(Sprite);
-                    const symbolName = this.getSymbolName(SpecialSymbol.JACKPOT);
-                    jackpotSprite.spriteFrame = atlas.getSpriteFrame(`text-symbol-${symbolName}`);
-                    ComponentUtils.setNodeColor(jackpotNode, colorList[childIndex]);
+                    this.showJackpotText(jackpotNode, colorList[childIndex]);
 
                     label.string = "";
                     label.overflow = Label.Overflow.SHRINK;
@@ -125,5 +121,13 @@ export default class SymbolPreview extends Component {
                 ComponentUtils.setNodeColor(child, colorList[childIndex]);
             });
         });
+    }
+
+    protected showJackpotText(jackpotNode: Node, textColor: string) {
+        const atlas = resourceCaches.gameAtlas;
+        const jackpotSprite = jackpotNode.getComponent(Sprite);
+        const symbolName = this.getSymbolName(SpecialSymbol.JACKPOT);
+        jackpotSprite.spriteFrame = atlas.getSpriteFrame(`text-symbol-${symbolName}`);
+        ComponentUtils.setNodeColor(jackpotNode, textColor);
     }
 }
