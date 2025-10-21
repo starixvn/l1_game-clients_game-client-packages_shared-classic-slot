@@ -18,9 +18,16 @@ export default class SlotIngameMenu extends InGameMenu {
 
     onClickExpand() {
         super.onClickExpand();
-        this.triggerEvent();
+        this.triggerEvent(DialogName.IN_GAME_MENU);
     }
 
-    @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.IN_GAME_MENU }))
-    triggerEvent() {}
+    @handle(SlotUIHandler, (store, name: string) => store.triggerDialogOpen({ name }))
+    triggerEvent(name: string) {
+        return name;
+    }
+
+    onOpenGuide() {
+        super.onOpenGuide();
+        this.triggerEvent(DialogName.GAME_GUIDE);
+    }
 }

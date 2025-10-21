@@ -6,7 +6,7 @@ import { ChangeNodeColor } from "db://shared-components/shared/common-components
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
-import { BetControlStore, SlotBetHandler } from "../../handlers";
+import { BetControlStore, SlotBetHandler, SlotUIHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotUIStore } from "../../handlers/stores/slot-ui-store";
 import { DialogName, floatToNumber, resourceCaches } from "../../utils/classic-slot-utils";
@@ -193,11 +193,18 @@ export default class BetControl extends ObserverComponent {
     @handle(BetControlStore, (store) => store.quickChangeStake(true))
     onIncreaseStake() {
         this.closeStakeSelector();
+        this.triggerEvent(DialogName.CHANGE_BET);
     }
 
     @handle(BetControlStore, (store) => store.quickChangeStake(false))
     onDecreaseStake() {
         this.closeStakeSelector();
+        this.triggerEvent(DialogName.CHANGE_BET);
+    }
+
+    @handle(SlotUIHandler, (store, name: string) => store.triggerDialogOpen({ name }))
+    triggerEvent(name: string) {
+        return name;
     }
 
     @handle(SlotBetHandler, (handler) => handler.showLineSelection())
