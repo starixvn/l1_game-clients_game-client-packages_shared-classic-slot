@@ -372,7 +372,9 @@ export class SlotSettlementHandler {
                 this.fsbPromotionUIStore.resumedFSBPromotion = true;
             }
 
-            this.slotBetHandler.callTriggerAction();
+            this.scheduleNextSpin(() => {
+                this.slotBetHandler.callBet();
+            });
         }
     }
 }
