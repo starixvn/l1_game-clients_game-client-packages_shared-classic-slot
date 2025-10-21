@@ -103,7 +103,7 @@ jest.mock("db://shared-components/game/audios/utils", () => ({
     AudioUtils: {
         playSFX: jest.fn(),
         playClick: jest.fn(),
-    },
+    }
 }));
 
 // Mock AudioIds
@@ -116,7 +116,7 @@ jest.mock("db://assets/game/audios/AudioIds", () => ({
 // Mock ObserverComponent
 jest.mock("db://shared-components/shared/common-components/observer-component/scripts/observer-component", () => ({
     ObserverComponent: class MockObserverComponent {
-        onLoad() {}
+        onLoad() { }
     },
 }));
 
@@ -129,6 +129,17 @@ jest.mock("../../../assets/scripts/utils/classic-slot-utils", () => ({
             stop: jest.fn(),
         };
     }),
+    DialogName: {
+        AUTO_SPIN: "auto-spin",
+        STAKE_SELECTOR: "stake-selector",
+        LINE_SELECTION: "line-selection",
+        PREVIEW_ODDS: "preview-odds",
+        SPINNING: "spinning",
+        IN_GAME_MENU: "in-game-menu",
+        DUMMY_DIALOG: "dummy-dialog",
+        GAME_GUIDE: "game-guide",
+        CHANGE_BET: "change-bet",
+    },
 }));
 
 describe("BetControl", () => {
