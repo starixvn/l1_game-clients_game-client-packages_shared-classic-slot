@@ -1,5 +1,5 @@
 import gc from "@sg/game-client-base";
-import { _decorator, instantiate, Label, Node, Prefab, Sprite, SpriteAtlas, SpriteFrame } from "cc";
+import { _decorator, instantiate, Label, Node, Prefab, ScrollView, Sprite, SpriteAtlas, SpriteFrame } from "cc";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
@@ -44,6 +44,9 @@ export class ClassicSlotBetDetail extends ObserverComponent {
 
     @property(Label)
     lblBetWin: Label = null;
+
+    @property(ScrollView)
+    contentScrollView: ScrollView = null;
 
     protected enableJackpot = false;
     protected symbolAtlas: SpriteAtlas = null;
@@ -91,6 +94,10 @@ export class ClassicSlotBetDetail extends ObserverComponent {
 
         const isWinning = (settlementResult.winningPaylines.length > 0 || settlementResult.bonus.odds > 0 || settlementResult.freeSpins.odds > 0);
         this.nodeNoWinningLines.active = !isWinning;
+
+        if (this.contentScrollView) {
+            this.contentScrollView.node.active = isWinning;
+        }
     }
 
     private createBetLogs(data) {
