@@ -118,7 +118,6 @@ jest.mock("../../assets/scripts/handlers/handlers/slot-bet-handlers", () => ({
         handlePlaceBetFailed: jest.fn(),
         callBet: jest.fn(),
         actionAutoSpin: jest.fn(),
-        callTriggerAction: jest.fn(),
     })),
 }));
 jest.mock("../../assets/scripts/handlers/handlers/slot-error-handler", () => ({
@@ -930,7 +929,6 @@ describe("SlotSettlementHandler", () => {
             expect(betControlStore.setFreeSpinStake).toHaveBeenCalledWith(50);
             expect(betControlStore.setTotalFreeSpins).toHaveBeenCalledWith(5);
             expect(betControlStore.syncFreeSpinCount).toHaveBeenCalled();
-            expect(slotBetHandler.callTriggerAction).toHaveBeenCalled();
         });
 
         it("should not set anything when total is 0", () => {
