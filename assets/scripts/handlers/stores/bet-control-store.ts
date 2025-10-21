@@ -98,11 +98,13 @@ export class BetControlStore {
     }
 
     get disableIncreaseStake() {
-        return this.stakeIndex === this.betLevels.length - 1 || this.stakeIndex === -1;
+        return (
+            this.stakeIndex === this.betLevels.length - 1 || this.stakeIndex === -1 || this.slotBoardStore.slotState === SlotState.SPINNING
+        );
     }
 
     get disableDecreaseStake() {
-        return this.stakeIndex === 0 || this.stakeIndex === -1;
+        return this.stakeIndex === 0 || this.stakeIndex === -1 || this.slotBoardStore.slotState === SlotState.SPINNING;
     }
 
     get isReadyBet() {

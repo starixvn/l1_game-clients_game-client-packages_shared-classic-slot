@@ -208,8 +208,6 @@ export default class BetControl extends ObserverComponent {
     @render(BetControlStore, (store) => store.preventChangeBet)
     renderPreventChangeBet(preventChangeBet: boolean) {
         this.btnShowStakeSelector.interactable = !preventChangeBet;
-        this.btnDecreaseStake.interactable = !preventChangeBet;
-        this.btnIncreaseStake.interactable = !preventChangeBet;
     }
 
     @render(BetControlStore, (store) => store.preventOpenAutoSpin)
