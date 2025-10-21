@@ -132,6 +132,7 @@ jest.mock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-
     FSBPromotionUIHandler: class MockFSBPromotionUIHandler {
         updateTotalWin = jest.fn();
         changeUIPendingEvent = jest.fn();
+        tryShowEndedPopup = jest.fn();
     },
 }));
 
@@ -342,6 +343,7 @@ describe("SlotSettlementHandler", () => {
         (gc.NumberUtils.getValueByCurrency as jest.Mock).mockClear();
         fsbPromotionUIHandler.updateTotalWin.mockClear();
         fsbPromotionUIHandler.changeUIPendingEvent.mockClear();
+        fsbPromotionUIHandler.tryShowEndedPopup.mockClear();
 
         slotBoardStore.slotState = SlotState.NOT_READY;
         slotBoardStore.highlightSpecialSymbols = [];
