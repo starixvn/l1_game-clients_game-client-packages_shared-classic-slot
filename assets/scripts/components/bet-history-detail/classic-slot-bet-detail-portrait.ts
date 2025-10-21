@@ -86,6 +86,11 @@ export class ClassicSlotBetDetailPortrait extends ClassicSlotBetDetail {
         this.btnNext.node.active = !isNewRound;
     }
 
+    @render(BetHistoryCacheStore, (store) => store.isLastDetail())
+    renderIsLastDetail(isLastDetail: boolean) {
+        this.btnPrev.node.active = !isLastDetail;
+    }
+
     onClickNext() {
         AudioUtils.playClick();
         this.isAnimatingSwipe = { direction: 'left' };
