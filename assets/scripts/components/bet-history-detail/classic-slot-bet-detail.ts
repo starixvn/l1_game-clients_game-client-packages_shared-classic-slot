@@ -1,14 +1,12 @@
 import gc from "@sg/game-client-base";
-import { _decorator, instantiate, Label, Node, Prefab, ScrollView, Sprite, SpriteAtlas, SpriteFrame } from "cc";
+import { _decorator, Color, instantiate, Label, Node, Prefab, ScrollView, Sprite, SpriteAtlas, SpriteFrame } from "cc";
 import { Dialog } from "db://shared-components/shared/common-components/dialogs/dialog";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { ComponentUtils } from "db://shared-components/shared/utils";
-import Observer from "observer";
-import { SpecialSymbol } from "../../definitions";
+import { paylines, SpecialSymbol } from "../../definitions";
 import { formatNamePool, getSpriteLine, getSymbolName, resourceCaches } from "../../utils/classic-slot-utils";
 import { ClassicSlotBaseBetDetailLogItem } from "./classic-slot-bet-detail-log-item";
 const { ccclass, property } = _decorator;
-const { handle } = Observer;
 
 @ccclass("ClassicSlotBetDetail")
 export class ClassicSlotBetDetail extends ObserverComponent {
@@ -64,7 +62,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult } = model.betHistoryLog as any;
         this.enableJackpot = enableJackpot;
         this.lblRound.string = freeSpin ? `${id.toString()} (Free Spin)` : id.toString();
-        this.initResultBoard(result);
+        this.initResultBoard(result , settlementResult, paylines);
         this.createBetLogs(model.betHistoryLog);
         this.showNoWinningPaylinesText(model.betHistoryLog);
 
@@ -202,17 +200,127 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         this.content.addChild(node);
     }
 
-    protected initResultBoard(board) {
+    protected initResultBoard(board, settlementResult?, selectedPaylines?) {
         ComponentUtils.moveToOtherNode(this.symbolSample, this.node);
         this.result.destroyAllChildren();
+        const winningPositions = this.getWinningPositions(board, settlementResult, selectedPaylines);
+        const hasWinning = winningPositions.size > 0;
+
         for (let row = 0; row < 3; row++) {
             for (let column = 0; column < 5; column++) {
+                const symbolIndex = row + column * 3;
                 const node = instantiate(this.symbolSample);
                 node.active = true;
+                
                 const sprite = node.getComponentsInChildren(Sprite)[0];
-                sprite.spriteFrame = this.setSymbolFrame(board[row + column * 3]);
+                sprite.spriteFrame = this.setSymbolFrame(board[symbolIndex]);
+                if (hasWinning) {
+                    const isWinning = winningPositions.has(symbolIndex);
+                    sprite.color = isWinning 
+                        ? new Color(255, 255, 255, 255)
+                        : new Color(255, 255, 255, 40); 
+                } else {
+                    sprite.color = new Color(255, 255, 255, 40);
+                }
+                
                 this.result.addChild(node);
             }
+        }
+    }
+
+    private getWinningPositions(
+        board: number[],
+        settlementResult?,
+        selectedPaylines?
+    ): Set<number> {
+        const positions = new Set<number>();
+        
+        if (!settlementResult || !selectedPaylines) {
+            return positions;
+        }
+
+        // Process winning paylines
+        settlementResult.winningPaylines?.forEach((winningLine) => {
+            if (!selectedPaylines.includes(winningLine.payline)) {
+                return;
+            }
+            const linePositions = paylines[winningLine.payline];
+            const winningSymbol = +winningLine.symbol;
+            const matchedPositions = this.findMatchingSymbolsOnLine(board, linePositions, winningSymbol);
+            
+            this.addPositionsIfCountMatches(positions, matchedPositions, winningLine.count);
+        });
+
+        // Add Bonus symbols if odds > 0
+        if (settlementResult.bonus?.odds > 0) {
+            const bonusPositions = this.collectSymbolPositions(board, SpecialSymbol.BONUS);
+            this.addPositionsIfCountMatches(positions, bonusPositions, settlementResult.bonus.count);
+        }
+
+        // Add Free Spin symbols if odds > 0
+        if (settlementResult.freeSpins?.odds > 0) {
+            const freeSpinPositions = this.collectSymbolPositions(board, SpecialSymbol.FREESPIN);
+            this.addPositionsIfCountMatches(positions, freeSpinPositions, settlementResult.freeSpins.count);
+        }
+
+        // Add Jackpot symbols
+        if (settlementResult.jackpot) {
+            const jackpotLineIndex = settlementResult.jackpot.winningLine;
+            
+            if (jackpotLineIndex !== undefined && paylines[jackpotLineIndex]) {
+                const jackpotLinePositions = paylines[jackpotLineIndex];
+                const jackpotPositions = this.collectSymbolPositions(board, SpecialSymbol.JACKPOT, jackpotLinePositions);
+                this.addPositionsIfCountMatches(positions, jackpotPositions, 5);
+            }
+        }
+
+        return positions;
+    }
+
+    private isSymbolMatch(boardSymbol: number, targetSymbol: number): boolean {
+        return boardSymbol === targetSymbol || boardSymbol === SpecialSymbol.WILD;
+    }
+
+    private findMatchingSymbolsOnLine(
+        board: number[],
+        linePositions: number[],
+        targetSymbol: number
+    ): number[] {
+        const matchedPositions: number[] = [];
+        
+        for (const position of linePositions) {
+            if (this.isSymbolMatch(board[position], targetSymbol)) {
+                matchedPositions.push(position);
+            }
+        }
+        
+        return matchedPositions;
+    }
+
+    private collectSymbolPositions(
+        board: number[],
+        symbolType: number,
+        searchPositions?: number[]
+    ): number[] {
+        const positions: number[] = [];
+        const positionsToSearch = searchPositions || board.map((_, index) => index);
+        
+        for (const index of positionsToSearch) {
+            if (board[index] === symbolType) {
+                positions.push(index);
+            }
+        }
+        
+        return positions;
+    }
+
+    private addPositionsIfCountMatches(
+        targetSet: Set<number>,
+        foundPositions: number[],
+        expectedCount: number
+    ): void {
+        if (foundPositions.length === expectedCount) {
+            foundPositions.forEach(pos => targetSet.add(pos));
         }
     }
 
