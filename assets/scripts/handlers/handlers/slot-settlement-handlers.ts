@@ -351,6 +351,7 @@ export class SlotSettlementHandler {
             this.fsbPromotionUIHandler.changeUIPendingEvent(FreeSpinsPromotionEvents.OPEN_PROMOTION_INFO);
         }
         this.betControlStore.isFreeSpinEffectCompleted = true;
+        this.fsbPromotionUIHandler.tryShowEndedPopup();
     }
 
     protected scheduleNextSpin(action: () => void) {
