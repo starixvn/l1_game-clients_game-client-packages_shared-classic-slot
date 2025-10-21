@@ -356,6 +356,7 @@ export class SlotSettlementHandler {
 
     protected scheduleNextSpin(action: () => void) {
         const delayDuration = 1000;
+        this.slotBoardStore.slotState = SlotState.AUTO_SPIN;
         this.timeoutNextSpin = setTimeout(() => {
             action();
         }, delayDuration);

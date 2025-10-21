@@ -1,4 +1,6 @@
 import gc from "@sg/game-client-base";
+import { FSBPromotionStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import { Container } from "inversify";
 import "reflect-metadata";
 import { SLOT_BET_CHOICES, SlotNotification, SlotState } from "../../assets/scripts/definitions";
@@ -7,8 +9,6 @@ import { SlotBetResponseHandler } from "../../assets/scripts/handlers/handlers/s
 import { SlotUIHandler } from "../../assets/scripts/handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../../assets/scripts/handlers/stores/bet-control-store";
 import { SlotBoardStore } from "../../assets/scripts/handlers/stores/slot-board-store";
-import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
-import { FSBPromotionStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store";
 
 // Mock BetControlStore
 jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
@@ -320,7 +320,7 @@ describe("SlotBetHandler", () => {
     describe("clearTriggerAction", () => {
         it("should clear triggerAutoSpin and timeout", () => {
             betControlStore.triggerAutoSpin = true;
-            slotBetHandler["timeoutHolding"] = setTimeout(() => {}, 1000) as any;
+            slotBetHandler["timeoutHolding"] = setTimeout(() => { }, 1000) as any;
             const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
 
             slotBetHandler.clearTriggerAction();
@@ -493,7 +493,7 @@ describe("SlotBetHandler", () => {
 
     describe("cancelAutoSpin", () => {
         it("should clear timeout and cancel auto spin in store", () => {
-            slotBetHandler["timeoutStartAutoSpin"] = setTimeout(() => {}, 1000) as any;
+            slotBetHandler["timeoutStartAutoSpin"] = setTimeout(() => { }, 1000) as any;
             const clearTimeoutSpy = jest.spyOn(global, "clearTimeout");
 
             slotBetHandler.cancelAutoSpin();
@@ -570,14 +570,14 @@ describe("SlotBetHandler", () => {
     describe("Edge cases and error scenarios", () => {
         it("should handle timeoutHolding being undefined in clearTriggerAction", () => {
             slotBetHandler["timeoutHolding"] = undefined;
-            
+
             expect(() => slotBetHandler.clearTriggerAction()).not.toThrow();
             expect(betControlStore.triggerAutoSpin).toBe(false);
         });
 
         it("should handle timeoutStartAutoSpin being undefined in cancelAutoSpin", () => {
             slotBetHandler["timeoutStartAutoSpin"] = undefined;
-            
+
             expect(() => slotBetHandler.cancelAutoSpin()).not.toThrow();
             expect(betControlStore.cancelAutoSpin).toHaveBeenCalledTimes(1);
         });

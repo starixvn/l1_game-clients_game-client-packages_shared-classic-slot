@@ -119,6 +119,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     cancelAutoSpin() {
         this.timeoutStartAutoSpin && clearTimeout(this.timeoutStartAutoSpin);
         this.betControlStore.cancelAutoSpin();
+        this.slotBoardStore.resetToReady();
     }
 
     openAutoSpinDialog() {
@@ -138,7 +139,6 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         this.cancelAutoSpin();
         this.clearTriggerAction();
         this.slotBoardStore.clearSettlement();
-        this.slotBoardStore.resetToReady();
 
         if (clearFreeSpins) {
             this.betControlStore.clearFreeSpins();

@@ -106,7 +106,9 @@ export class BetControlStore {
     }
 
     get isReadyBet() {
-        return this.slotBoardStore.slotState === SlotState.READY || this.slotBoardStore.slotState === SlotState.SETTLED;
+        return this.slotBoardStore.slotState === SlotState.READY
+            || this.slotBoardStore.slotState === SlotState.SETTLED
+            || this.slotBoardStore.slotState === SlotState.AUTO_SPIN;
     }
 
     get preventOpenAutoSpin() {
