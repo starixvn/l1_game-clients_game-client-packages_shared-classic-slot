@@ -26,8 +26,13 @@ export default class BetLevelsContainer extends ObserverComponent {
     @property
     hideWhenSelected = true;
 
+    @property
+    itemHeight = 60;
+
+    @property
+    marginBetweenItems = 10;
+
     private betLevels: number[] = [];
-    private readonly itemHeight = 60;
     private readonly itemsOfColumnMax = 5;
     private stakeIndex = -1;
 
@@ -88,9 +93,9 @@ export default class BetLevelsContainer extends ObserverComponent {
     protected calculateContainerHeight() {
         let height = 0;
         if (this.betLevels.length >= this.itemsOfColumnMax) {
-            height = this.itemsOfColumnMax * this.itemHeight + (this.itemsOfColumnMax + 1) * 10;
+            height = this.itemsOfColumnMax * this.itemHeight + (this.itemsOfColumnMax + 1) * this.marginBetweenItems;
         } else {
-            height = this.betLevels.length * this.itemHeight + (this.betLevels.length + 1) * 10;
+            height = this.betLevels.length * this.itemHeight + (this.betLevels.length + 1) * this.marginBetweenItems;
         }
 
         ComponentUtils.setNodeTransform(this.containerNode, { height });
