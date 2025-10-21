@@ -1,10 +1,12 @@
 import "reflect-metadata";
 //rest
 import gc from "@sg/game-client-base";
+import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import { Container } from "inversify";
 import mobx from "mobx";
-import { SLOT_LINES } from "../../../assets/scripts/definitions";
+import { SLOT_LINES, SlotState } from "../../../assets/scripts/definitions";
 import { BetControlStore } from "../../../assets/scripts/handlers/stores/bet-control-store";
+import { SlotBoardStore } from "../../../assets/scripts/handlers/stores/slot-board-store";
 
 // Mocks
 jest.mock("@sg/game-client-base", () => {
@@ -59,6 +61,13 @@ jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui
         })),
     };
 });
+jest.mock("../../../assets/scripts/handlers/stores/slot-board-store", () => {
+    return {
+        SlotBoardStore: jest.fn().mockImplementation(() => ({
+            slotState: SlotState.READY,
+        })),
+    };
+});
 
 describe("BetControlStore", () => {
     let container: Container;
@@ -81,6 +90,8 @@ describe("BetControlStore", () => {
             .toConstantValue(new (jest.requireMock("@sg/game-client-base").GameUserSettings.GameUserSettingHandler)());
 
         container.bind(gc.Notices.NoticeStore).toConstantValue(new (jest.requireMock("@sg/game-client-base").Notices.NoticeStore)());
+        container.bind(SlotBoardStore).toConstantValue(new (jest.requireMock("../../../assets/scripts/handlers/stores/slot-board-store").SlotBoardStore)());
+        container.bind(FSBPromotionUIStore).toConstantValue(new (jest.requireMock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store").FSBPromotionUIStore)());
         betControlStore = container.get(BetControlStore);
 
         // Manually trigger the reaction logic for betLevels initialization as it's in a setTimeout
@@ -211,6 +222,8 @@ describe("BetControlStore", () => {
             beforeEach(() => {
                 mobx.runInAction(() => {
                     betControlStore.betLevels = [10, 20, 30];
+                    //@ts-ignore
+                    betControlStore.slotBoardStore.slotState = SlotState.READY;
                 });
             });
             it("should be true if stakeIndex is at the last element", () => {
@@ -228,7 +241,9 @@ describe("BetControlStore", () => {
             it("should be false if stake can be increased", () => {
                 mobx.runInAction(() => {
                     betControlStore.stake = 10;
+
                 });
+
                 expect(betControlStore.disableIncreaseStake).toBe(false);
                 mobx.runInAction(() => {
                     betControlStore.stake = 20;
@@ -241,6 +256,8 @@ describe("BetControlStore", () => {
             beforeEach(() => {
                 mobx.runInAction(() => {
                     betControlStore.betLevels = [10, 20, 30];
+                    //@ts-ignore
+                    betControlStore.slotBoardStore.slotState = SlotState.READY;
                 });
             });
             it("should be true if stakeIndex is 0", () => {
