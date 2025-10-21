@@ -190,7 +190,7 @@
       "__uuid__": "766602cb-5cd9-48af-8b3c-9eb4f7811514",
       "__expectedType__": "cc.SpriteAtlas"
     },
-    "_handleTouchEvent": true,
+    "_handleTouchEvent": false,
     "_id": ""
   },
   {
@@ -225,6 +225,7 @@
     "msgRichText": {
       "__id__": 5
     },
+    "symbolSize": 75,
     "_id": ""
   },
   {
