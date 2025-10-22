@@ -1156,6 +1156,52 @@
         ".json"
       ],
       "subMetas": {}
+    },
+    "e61b7": {
+      "importer": "sprite-frame",
+      "uuid": "0dbfe6ae-be86-4831-a0d9-638e709a7795@e61b7",
+      "displayName": "",
+      "id": "e61b7",
+      "name": "payline-number-bg",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 439,
+        "trimY": 3,
+        "width": 32,
+        "height": 32,
+        "rawWidth": 32,
+        "rawHeight": 32,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "a8afd1f4-13ce-4369-b98b-ba105988adf6@6c48a",
+        "atlasUuid": "0dbfe6ae-be86-4831-a0d9-638e709a7795",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
     }
   },
   "userData": {

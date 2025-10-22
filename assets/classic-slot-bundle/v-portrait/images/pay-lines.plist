@@ -379,6 +379,21 @@
                 <key>textureRotated</key>
                 <false/>
             </dict>
+            <key>payline-number-bg.png</key>
+            <dict>
+                <key>aliases</key>
+                <array/>
+                <key>spriteOffset</key>
+                <string>{0,0}</string>
+                <key>spriteSize</key>
+                <string>{32,32}</string>
+                <key>spriteSourceSize</key>
+                <string>{32,32}</string>
+                <key>textureRect</key>
+                <string>{{439,3},{32,32}}</string>
+                <key>textureRotated</key>
+                <false/>
+            </dict>
         </dict>
         <key>metadata</key>
         <dict>
@@ -393,7 +408,7 @@
             <key>size</key>
             <string>{512,512}</string>
             <key>smartupdate</key>
-            <string>$TexturePacker:SmartUpdate:12cb9ed736cc17dd777b2cf0ba1ccdf9:e6821f6fef03e498721bc9b5d703d533:17c94a2a7df5cff4b1c362e3eac89d9d$</string>
+            <string>$TexturePacker:SmartUpdate:116865a9adda376b6189edc31e815377:d3142a2015301e2979fef7e09dcbaa4b:17c94a2a7df5cff4b1c362e3eac89d9d$</string>
             <key>textureFileName</key>
             <string>pay-lines.webp</string>
         </dict>
