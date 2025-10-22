@@ -740,7 +740,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 120.60999298095703,
+      "x": 116.73599243164062,
       "y": 0,
       "z": 0
     },
@@ -793,7 +793,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -14.899993896484375,
+      "x": -11.739997863769531,
       "y": 0,
       "z": 0
     },
@@ -834,7 +834,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 21.419998168945312,
+      "width": 19.991989135742188,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -873,8 +873,8 @@
     "_string": "X",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 30,
-    "_fontSize": 30,
+    "_actualFontSize": 28,
+    "_fontSize": 28,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -976,7 +976,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 15.709999084472656,
+      "x": 12.495994567871094,
       "y": 0,
       "z": 0
     },
@@ -1017,7 +1017,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 19.79998779296875,
+      "width": 18.479995727539062,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1056,8 +1056,8 @@
     "_string": "2",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 30,
-    "_fontSize": 30,
+    "_actualFontSize": 28,
+    "_fontSize": 28,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -1147,7 +1147,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 51.21998596191406,
+      "width": 43.47198486328125,
       "height": 100
     },
     "_anchorPoint": {
@@ -1185,7 +1185,7 @@
     "_paddingRight": 0,
     "_paddingTop": 0,
     "_paddingBottom": 0,
-    "_spacingX": 10,
+    "_spacingX": 5,
     "_spacingY": 0,
     "_verticalDirection": 1,
     "_horizontalDirection": 0,
@@ -1226,7 +1226,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 146.21998596191406,
+      "width": 138.47198486328125,
       "height": 100
     },
     "_anchorPoint": {
@@ -1317,7 +1317,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 93.23,
+      "x": 60,
       "y": 0,
       "z": 0
     },
@@ -1358,7 +1358,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 122.99996948242188,
+      "width": 114.79994201660156,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1397,8 +1397,8 @@
     "_string": "4 Bonus",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 30,
-    "_fontSize": 30,
+    "_actualFontSize": 28,
+    "_fontSize": 28,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -1544,7 +1544,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 98.78997802734375,
+      "width": 92.20394897460938,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -1583,8 +1583,8 @@
     "_string": "10000",
     "_horizontalAlign": 2,
     "_verticalAlign": 1,
-    "_actualFontSize": 30,
-    "_fontSize": 30,
+    "_actualFontSize": 28,
+    "_fontSize": 28,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,

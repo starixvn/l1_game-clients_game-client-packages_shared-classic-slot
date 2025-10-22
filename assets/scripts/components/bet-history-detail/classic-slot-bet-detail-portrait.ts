@@ -31,13 +31,13 @@ export class ClassicSlotBetDetailPortrait extends ClassicSlotBetDetail {
     }
 
     private setupTouchHandler() {
-        const touchSwipeHandler = this.node.getComponentsInChildren(TouchSwipeBase)[0];
-        if (touchSwipeHandler) {
+        const touchSwipeHandlers = this.node.getComponentsInChildren(TouchSwipeBase);
+        touchSwipeHandlers.forEach(touchSwipeHandler => {
             touchSwipeHandler.swipeCallback = (isLeft: boolean) => {
                 this.isAnimatingSwipe = { direction: isLeft ? 'left' : 'right' };
-                this.requestDetail(isLeft);
-            }
-        }
+                    this.requestDetail(isLeft);
+                }
+            });
     }
 
     override showBetDetail(model: BetDetailModel): void {
