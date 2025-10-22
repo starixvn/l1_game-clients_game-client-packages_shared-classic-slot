@@ -173,7 +173,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "274b102a-9505-4157-90c4-cc537af86c68@af0da",
+      "__uuid__": "112fa8bd-6bd6-4804-8bde-00279c46ce76@af0da",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 1,
@@ -309,7 +309,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "274b102a-9505-4157-90c4-cc537af86c68@79400",
+      "__uuid__": "112fa8bd-6bd6-4804-8bde-00279c46ce76@79400",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 1,
