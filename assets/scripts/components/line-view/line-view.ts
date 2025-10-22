@@ -20,6 +20,8 @@ export default class LineView extends Component {
     @property
     isLabelLeft = true;
 
+    public linkWithLabel = true;
+
     public light: Node = null;
     private subLines = {};
 
@@ -36,10 +38,15 @@ export default class LineView extends Component {
         const linePositions = this.board.getItemPositions(lineNum - 1);
         const positions = [];
         const offset = transform.width / 2;
-        if (this.isLabelLeft) {
-            positions.push(v3(labelPos.x + offset, labelPos.y), ...linePositions);
+
+        if (this.linkWithLabel) {
+            if (this.isLabelLeft) {
+                positions.push(v3(labelPos.x + offset, labelPos.y), ...linePositions);
+            } else {
+                positions.push(...linePositions, v3(labelPos.x - offset, labelPos.y));
+            }
         } else {
-            positions.push(...linePositions, v3(labelPos.x - offset, labelPos.y));
+            positions.push(...linePositions);
         }
         this.createLines(positions);
     }

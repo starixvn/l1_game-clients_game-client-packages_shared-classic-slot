@@ -24,6 +24,9 @@ export default class LineViewContainer extends ObserverComponent {
     @property(SlotBoard)
     slotBoard: SlotBoard = null;
 
+    @property
+    public linkWithLabel = true;
+
     readonly lineOrders = {
         left: [20, 8, 2, 14, 17, 7, 1, 10, 23, 15, 9, 3, 21],
         right: [18, 5, 12, 24, 6, 22, 16, 11, 19, 13, 4, 25],
@@ -89,6 +92,7 @@ export default class LineViewContainer extends ObserverComponent {
     protected createLineView(child: Node) {
         const node = new Node();
         const view = node.addComponent(LineView);
+        view.linkWithLabel = this.linkWithLabel;
         view.linePrefab = this.linePrefab;
         view.lightPrefab = this.lineGlowPrefab;
         view.board = this.slotBoard;
