@@ -142,8 +142,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 785.9999999999999,
-      "height": 1398
+      "width": 786,
+      "height": 1398.0000000000002
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -360,8 +360,8 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 0.9137254901960784,
-      "y": 0.9137254901960784,
+      "x": 0.9137254901960786,
+      "y": 0.9137254901960786,
       "z": 1
     },
     "_mobility": 0,
@@ -1632,7 +1632,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 139.4679718017578,
+      "width": 330,
       "height": 55.44
     },
     "_anchorPoint": {
@@ -1675,7 +1675,7 @@
     "_fontSize": 34,
     "_fontFamily": "Arial",
     "_lineHeight": 44,
-    "_overflow": 0,
+    "_overflow": 2,
     "_enableWrapText": false,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
@@ -3204,7 +3204,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -294.75,
+      "x": -299.75,
       "y": 0,
       "z": 0
     },
@@ -3245,7 +3245,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 79.22998046875,
+      "width": 150,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -3288,7 +3288,7 @@
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
-    "_overflow": 0,
+    "_overflow": 3,
     "_enableWrapText": false,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
@@ -3435,7 +3435,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -113,
+      "x": -118.132,
       "y": 0,
       "z": 0
     },
@@ -3476,7 +3476,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 125.90995788574219,
+      "width": 160,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -3519,7 +3519,7 @@
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
-    "_overflow": 0,
+    "_overflow": 3,
     "_enableWrapText": false,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
@@ -3666,7 +3666,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 98.25,
+      "x": 76.556,
       "y": 0,
       "z": 0
     },
@@ -3707,8 +3707,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 245,
-      "height": 110
+      "width": 160,
+      "height": 90.39999999999999
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -3750,7 +3750,7 @@
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
-    "_overflow": 1,
+    "_overflow": 3,
     "_enableWrapText": false,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
@@ -3897,7 +3897,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 294.75,
+      "x": 277.362,
       "y": 0,
       "z": 0
     },
@@ -3938,8 +3938,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 150,
-      "height": 110
+      "width": 230,
+      "height": 50.4
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -3981,7 +3981,7 @@
     "_fontSize": 30,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
-    "_overflow": 1,
+    "_overflow": 3,
     "_enableWrapText": false,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
@@ -4073,7 +4073,7 @@
     "__prefab": {
       "__id__": 186
     },
-    "key": "Classicslot.big_win",
+    "key": "Classicslot.big_win_2_lines",
     "format": 1,
     "prefix": "",
     "suffix": "",
@@ -4425,7 +4425,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 169.6599578857422,
+      "width": 330,
       "height": 55.44
     },
     "_anchorPoint": {
@@ -4468,7 +4468,7 @@
     "_fontSize": 34,
     "_fontFamily": "Arial",
     "_lineHeight": 44,
-    "_overflow": 0,
+    "_overflow": 2,
     "_enableWrapText": false,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
@@ -7343,8 +7343,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 785.9999999999999,
-      "height": 1398
+      "width": 786,
+      "height": 1398.0000000000002
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
