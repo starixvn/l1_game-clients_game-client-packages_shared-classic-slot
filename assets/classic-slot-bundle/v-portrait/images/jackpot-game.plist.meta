@@ -1,0 +1,155 @@
+{
+  "ver": "1.0.8",
+  "importer": "sprite-atlas",
+  "imported": true,
+  "uuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64",
+  "files": [
+    ".json"
+  ],
+  "subMetas": {
+    "cf830": {
+      "importer": "sprite-frame",
+      "uuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64@cf830",
+      "displayName": "",
+      "id": "cf830",
+      "name": "jackpot-popup-bg",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 3,
+        "trimY": 91,
+        "width": 186,
+        "height": 189,
+        "rawWidth": 186,
+        "rawHeight": 189,
+        "borderTop": 23,
+        "borderBottom": 23,
+        "borderLeft": 26,
+        "borderRight": 20,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "5f9a2d2e-4d1e-4dda-94e3-f44fea5d36af@6c48a",
+        "atlasUuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "1d35a": {
+      "importer": "sprite-frame",
+      "uuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64@1d35a",
+      "displayName": "",
+      "id": "1d35a",
+      "name": "jackpot-timer-bg",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": true,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 3,
+        "trimY": 282,
+        "width": 177,
+        "height": 63,
+        "rawWidth": 185,
+        "rawHeight": 63,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "5f9a2d2e-4d1e-4dda-94e3-f44fea5d36af@6c48a",
+        "atlasUuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "e2f4e": {
+      "importer": "sprite-frame",
+      "uuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64@e2f4e",
+      "displayName": "",
+      "id": "e2f4e",
+      "name": "jackpot-title-bg",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 3,
+        "trimY": 3,
+        "width": 469,
+        "height": 86,
+        "rawWidth": 469,
+        "rawHeight": 86,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": true,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "5f9a2d2e-4d1e-4dda-94e3-f44fea5d36af@6c48a",
+        "atlasUuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64",
+        "trimType": "auto"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    }
+  },
+  "userData": {
+    "atlasTextureName": "jackpot-game.webp",
+    "format": 3,
+    "uuid": "e94cf0de-9c24-4dcc-b0d1-2322e8eecf64",
+    "textureUuid": "5f9a2d2e-4d1e-4dda-94e3-f44fea5d36af@6c48a"
+  }
+}
