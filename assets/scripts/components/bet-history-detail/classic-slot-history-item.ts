@@ -56,7 +56,7 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         if (settlementResult.jackpot) {
             win += settlementResult.jackpot.winningAmount;
         }
-
+        this.node.name = `item-${id}`;
         this.node.active = true;
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
