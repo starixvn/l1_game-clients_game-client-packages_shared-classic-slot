@@ -8,6 +8,9 @@ const { ccclass, property } = _decorator;
 
 @ccclass
 export default class AutoSpinDialogContainer extends ObserverComponent {
+    @property
+    prefabPath = "prefabs/auto-spin-dialog";
+
     @render(BetControlStore, (store) => store.autoSpinDialogOpenEvent, { fireImmediately: false })
     renderAutoSpinDialogOpen(autoSpinDialogOpenEvent: any) {
         if (autoSpinDialogOpenEvent) {
@@ -16,7 +19,7 @@ export default class AutoSpinDialogContainer extends ObserverComponent {
     }
 
     async show() {
-        const prefab = await loadSharedClassicSlotAsset<Prefab>("prefabs/auto-spin-dialog", Prefab);
+        const prefab = await loadSharedClassicSlotAsset<Prefab>(this.prefabPath, Prefab);
         const dialog = instantiate(prefab);
         this.node.addChild(dialog);
     }
