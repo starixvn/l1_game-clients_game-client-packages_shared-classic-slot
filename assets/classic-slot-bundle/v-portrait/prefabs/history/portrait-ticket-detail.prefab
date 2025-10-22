@@ -5864,7 +5864,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": -82.97997283935547,
+      "x": -82.01997375488281,
       "y": 0,
       "z": 0
     },
@@ -6169,7 +6169,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 105.95994567871094,
+      "width": 104.03994750976562,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -6215,7 +6215,7 @@
     "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
-      "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
+      "__uuid__": "10013268-eb64-492c-9cd9-4a1aebbcfe21",
       "__expectedType__": "cc.TTFFont"
     },
     "_isSystemFontUsed": false,
@@ -6351,7 +6351,7 @@
     },
     "_lpos": {
       "__type__": "cc.Vec3",
-      "x": 82.97997283935547,
+      "x": 82.01997375488281,
       "y": 0,
       "z": 0
     },
@@ -6597,7 +6597,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 165.95994567871094,
+      "width": 164.03994750976562,
       "height": 100
     },
     "_anchorPoint": {
@@ -7628,7 +7628,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 290.349853515625,
+      "width": 239.3278350830078,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -7664,11 +7664,11 @@
       "b": 255,
       "a": 255
     },
-    "_string": "NO WINNING PAYLINES",
+    "_string": "No Winning Paylines",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 25,
-    "_fontSize": 25,
+    "_actualFontSize": 24,
+    "_fontSize": 24,
     "_fontFamily": "Arial",
     "_lineHeight": 40,
     "_overflow": 0,
@@ -7746,7 +7746,7 @@
       "__id__": 380
     },
     "key": "Classicslot.non_winning_payline",
-    "format": 1,
+    "format": 3,
     "prefix": "",
     "suffix": "",
     "_id": ""
