@@ -1683,7 +1683,7 @@
     "_fontSize": 24,
     "_fontFamily": "Arial",
     "_lineHeight": 44,
-    "_overflow": 1,
+    "_overflow": 2,
     "_enableWrapText": true,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",
@@ -1935,7 +1935,7 @@
     "_fontSize": 24,
     "_fontFamily": "Arial",
     "_lineHeight": 44,
-    "_overflow": 1,
+    "_overflow": 2,
     "_enableWrapText": true,
     "_font": {
       "__uuid__": "0f6981e6-5811-45ce-ac30-f06164d111a7",

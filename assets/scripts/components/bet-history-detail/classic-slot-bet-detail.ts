@@ -67,20 +67,20 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         this.showNoWinningPaylinesText(model.betHistoryLog);
 
         if (this.lblBet) {
-            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2);
+            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2 , true);
         }
         if (this.lblPaylines) {
             this.lblPaylines.string = paylines.length.toString();
         }
         if (this.lblTotalAmount) {
-            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount, 2, false);
+            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount, 2, true);
         }
         if (this.lblBetWin) {
             let win = betWin;
             if (settlementResult.jackpot) {
                 win += settlementResult.jackpot.winningAmount;
             }
-            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(win, 2, false);
+            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(win, 2, true);
         }
         if (this.lblTime) {
             this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
