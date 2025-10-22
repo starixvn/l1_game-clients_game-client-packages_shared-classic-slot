@@ -58,6 +58,7 @@ export default class ClassicSlot extends GameComponent {
     gameConfigOdds: any;
     jackpotEnabled = false;
     isReadyBet = false;
+    protected enableEventShowHideGame = false;
 
     override isValidResult(result: gc.GameServiceMessage.TResult, settlementResult: gc.GameServiceMessage.TSettlementResult) {
         return !!result;
