@@ -890,24 +890,14 @@ describe("ClassicSlot", () => {
     });
 
     describe("autoSpinFSB", () => {
-        it("should call tryConsumeFSB and callBet when canSpinNextFSB is true", () => {
+        it("should call tryConsumeFSB and callBet when canSpinNextFSB", () => {
             const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
             const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
 
-            component.autoSpinFSB(true);
+            component.autoSpinFSB();
 
             expect(tryConsumeFSBSpy).toHaveBeenCalled();
             expect(callBetSpy).toHaveBeenCalled();
-        });
-
-        it("should not call methods when canSpinNextFSB is false", () => {
-            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
-            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
-
-            component.autoSpinFSB(false);
-
-            expect(tryConsumeFSBSpy).not.toHaveBeenCalled();
-            expect(callBetSpy).not.toHaveBeenCalled();
         });
     });
 
