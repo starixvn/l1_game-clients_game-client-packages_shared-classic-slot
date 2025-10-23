@@ -155,7 +155,7 @@ export default class BetControl extends ObserverComponent {
     @render(SlotUIStore, (store) => store.dialogOpenEvent)
     renderDialogOpenEvent(dialogOpenEvent: { name: string }) {
         const shouldClose = dialogOpenEvent.name !== DialogName.STAKE_SELECTOR;
-        shouldClose && this.closeStakeSelector();
+        shouldClose && this.closeStakeSelectorSilently();
     }
 
     toggleStakeSelector() {
