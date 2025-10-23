@@ -115,12 +115,22 @@ export class SlotIngameMessage extends ObserverComponent {
 
     @render(SlotBoardStore, (store) => store.winningBet, { fireImmediately: false })
     renderWinningBet(winningBet: number) {
-        if (winningBet > 0) {
-            AnimationUtils.fadeOut(this.msgRichText.node, 0.2);
+        const isWin = winningBet > 0;
+        this.nodeTotalWin.active = isWin;
+
+        if (isWin) {
+            AnimationUtils.fadeOut(this.msgRichText.node, 0.2).then(() => {
+                try {
+                    if (!isWin) {
+                        this.msgRichText.node.active = false;
+                    }
+                } catch (e) { }
+            });
             this.unschedule(this.scheduleChangeMessages);
             this.showTotalWin(winningBet);
         } else {
             this.nodeTotalWin.scale = v3(0, 0, 0);
+            this.msgRichText.node.active = true;
             AnimationUtils.fadeIn(this.msgRichText.node, 0.2);
             this.scheduleChangeMessages();
         }
