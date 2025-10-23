@@ -352,6 +352,14 @@ export class SlotSettlementHandler {
         }
         this.betControlStore.isFreeSpinEffectCompleted = true;
         this.fsbPromotionUIHandler.tryShowEndedPopup();
+        this.checkToSpinNextFSB();
+    }
+
+    checkToSpinNextFSB() {
+        if (this.fsbPromotionUIStore.canSpinNextFSB) {
+            this.fsbPromotionUIHandler.tryConsumeFSB();
+            this.slotBetHandler.callBet();
+        }
     }
 
     protected scheduleNextSpin(action: () => void) {
