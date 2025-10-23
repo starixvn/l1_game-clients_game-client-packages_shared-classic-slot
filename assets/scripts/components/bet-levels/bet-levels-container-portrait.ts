@@ -7,11 +7,10 @@ const { render, handle } = Observer;
 @ccclass
 export default class BetLevelsContainerPortrait extends BetLevelsContainer {
     @property
-    columnsNumber = 3;
+    columnsCount = 3;
 
     protected calculateContainerHeight() {
-        const itemsOfColumn = Math.ceil(this.betLevels.length / this.columnsNumber);
-        console.log("itemsOfColumn", itemsOfColumn);
+        const itemsOfColumn = Math.ceil(this.betLevels.length / this.columnsCount);
         const height = itemsOfColumn * this.itemHeight + (itemsOfColumn + 1) * this.marginBetweenItems;
 
         ComponentUtils.setNodeTransform(this.containerNode, { height });
