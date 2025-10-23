@@ -291,8 +291,8 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 1,
-      "y": 1,
+      "x": 0.9999999999999999,
+      "y": 0.9999999999999999,
       "z": 1
     },
     "_mobility": 0,
@@ -2346,7 +2346,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 786,
+      "width": 785.9999999999999,
       "height": 1398
     },
     "_anchorPoint": {
@@ -2418,7 +2418,7 @@
       "__id__": 84
     },
     "jackpotWinningAmountPrefab": {
-      "__uuid__": "9b363e5a-0118-47e9-a15b-5a918786f12e",
+      "__uuid__": "4cf34e16-8cb8-4ce8-92e1-77a110566278",
       "__expectedType__": "cc.Prefab"
     },
     "_id": ""
