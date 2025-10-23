@@ -262,12 +262,6 @@ export default class ClassicSlot extends GameComponent {
         }, delayMs);
     }
 
-    @render(FSBPromotionUIStore, (store) => store.canSpinNextFSB)
-    autoSpinFSB() {
-        this.tryConsumeFSB();
-        this.callBet();
-    }
-
     @handle(FSBPromotionUIHandler, (handler) => handler.tryConsumeFSB())
     tryConsumeFSB() { }
 

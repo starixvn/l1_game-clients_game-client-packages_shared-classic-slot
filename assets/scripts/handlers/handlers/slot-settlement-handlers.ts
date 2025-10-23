@@ -2,7 +2,7 @@ import gc from "@sg/game-client-base";
 import { tween } from "cc";
 import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
 import { FreeSpinsPromotionEvents, FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
-import { AnimationUtils } from "db://shared-components/shared/utils";
+import { AnimationUtils, FunctionUtils } from "db://shared-components/shared/utils";
 import inversify from "inversify";
 import mobx from "mobx";
 import { LineData, paylines, SlotGameServiceMessage, SlotNotification, SlotState, SpecialSymbol } from "../../definitions";
@@ -330,7 +330,7 @@ export class SlotSettlementHandler {
         this.clearSettlement();
     }
 
-    protected checkSpinNextRound() {
+    protected async checkSpinNextRound() {
         if (this.betControlStore.freeSpinEnabled) {
             this.scheduleNextSpin(() => {
                 this.slotBetHandler.callBet();
@@ -352,6 +352,11 @@ export class SlotSettlementHandler {
         }
         this.betControlStore.isFreeSpinEffectCompleted = true;
         this.fsbPromotionUIHandler.tryShowEndedPopup();
+        if (this.fsbPromotionUIStore.isShowFreeSpinMessage) {
+            this.fsbPromotionUIHandler.openPromotionInfo();
+            this.fsbPromotionUIHandler.setShowFreeSpinMessage(false);
+            await FunctionUtils.waitUntil(() => this.fsbPromotionUIStore.isFSBInfoReady, 100, 10000).catch(() => { });
+        }
         this.checkToSpinNextFSB();
     }
 
