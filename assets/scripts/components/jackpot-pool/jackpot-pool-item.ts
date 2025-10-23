@@ -9,7 +9,7 @@ export default class JackpotPoolItem extends Component {
     @property(Label)
     lblValue: Label = null;
 
-    private objectTween = { value: -1 };
+    private readonly objectTween = { value: -1 };
 
     setValue(value: number) {
         if (this.objectTween.value === value) {
