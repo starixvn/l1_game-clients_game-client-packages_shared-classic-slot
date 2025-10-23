@@ -1,6 +1,6 @@
 
 
-import { _decorator, Label, Node } from "cc";
+import { _decorator, Label, Node, Tween } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
@@ -17,6 +17,7 @@ export class FreespinMessage extends ObserverComponent {
 
     normalNode: Node = null;
     lastNode: Node = null;
+    private freeSpinEnabled = false;
 
     onLoad() {
         this.normalNode = this.container.getChildByName("normal");
@@ -37,11 +38,15 @@ export class FreespinMessage extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.freeSpinEnabledDisplay)
     renderFreeSpinEnabled(freeSpinEnabled: boolean) {
+        this.freeSpinEnabled = freeSpinEnabled;
+        Tween.stopAllByTarget(this.container);
         if (freeSpinEnabled) {
             AnimationUtils.fadeIn(this.container, 0.3);
         } else {
             AnimationUtils.fadeOut(this.container, 0.3).then(() => {
-                this.container.active = false;
+                if (!this.freeSpinEnabled) {
+                    this.container.active = false;
+                }
             });
         }
     }
