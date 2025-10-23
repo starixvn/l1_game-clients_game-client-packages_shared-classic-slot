@@ -28,6 +28,9 @@
     "_active": true,
     "_components": [
       {
+        "__id__": 421
+      },
+      {
         "__id__": 423
       },
       {
@@ -35,13 +38,10 @@
       },
       {
         "__id__": 427
-      },
-      {
-        "__id__": 429
       }
     ],
     "_prefab": {
-      "__id__": 431
+      "__id__": 429
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -142,8 +142,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 786,
-      "height": 1398.0000000000002
+      "width": 785.9999999999999,
+      "height": 1398
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -337,13 +337,10 @@
     "_components": [
       {
         "__id__": 418
-      },
-      {
-        "__id__": 420
       }
     ],
     "_prefab": {
-      "__id__": 422
+      "__id__": 420
     },
     "_lpos": {
       "__type__": "cc.Vec3",
@@ -360,8 +357,8 @@
     },
     "_lscale": {
       "__type__": "cc.Vec3",
-      "x": 0.9137254901960786,
-      "y": 0.9137254901960786,
+      "x": 1,
+      "y": 0.9137254901960784,
       "z": 1
     },
     "_mobility": 0,
@@ -4755,8 +4752,6 @@
       "__id__": 0
     },
     "fileId": "3aM3GSkxpC5anLjWPw1GMr",
-    "instance": null,
-    "targetOverrides": null,
     "nestedPrefabInstanceRoots": null
   },
   {
@@ -7298,25 +7293,6 @@
     "fileId": "0f1Bu+rlNP2K96O55atZMo"
   },
   {
-    "__type__": "5f091StlyZCR7fwiAyuiu3Y",
-    "_name": "",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "node": {
-      "__id__": 13
-    },
-    "_enabled": true,
-    "__prefab": {
-      "__id__": 421
-    },
-    "_policy": 2,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.CompPrefabInfo",
-    "fileId": "a8uB3nFaBL2b/BFgHMyCZL"
-  },
-  {
     "__type__": "cc.PrefabInfo",
     "root": {
       "__id__": 1
@@ -7339,12 +7315,12 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 424
+      "__id__": 422
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 786,
-      "height": 1398.0000000000002
+      "width": 785.9999999999999,
+      "height": 1398
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -7367,7 +7343,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 426
+      "__id__": 424
     },
     "_alignFlags": 45,
     "_target": null,
@@ -7403,10 +7379,10 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 428
+      "__id__": 426
     },
     "dialog": {
-      "__id__": 429
+      "__id__": 427
     },
     "toggleContainer": {
       "__id__": 222
@@ -7435,7 +7411,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 430
+      "__id__": 428
     },
     "nodeFadeBackground": {
       "__id__": 2
@@ -7463,52 +7439,52 @@
     "instance": null,
     "targetOverrides": [
       {
+        "__id__": 430
+      },
+      {
         "__id__": 432
       },
       {
-        "__id__": 434
+        "__id__": 435
       },
       {
-        "__id__": 437
+        "__id__": 438
       },
       {
-        "__id__": 440
+        "__id__": 441
       },
       {
-        "__id__": 443
+        "__id__": 444
       },
       {
-        "__id__": 446
+        "__id__": 447
       },
       {
-        "__id__": 449
+        "__id__": 450
       },
       {
-        "__id__": 452
+        "__id__": 453
       },
       {
-        "__id__": 455
+        "__id__": 456
       },
       {
-        "__id__": 458
+        "__id__": 459
       },
       {
-        "__id__": 461
+        "__id__": 462
       },
       {
-        "__id__": 464
+        "__id__": 465
       },
       {
-        "__id__": 467
+        "__id__": 468
       },
       {
-        "__id__": 470
+        "__id__": 471
       },
       {
-        "__id__": 473
-      },
-      {
-        "__id__": 476
+        "__id__": 474
       }
     ],
     "nestedPrefabInstanceRoots": [
@@ -7520,7 +7496,7 @@
   {
     "__type__": "cc.TargetOverrideInfo",
     "source": {
-      "__id__": 427
+      "__id__": 425
     },
     "sourceInfo": null,
     "propertyPath": [
@@ -7530,7 +7506,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 433
+      "__id__": 431
     }
   },
   {
@@ -7545,7 +7521,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 435
+      "__id__": 433
     },
     "propertyPath": [
       "nodeBackgroundSelect"
@@ -7554,7 +7530,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 436
+      "__id__": 434
     }
   },
   {
@@ -7575,7 +7551,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 438
+      "__id__": 436
     },
     "propertyPath": [
       "nodeBackground"
@@ -7584,7 +7560,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 439
+      "__id__": 437
     }
   },
   {
@@ -7605,7 +7581,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 441
+      "__id__": 439
     },
     "propertyPath": [
       "lblNumber"
@@ -7614,7 +7590,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 442
+      "__id__": 440
     }
   },
   {
@@ -7635,7 +7611,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 444
+      "__id__": 442
     },
     "propertyPath": [
       "nodeBackgroundSelect"
@@ -7644,7 +7620,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 445
+      "__id__": 443
     }
   },
   {
@@ -7665,7 +7641,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 447
+      "__id__": 445
     },
     "propertyPath": [
       "nodeBackground"
@@ -7674,7 +7650,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 448
+      "__id__": 446
     }
   },
   {
@@ -7695,7 +7671,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 450
+      "__id__": 448
     },
     "propertyPath": [
       "lblNumber"
@@ -7704,7 +7680,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 451
+      "__id__": 449
     }
   },
   {
@@ -7725,7 +7701,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 453
+      "__id__": 451
     },
     "propertyPath": [
       "nodeBackgroundSelect"
@@ -7734,7 +7710,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 454
+      "__id__": 452
     }
   },
   {
@@ -7755,7 +7731,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 456
+      "__id__": 454
     },
     "propertyPath": [
       "nodeBackground"
@@ -7764,7 +7740,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 457
+      "__id__": 455
     }
   },
   {
@@ -7785,7 +7761,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 459
+      "__id__": 457
     },
     "propertyPath": [
       "lblNumber"
@@ -7794,7 +7770,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 460
+      "__id__": 458
     }
   },
   {
@@ -7815,7 +7791,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 462
+      "__id__": 460
     },
     "propertyPath": [
       "nodeBackgroundSelect"
@@ -7824,7 +7800,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 463
+      "__id__": 461
     }
   },
   {
@@ -7845,7 +7821,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 465
+      "__id__": 463
     },
     "propertyPath": [
       "nodeBackground"
@@ -7854,7 +7830,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 466
+      "__id__": 464
     }
   },
   {
@@ -7875,7 +7851,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 468
+      "__id__": 466
     },
     "propertyPath": [
       "lblNumber"
@@ -7884,7 +7860,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 469
+      "__id__": 467
     }
   },
   {
@@ -7905,7 +7881,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 471
+      "__id__": 469
     },
     "propertyPath": [
       "nodeBackgroundSelect"
@@ -7914,7 +7890,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 472
+      "__id__": 470
     }
   },
   {
@@ -7935,7 +7911,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 474
+      "__id__": 472
     },
     "propertyPath": [
       "nodeBackground"
@@ -7944,7 +7920,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 475
+      "__id__": 473
     }
   },
   {
@@ -7965,7 +7941,7 @@
       "__id__": 241
     },
     "sourceInfo": {
-      "__id__": 477
+      "__id__": 475
     },
     "propertyPath": [
       "lblNumber"
@@ -7974,7 +7950,7 @@
       "__id__": 241
     },
     "targetInfo": {
-      "__id__": 478
+      "__id__": 476
     }
   },
   {
