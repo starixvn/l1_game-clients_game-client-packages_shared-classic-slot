@@ -19,7 +19,7 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
     lblTotalWin: Label = null;
 
     @property
-    textHighlightColor: Color = Color.YELLOW;
+    textHighlightColor: Color = new Color().fromHEX('#EBBC00');
 
     @property
     textNormalColor: Color = Color.WHITE;
