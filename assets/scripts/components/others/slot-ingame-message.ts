@@ -1,9 +1,9 @@
-
-
 import gc from "@sg/game-client-base";
-import { _decorator, Color, RichText, sys, tween, v3 } from "cc";
+import { _decorator, Color, Font, Label, Node, RichText, sys, tween, v3 } from "cc";
 import { AutoScrollingContent } from "db://shared-components/shared/common-components/auto-scrolling/auto-scrolling-content";
+import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
+import { AnimationUtils } from "db://shared-components/shared/utils";
 import _ from "lodash";
 import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
@@ -16,16 +16,13 @@ export class SlotIngameMessage extends ObserverComponent {
     @property(RichText)
     msgRichText: RichText = null;
 
+    @property(Node)
+    nodeTotalWin: Node = null;
+
     @property
     symbolSize = 75;
 
-    protected keys = [
-        "show_msg_when_spin_desktop",
-        "show_msg_when_spin_phone",
-        "msg_bonus_symbol",
-        "msg_free_spins",
-        "msg_wild",
-    ];
+    protected keys = ["show_msg_when_spin_desktop", "show_msg_when_spin_phone", "msg_bonus_symbol", "msg_free_spins", "msg_wild"];
 
     protected filterKeys = [];
     protected currentKey = "";
@@ -101,29 +98,31 @@ export class SlotIngameMessage extends ObserverComponent {
         return this.node.getComponent(AutoScrollingContent).updateScrolling();
     }
 
-    showTotalWin(value: number) {
-        const color = "FFFC00";
-        const caption = gc.Translator.t(`Common.total_win`);
-        const msg = `${caption}: <color=${color}>${gc.FormatUtils.numberWithCommas(value, 2, false)}</color>`;
-        this.updateMessageContent(msg);
+    async showTotalWin(value: number) {
+        const fontBitmap = await bundleManager.loadResourcesAsset("fonts/big-money-font", Font);
+        const lblTotalWin = this.nodeTotalWin.getChildByName("value").getComponent(Label);
+        lblTotalWin.font = fontBitmap;
+        lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2, false);
         this.updateScrolling();
 
-        this.msgRichText.node.position = v3(0, 0, 0);
-        this.msgRichText.node.scale = v3(1, 1, 1).multiplyScalar(0.3);
-        tween(this.msgRichText.node)
+        this.nodeTotalWin.position = v3(0, 0, 0);
+        this.nodeTotalWin.scale = v3(1, 1, 1).multiplyScalar(0.3);
+        tween(this.nodeTotalWin)
             .to(0.3, { scale: v3(1, 1, 1).multiplyScalar(1.2) }, { easing: "backOut" })
             .to(0.1, { scale: v3(1, 1, 1) }, { easing: "sineOut" })
-            .start()
+            .start();
     }
 
     @render(SlotBoardStore, (store) => store.winningBet, { fireImmediately: false })
     renderWinningBet(winningBet: number) {
         if (winningBet > 0) {
+            AnimationUtils.fadeOut(this.msgRichText.node, 0.2);
             this.unschedule(this.scheduleChangeMessages);
             this.showTotalWin(winningBet);
         } else {
+            this.nodeTotalWin.scale = v3(0, 0, 0);
+            AnimationUtils.fadeIn(this.msgRichText.node, 0.2);
             this.scheduleChangeMessages();
         }
     }
 }
-
