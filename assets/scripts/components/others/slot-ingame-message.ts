@@ -99,7 +99,7 @@ export class SlotIngameMessage extends ObserverComponent {
     }
 
     async showTotalWin(value: number) {
-        const fontBitmap = await bundleManager.loadResourcesAsset("fonts/big-money-font", Font);
+        const fontBitmap = await bundleManager.loadResourcesAsset("fonts/font-win-money", Font);
         const lblTotalWin = this.nodeTotalWin.getChildByName("value").getComponent(Label);
         lblTotalWin.font = fontBitmap;
         lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2, false);
