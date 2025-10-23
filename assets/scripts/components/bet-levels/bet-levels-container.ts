@@ -32,7 +32,7 @@ export default class BetLevelsContainer extends ObserverComponent {
     @property
     marginBetweenItems = 10;
 
-    private betLevels: number[] = [];
+    protected betLevels: number[] = [];
     private readonly itemsOfColumnMax = 5;
     private stakeIndex = -1;
 

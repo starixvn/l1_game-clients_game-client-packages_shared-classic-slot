@@ -11343,7 +11343,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 0,
-      "y": 292,
+      "y": 248,
       "z": 0
     },
     "_lrot": {
@@ -12231,7 +12231,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 40,
-      "height": 84
+      "height": 40
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -15236,7 +15236,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 630,
-      "height": 374
+      "height": 330
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -15295,7 +15295,7 @@
     "node": {
       "__id__": 525
     },
-    "_enabled": true,
+    "_enabled": false,
     "__prefab": {
       "__id__": 713
     },
@@ -15763,40 +15763,6 @@
     "nestedPrefabInstanceRoots": null
   },
   {
-    "__type__": "e68ebYSWdlIo7Q5XgNBk44K",
-    "_name": "",
-    "_objFlags": 0,
-    "__editorExtras__": {},
-    "node": {
-      "__id__": 291
-    },
-    "_enabled": true,
-    "__prefab": {
-      "__id__": 737
-    },
-    "itemPrefab": {
-      "__uuid__": "e03dfd3a-983b-49a3-95f9-b1921fd3309f",
-      "__expectedType__": "cc.Prefab"
-    },
-    "containerNode": {
-      "__id__": 568
-    },
-    "lblStake": {
-      "__id__": 654
-    },
-    "lblTotalBet": {
-      "__id__": 686
-    },
-    "hideWhenSelected": false,
-    "itemHeight": 74,
-    "marginBetweenItems": 20,
-    "_id": ""
-  },
-  {
-    "__type__": "cc.CompPrefabInfo",
-    "fileId": "91z3Ey9WlGiIYRNuY7g4Vl"
-  },
-  {
     "__type__": "cc.UITransform",
     "_name": "",
     "_objFlags": 0,
@@ -15806,7 +15772,7 @@
     },
     "_enabled": true,
     "__prefab": {
-      "__id__": 739
+      "__id__": 737
     },
     "_contentSize": {
       "__type__": "cc.Size",
@@ -15823,6 +15789,41 @@
   {
     "__type__": "cc.CompPrefabInfo",
     "fileId": "160CXv8fZIVY5sshhaulW3"
+  },
+  {
+    "__type__": "d3e6bcfwqNOrYSTNw1I2p/l",
+    "_name": "",
+    "_objFlags": 0,
+    "__editorExtras__": {},
+    "node": {
+      "__id__": 291
+    },
+    "_enabled": true,
+    "__prefab": {
+      "__id__": 739
+    },
+    "itemPrefab": {
+      "__uuid__": "e03dfd3a-983b-49a3-95f9-b1921fd3309f",
+      "__expectedType__": "cc.Prefab"
+    },
+    "containerNode": {
+      "__id__": 568
+    },
+    "lblStake": {
+      "__id__": 654
+    },
+    "lblTotalBet": {
+      "__id__": 686
+    },
+    "hideWhenSelected": true,
+    "itemHeight": 74,
+    "marginBetweenItems": 20,
+    "columnsNumber": 3,
+    "_id": ""
+  },
+  {
+    "__type__": "cc.CompPrefabInfo",
+    "fileId": "cfHoKFS6BFPLTB1U3Geikp"
   },
   {
     "__type__": "cc.PrefabInfo",
