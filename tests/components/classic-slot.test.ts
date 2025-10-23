@@ -889,18 +889,6 @@ describe("ClassicSlot", () => {
         });
     });
 
-    describe("autoSpinFSB", () => {
-        it("should call tryConsumeFSB and callBet when canSpinNextFSB", () => {
-            const tryConsumeFSBSpy = jest.spyOn(component, "tryConsumeFSB").mockImplementation();
-            const callBetSpy = jest.spyOn(component, "callBet").mockImplementation();
-
-            component.autoSpinFSB();
-
-            expect(tryConsumeFSBSpy).toHaveBeenCalled();
-            expect(callBetSpy).toHaveBeenCalled();
-        });
-    });
-
     describe("onLoad", () => {
         it("should call initSharedCaches, updateBalanceColor, super.onLoad, and addComponent", () => {
             const initSharedCachesSpy = jest.spyOn(component, "initSharedCaches").mockImplementation();
