@@ -28,6 +28,8 @@ export class SlotIngameMessage extends ObserverComponent {
     protected currentKey = "";
     protected gameConfigOdds: any;
 
+    private isWin = false;
+
     onLoad() {
         const { noticeTextColor } = resourceCaches.colorJson;
         this.msgRichText.fontColor = new Color().fromHEX(noticeTextColor);
@@ -115,13 +117,12 @@ export class SlotIngameMessage extends ObserverComponent {
 
     @render(SlotBoardStore, (store) => store.winningBet, { fireImmediately: false })
     renderWinningBet(winningBet: number) {
-        const isWin = winningBet > 0;
-        this.nodeTotalWin.active = isWin;
-
-        if (isWin) {
+        this.isWin = winningBet > 0;
+        this.nodeTotalWin.active = this.isWin;
+        if (this.isWin) {
             AnimationUtils.fadeOut(this.msgRichText.node, 0.2).then(() => {
                 try {
-                    if (!isWin) {
+                    if (!this.isWin) {
                         this.msgRichText.node.active = false;
                     }
                 } catch (e) { }
