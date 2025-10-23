@@ -1,8 +1,9 @@
+// should be the first import
+import "reflect-metadata";
 import gc from "@sg/game-client-base";
 import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
 import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import { Container } from "inversify";
-import "reflect-metadata";
 import { SlotNotification, SlotState, SpecialSymbol } from "../../assets/scripts/definitions";
 import { SlotBetHandler } from "../../assets/scripts/handlers/handlers/slot-bet-handlers";
 import { SlotErrorHandler } from "../../assets/scripts/handlers/handlers/slot-error-handler";
@@ -14,6 +15,7 @@ import { SlotDurationStore } from "../../assets/scripts/handlers/stores/slot-dur
 // Define an enhanced type for the BetControlStore mock instance
 interface EnhancedMockedBetControlStore extends jest.Mocked<BetControlStore> {
     totalFreeSpins: number;
+    freeSpinCount: number;
     roundId: number; // Mock also defines roundId directly
     autoSpinEnabled: boolean;
     freeSpinEnabled: boolean;
@@ -21,6 +23,7 @@ interface EnhancedMockedBetControlStore extends jest.Mocked<BetControlStore> {
     triggerAutoSpin: boolean;
     stake: number;
     freeSpinStake: number;
+    isFreeSpinEffectCompleted: boolean;
     // Methods like setTotalFreeSpins, decreaseFreeSpinCount, etc., are part of jest.Mocked<BetControlStore>
     // if they are actual methods of BetControlStore.
     // The mock implementation below adds them as jest.fn() properties on the instance.
@@ -38,6 +41,9 @@ jest.mock(
         AnimationUtils: {
             delayTime: jest.fn().mockResolvedValue(undefined),
         },
+        FunctionUtils: {
+            waitUntil: jest.fn().mockResolvedValue(undefined),
+        },
     }),
     { virtual: true }
 );
@@ -46,12 +52,14 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
     BetControlStore: jest.fn().mockImplementation(function (this: any) {
         this.roundId = -1;
         this.totalFreeSpins = 0;
+        this.freeSpinCount = 0;
         this.autoSpinEnabled = false;
         this.freeSpinEnabled = false;
         this.turboEnabled = false;
         this.triggerAutoSpin = false;
         this.stake = 100;
         this.freeSpinStake = -1;
+        this.isFreeSpinEffectCompleted = false;
 
         this.setTotalFreeSpins = jest.fn((count: number) => {
             this.totalFreeSpins = count;
@@ -88,6 +96,7 @@ jest.mock("../../assets/scripts/handlers/stores/slot-board-store", () => ({
         clearSettlement: jest.fn(),
         resetToReady: jest.fn(),
         winningBet: 0, // Added property
+        forceStopSettle: false,
         spinResult: {
             result: [],
             duration: 0,
@@ -132,6 +141,9 @@ jest.mock("db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-
         updateTotalWin = jest.fn();
         changeUIPendingEvent = jest.fn();
         tryShowEndedPopup = jest.fn();
+        openPromotionInfo = jest.fn();
+        setShowFreeSpinMessage = jest.fn();
+        tryConsumeFSB = jest.fn();
     },
 }));
 
@@ -146,6 +158,12 @@ jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui
     FSBPromotionUIStore: class MockFSBPromotionUIStore {
         isSpinningFSB = false;
         isShowFreeSpinMessage = false;
+        isFSBInfoReady = false;
+        resumedFSBPromotion = false;
+        
+        get canSpinNextFSB() {
+            return false;
+        }
     },
 }));
 
@@ -343,6 +361,9 @@ describe("SlotSettlementHandler", () => {
         fsbPromotionUIHandler.updateTotalWin.mockClear();
         fsbPromotionUIHandler.changeUIPendingEvent.mockClear();
         fsbPromotionUIHandler.tryShowEndedPopup.mockClear();
+        fsbPromotionUIHandler.openPromotionInfo.mockClear();
+        fsbPromotionUIHandler.setShowFreeSpinMessage.mockClear();
+        fsbPromotionUIHandler.tryConsumeFSB.mockClear();
 
         slotBoardStore.slotState = SlotState.NOT_READY;
         slotBoardStore.highlightSpecialSymbols = [];
@@ -359,6 +380,8 @@ describe("SlotSettlementHandler", () => {
         mainPlayerStore.rate = 1;
         fsbPromotionUIStore.isSpinningFSB = false;
         fsbPromotionUIStore.isShowFreeSpinMessage = false;
+        fsbPromotionUIStore.isFSBInfoReady = false;
+        fsbPromotionUIStore.resumedFSBPromotion = false;
     });
 
     afterEach(() => {
