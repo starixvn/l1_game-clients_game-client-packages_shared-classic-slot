@@ -1,5 +1,7 @@
-import { _decorator, Label, Node } from "cc";
+import { _decorator, Label, Node, sp } from "cc";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
+import { ButtonState } from "db://shared-components/shared/common-components/button/button-state";
+import { StateChangedEvent } from "db://shared-components/shared/common-components/button/custom-button";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { SlotBetHandler } from "../../handlers/handlers/slot-bet-handlers";
@@ -15,6 +17,22 @@ export default class AutoSpinButton extends ObserverComponent {
     @property(Node)
     nodeAutoSpin: Node = null;
 
+    @property(sp.Skeleton)
+    spineAutoSpin: sp.Skeleton = null;
+
+    onLoad() {
+        super.onLoad();
+        this.nodeAutoSpin.on(StateChangedEvent, this.onButtonStateChanged, this);
+    }
+
+    onButtonStateChanged(state: ButtonState) {
+        if (state === ButtonState.HOVER) {
+            this.spineAutoSpin.setAnimation(1, "hover", true);
+        } else {
+            this.spineAutoSpin.clearAnimation(1);
+        }
+    }
+
     @render(BetControlStore, (store) => store.autoSpinCount)
     rendeAutoSpinCount(autoSpinCount: number) {
         this.lblAutoSpin.string = autoSpinCount.toString();
@@ -24,7 +42,6 @@ export default class AutoSpinButton extends ObserverComponent {
     renderAutoSpinEnabled(autoSpinEnabled: boolean) {
         this.nodeAutoSpin.active = autoSpinEnabled;
     }
-
 
     @handle(SlotBetHandler, (store) => store.cancelAutoSpin())
     cancelAutoSpin() {
