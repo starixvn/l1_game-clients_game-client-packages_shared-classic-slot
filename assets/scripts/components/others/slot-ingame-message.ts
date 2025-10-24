@@ -3,7 +3,6 @@ import { _decorator, Color, Font, Label, Node, RichText, sys, tween, v3 } from "
 import { AutoScrollingContent } from "db://shared-components/shared/common-components/auto-scrolling/auto-scrolling-content";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
-import _ from "lodash";
 import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
 import { SlotBoardStore } from "../../handlers";
@@ -24,7 +23,7 @@ export class SlotIngameMessage extends ObserverComponent {
     protected keys = ["show_msg_when_spin_desktop", "show_msg_when_spin_phone", "msg_bonus_symbol", "msg_free_spins", "msg_wild"];
 
     protected filterKeys = [];
-    protected currentKey = "";
+    protected currentKeyIndex = 0;
     protected gameConfigOdds: any;
     protected lblTotalWin: Label = null;
 
@@ -90,10 +89,12 @@ export class SlotIngameMessage extends ObserverComponent {
             bonus_odds: this.getMinOdds(this.gameConfigOdds[SpecialSymbol.BONUS]),
             free_spin_odds: this.getMinOdds(this.gameConfigOdds[SpecialSymbol.FREESPIN]),
         };
-        const keys = this.filterKeys.filter(key => key !== this.currentKey);
-        const index = _.random(keys.length - 1);
-        this.currentKey = keys[index];
-        this.updateMessageContent(gc.Translator.t(`Classicslot.${this.currentKey}`, options));
+
+        // Use sequential index instead of random
+        const index = this.currentKeyIndex % this.filterKeys.length;
+        this.currentKeyIndex++;
+
+        this.updateMessageContent(gc.Translator.t(`Classicslot.${this.filterKeys[index]}`, options));
 
         const scrollDuration = this.updateScrolling();
         return Math.max(scrollDuration, 5);
