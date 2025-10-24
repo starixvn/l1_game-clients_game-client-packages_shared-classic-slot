@@ -1,9 +1,9 @@
 // should be the first import
-import "reflect-metadata";
 import gc from "@sg/game-client-base";
 import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
 import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
 import { Container } from "inversify";
+import "reflect-metadata";
 import { SlotNotification, SlotState, SpecialSymbol } from "../../assets/scripts/definitions";
 import { SlotBetHandler } from "../../assets/scripts/handlers/handlers/slot-bet-handlers";
 import { SlotErrorHandler } from "../../assets/scripts/handlers/handlers/slot-error-handler";
@@ -24,6 +24,7 @@ interface EnhancedMockedBetControlStore extends jest.Mocked<BetControlStore> {
     stake: number;
     freeSpinStake: number;
     isFreeSpinEffectCompleted: boolean;
+    isReadyBet: boolean; // Add missing property
     // Methods like setTotalFreeSpins, decreaseFreeSpinCount, etc., are part of jest.Mocked<BetControlStore>
     // if they are actual methods of BetControlStore.
     // The mock implementation below adds them as jest.fn() properties on the instance.
@@ -60,6 +61,7 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
         this.stake = 100;
         this.freeSpinStake = -1;
         this.isFreeSpinEffectCompleted = false;
+        this.isReadyBet = true; // Add missing property
 
         this.setTotalFreeSpins = jest.fn((count: number) => {
             this.totalFreeSpins = count;
@@ -160,7 +162,7 @@ jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui
         isShowFreeSpinMessage = false;
         isFSBInfoReady = false;
         resumedFSBPromotion = false;
-        
+
         get canSpinNextFSB() {
             return false;
         }
@@ -374,6 +376,7 @@ describe("SlotSettlementHandler", () => {
 
         betControlStore.totalFreeSpins = 0;
         betControlStore.freeSpinStake = -1;
+        betControlStore.isReadyBet = true; // Set to true by default for tests
         // Properties like autoSpinEnabled are set by the mock constructor, no need to reset here unless for a specific test.
         betStore.lastReceivedBet = null;
         errorStore.apiError = null;
