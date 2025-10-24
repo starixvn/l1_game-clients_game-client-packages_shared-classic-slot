@@ -1,5 +1,6 @@
 import { _decorator, EventTouch, game, Input, input, Intersection2D, KeyCode, math, Node, PolygonCollider2D, sp } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ButtonState } from "db://shared-components/shared/common-components/button/button-state";
 import { CustomButton, StateChangedEvent } from "db://shared-components/shared/common-components/button/custom-button";
@@ -11,7 +12,6 @@ import { BetControlStore, SlotUIHandler } from "../../handlers";
 import { SlotBetHandler } from "../../handlers/handlers/slot-bet-handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { DialogName } from "../../utils/classic-slot-utils";
-import { FSBPromotionUIHandler } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-ui-handler";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
 
@@ -155,7 +155,7 @@ export default class SpinButton extends ObserverComponent {
     @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.SPINNING }))
     @handle(SlotBetHandler, (handler) => handler.callTriggerAction())
     callTriggerAction() {
-        AudioUtils.playSFX(AudioIds.SPIN_BUTTON);
+        !this.isSpinning && AudioUtils.playSFX(AudioIds.SPIN_BUTTON);
     }
 
     @handle(SlotBetHandler, (handler) => handler.clearTriggerAction())
