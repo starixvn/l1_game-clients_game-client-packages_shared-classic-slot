@@ -104,7 +104,7 @@ export class SlotIngameMessage extends ObserverComponent {
         const fontBitmap = await bundleManager.loadResourcesAsset("fonts/font-win-money", Font);
         const lblTotalWin = this.nodeTotalWin.getChildByName("value").getComponent(Label);
         lblTotalWin.font = fontBitmap;
-        lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2, false);
+        lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2);
         this.updateScrolling();
 
         this.nodeTotalWin.position = v3(0, 0, 0);
