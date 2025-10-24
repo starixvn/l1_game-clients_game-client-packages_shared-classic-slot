@@ -11,6 +11,13 @@ jest.mock("@sg/game-client-base", () => ({
     FormatUtils: {
         numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
     },
+    Shared: {
+        utils: {
+            StorageManager: {
+                setPrefixKey: jest.fn(),
+            },
+        },
+    },
 }));
 
 // Mock ObserverComponent with ALL lifecycle methods

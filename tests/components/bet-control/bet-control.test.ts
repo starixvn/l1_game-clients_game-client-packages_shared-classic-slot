@@ -60,6 +60,13 @@ jest.mock("@sg/game-client-base", () => ({
             // Empty mock class
         },
     },
+    Shared: {
+        utils: {
+            StorageManager: {
+                setPrefixKey: jest.fn(),
+            },
+        },
+    },
 }));
 
 // Mock the entire handlers module to prevent all handler imports
