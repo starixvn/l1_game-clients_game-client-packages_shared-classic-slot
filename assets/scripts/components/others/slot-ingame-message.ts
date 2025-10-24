@@ -3,7 +3,6 @@ import { _decorator, Color, Font, Label, Node, RichText, sys, tween, v3 } from "
 import { AutoScrollingContent } from "db://shared-components/shared/common-components/auto-scrolling/auto-scrolling-content";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
-import { AnimationUtils } from "db://shared-components/shared/utils";
 import _ from "lodash";
 import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
@@ -27,6 +26,7 @@ export class SlotIngameMessage extends ObserverComponent {
     protected filterKeys = [];
     protected currentKey = "";
     protected gameConfigOdds: any;
+    protected lblTotalWin: Label = null;
 
     private isWin = false;
 
@@ -36,6 +36,9 @@ export class SlotIngameMessage extends ObserverComponent {
 
         const ignoreKey = !sys.isMobile ? "phone" : "desktop";
         this.filterKeys = this.keys.filter(key => !key.includes(ignoreKey));
+
+        this.lblTotalWin = this.nodeTotalWin.getChildByName("value").getComponent(Label);
+        this.loadFontTotalWin();
         super.onLoad();
     }
 
@@ -100,14 +103,17 @@ export class SlotIngameMessage extends ObserverComponent {
         return this.node.getComponent(AutoScrollingContent).updateScrolling();
     }
 
+    async loadFontTotalWin() {
+        try {
+            const fontBitmap = await bundleManager.loadResourcesAsset("fonts/font-win-money", Font);
+            this.lblTotalWin.font = fontBitmap;
+        } catch (e) { }
+    }
+
     async showTotalWin(value: number) {
-        const fontBitmap = await bundleManager.loadResourcesAsset("fonts/font-win-money", Font);
-        const lblTotalWin = this.nodeTotalWin.getChildByName("value").getComponent(Label);
-        lblTotalWin.font = fontBitmap;
-        lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2);
+        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2);
         this.updateScrolling();
 
-        this.nodeTotalWin.position = v3(0, 0, 0);
         this.nodeTotalWin.scale = v3(1, 1, 1).multiplyScalar(0.3);
         tween(this.nodeTotalWin)
             .to(0.3, { scale: v3(1, 1, 1).multiplyScalar(1.2) }, { easing: "backOut" })
@@ -119,20 +125,11 @@ export class SlotIngameMessage extends ObserverComponent {
     renderWinningBet(winningBet: number) {
         this.isWin = winningBet > 0;
         this.nodeTotalWin.active = this.isWin;
+        this.msgRichText.node.active = !this.isWin;
         if (this.isWin) {
-            AnimationUtils.fadeOut(this.msgRichText.node, 0.2).then(() => {
-                try {
-                    if (!this.isWin) {
-                        this.msgRichText.node.active = false;
-                    }
-                } catch (e) { }
-            });
             this.unschedule(this.scheduleChangeMessages);
             this.showTotalWin(winningBet);
         } else {
-            this.nodeTotalWin.scale = v3(0, 0, 0);
-            this.msgRichText.node.active = true;
-            AnimationUtils.fadeIn(this.msgRichText.node, 0.2);
             this.scheduleChangeMessages();
         }
     }
