@@ -1,4 +1,6 @@
 import { _decorator, easing, Layout } from "cc";
+import { AudioIds } from "db://assets/game/audios/AudioIds";
+import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { SLOT_ROW_MAX_INDEX, SpecialSymbol } from "../../definitions";
 import SlotReel from "./slot-reel";
 
@@ -191,6 +193,7 @@ export default class SlotReelNew extends SlotReel {
 
         if (this.isStoppingPhase) {
             if (this.currentSpeed <= this.SPEED_STOP_THRESHOLD) {
+                AudioUtils.playSFX(AudioIds.REEL_STOP);
                 this.startBounceStop();
             }
         }
