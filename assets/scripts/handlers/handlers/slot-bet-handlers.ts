@@ -29,6 +29,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     callBet() {
         if (this.betStore.isProcessingBet) {
             this.showWarningProcessingBet();
+            return;
         }
 
         if (!this.betControlStore.isReadyBet) {
