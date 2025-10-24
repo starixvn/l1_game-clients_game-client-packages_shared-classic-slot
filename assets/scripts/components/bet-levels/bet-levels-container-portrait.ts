@@ -17,11 +17,11 @@ export default class BetLevelsContainerPortrait extends BetLevelsContainer {
     }
 
     protected async onHide() {
-        const appearDuration = 0.4;
+        const duration = 0.4;
         AnimationUtils.stopFade(this.node);
-        AnimationUtils.fadeOut(this.node, appearDuration);
+        AnimationUtils.fadeOut(this.node, duration);
         tween(this.node)
-            .to(appearDuration, { scale: v3(0, 0, 0) }, { easing: "backIn" })
+            .to(duration, { scale: v3(0, 0, 0) }, { easing: "backIn" })
             .call(() => {
                 this.onHidden();
             })
