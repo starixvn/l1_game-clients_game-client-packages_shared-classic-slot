@@ -151,23 +151,23 @@ export default class SpinButton extends ObserverComponent {
         }
     }
     @handle(FSBPromotionUIHandler, (handler) => handler.triggerFSBManual())
-    triggerFSBManual() { }
+    triggerFSBManual() {}
 
     @handle(SlotUIHandler, (store) => store.triggerDialogOpen({ name: DialogName.SPINNING }))
     @handle(SlotBetHandler, (handler) => handler.callTriggerAction())
-    handleCallTriggerAction() { }
+    handleCallTriggerAction() {}
 
     callTriggerAction() {
-        if (this.willAutoSpin) {
+        if (this.willAutoSpin || this.isSpinning) {
             return;
         }
 
-        !this.isSpinning && AudioUtils.playSFX(AudioIds.SPIN_BUTTON);
+        AudioUtils.playSFX(AudioIds.SPIN_BUTTON);
         this.handleCallTriggerAction();
     }
 
     @handle(SlotBetHandler, (handler) => handler.clearTriggerAction())
-    clearTriggerAction() { }
+    clearTriggerAction() {}
 
     @render(BetControlStore, (store) => store.turboEnabled)
     renderTurboEnabled(turboEnabled: boolean) {
@@ -193,7 +193,7 @@ export default class SpinButton extends ObserverComponent {
         setTimeout(() => {
             try {
                 this.button.interactable = !disableSpinButton;
-            } catch (error) { }
+            } catch (error) {}
         }, 100);
     }
 }
