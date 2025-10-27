@@ -2200,7 +2200,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 100,
+      "width": 150,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -2431,7 +2431,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 140,
+      "width": 160,
       "height": 50.4
     },
     "_anchorPoint": {
@@ -2662,8 +2662,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 110,
-      "height": 50.4
+      "width": 160,
+      "height": 90.39999999999999
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -2698,7 +2698,7 @@
       "b": 255,
       "a": 255
     },
-    "_string": "PRIZE",
+    "_string": "TOTAL STAKE",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
     "_actualFontSize": 30,
@@ -2717,7 +2717,7 @@
     "_isBold": false,
     "_isUnderline": false,
     "_underlineHeight": 2,
-    "_cacheMode": 0,
+    "_cacheMode": 1,
     "_enableOutline": false,
     "_outlineColor": {
       "__type__": "cc.Color",
