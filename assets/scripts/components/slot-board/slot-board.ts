@@ -245,7 +245,7 @@ export default class SlotBoard extends Component {
         const nextReelIndex = current + 1;
         const currentColumns = current < SLOT_COLUMN_MAX_INDEX ? columns.slice(0, nextReelIndex) : columns;
         const peekEffects = this.checkPeekEffect(this.data, currentColumns);
-        this.handleSymbolsPeekEffect(peekEffects);
+        this.handleSymbolsPeekEffect(peekEffects, nextReelIndex);
 
         if (current < SLOT_COLUMN_MAX_INDEX) {
             if (!this.reels[nextReelIndex].isFaster) {
@@ -263,7 +263,7 @@ export default class SlotBoard extends Component {
         }
     }
 
-    handleSymbolsPeekEffect(peekEffects) {
+    handleSymbolsPeekEffect(peekEffects, nextReelIndex: number) {
         if (!resourceCaches.gameFeature?.enablePeekEffect) {
             return;
         }
@@ -274,7 +274,7 @@ export default class SlotBoard extends Component {
             this.showWinningEffect(paylines[peekEffects.jackpotLine], SpecialSymbol.JACKPOT);
         }
 
-        this.showPeekEffectSymbols(peekEffects.symbols);
+        this.showPeekEffectSymbols(peekEffects.symbols, nextReelIndex);
     }
 
     showPeekEffect(reelIndex: number) {
@@ -325,12 +325,15 @@ export default class SlotBoard extends Component {
         });
     }
 
-    showPeekEffectSymbols(symbols: number[]) {
+    showPeekEffectSymbols(symbols: number[], nextReelIndex: number) {
         if (!resourceCaches.gameFeature?.enablePeekEffect) {
             return;
         }
         symbols.forEach((symbol) => {
-            this.reels.forEach((reel) => {
+            this.reels.forEach((reel, index) => {
+                if (index >= nextReelIndex) {
+                    return;
+                }
                 reel.showHighlightSpecialSymbols(symbol);
             });
         });
