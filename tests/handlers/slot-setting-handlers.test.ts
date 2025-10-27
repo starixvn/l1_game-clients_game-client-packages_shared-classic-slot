@@ -31,6 +31,11 @@ jest.mock("@sg/game-client-base", () => {
             get: jest.fn(),
             set: jest.fn(),
         },
+        GameConfiguration: {
+            GameConfigurationHandler: jest.fn().mockImplementation(() => ({
+                handle: jest.fn(),
+            })),
+        },
         localStorageKeys: {
             gameUserSetting: "gameUserSetting_test_key",
         },

@@ -19,6 +19,8 @@ export class SlotSettingHandlers {
     @inject(BetControlStore) protected readonly betControlStore: BetControlStore;
     @inject(gc.Player.MainPlayerStore) protected readonly mainPlayerStore: gc.Player.MainPlayerStore;
     @inject(gc.App.AppStore) protected readonly appStore: gc.App.AppStore;
+    @inject(gc.GameConfiguration.GameConfigurationHandler) gameConfigurationHandler: gc.GameConfiguration.GameConfigurationHandler;
+
     constructor() {
         setTimeout(() => {
             mobx.when(() => this.mainPlayerStore.UID !== 0 && this.mainPlayerStore.currencyGroup !== "", () => {
@@ -37,6 +39,8 @@ export class SlotSettingHandlers {
                     this.loadTempStorage();
                 });
             });
+
+            this.gameConfigurationHandler.handle();
         }, 0);
     }
 
