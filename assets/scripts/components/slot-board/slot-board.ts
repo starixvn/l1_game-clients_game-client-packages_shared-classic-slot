@@ -5,7 +5,7 @@ import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 import { ComponentUtils } from "db://shared-components/shared/utils/component-utils";
-import { LineData, paylines, SLOT_COLUMN_MAX_INDEX, SpecialSymbol, SPIN_FOREVER } from "../../definitions";
+import { LineData, paylines, SLOT_COLUMN_COUNT, SLOT_COLUMN_MAX_INDEX, SpecialSymbol, SPIN_FOREVER } from "../../definitions";
 import { resourceCaches } from "../../utils/classic-slot-utils";
 import PreviewOddsPopup from "../others/preview-odds-popup";
 import SymbolPreview, { SymbolPreviewType } from "../others/symbol-preview";
@@ -153,9 +153,12 @@ export default class SlotBoard extends Component {
         });
     }
 
-    showWinningEffect(positions: number[], symbol: number) {
+    showWinningEffect(positions: number[], symbol: number, nextReelIndex = SLOT_COLUMN_COUNT) {
         positions.forEach((position) => {
             const { col, row } = this.getLocation(position);
+            if (col >= nextReelIndex) {
+                return;
+            }
             this.reels[col].showWinningEffect(row, symbol);
         });
         this.winningOverlayNode.active = true;
@@ -271,7 +274,7 @@ export default class SlotBoard extends Component {
             return;
         }
         if (peekEffects.jackpotLine !== undefined) {
-            this.showWinningEffect(paylines[peekEffects.jackpotLine], SpecialSymbol.JACKPOT);
+            this.showWinningEffect(paylines[peekEffects.jackpotLine], SpecialSymbol.JACKPOT, SLOT_COLUMN_MAX_INDEX);
         }
 
         this.showPeekEffectSymbols(peekEffects.symbols, nextReelIndex);
