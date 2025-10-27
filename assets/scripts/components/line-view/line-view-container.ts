@@ -44,6 +44,8 @@ export default class LineViewContainer extends ObserverComponent {
         this.showingWinningLine = winningLines.length > 0;
         this.showWinningLinesTween?.stop();
         this.hideAllLines();
+        this.slotBoard.hideWinningEffect();
+
         if (winningLines.length === 0) {
             return;
         }
