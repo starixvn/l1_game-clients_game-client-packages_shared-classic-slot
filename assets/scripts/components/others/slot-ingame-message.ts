@@ -28,7 +28,6 @@ export class SlotIngameMessage extends ObserverComponent {
     protected lblTotalWin: Label = null;
 
     private isWin = false;
-    private nodeAutoScrollingContent: Node = null;
 
     onLoad() {
         const { noticeTextColor } = resourceCaches.colorJson;
