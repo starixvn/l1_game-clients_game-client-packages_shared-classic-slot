@@ -140,6 +140,15 @@ export class BetControlStore {
         return this.freeSpinCount <= 0 && this.isFreeSpinEffectCompleted;
     }
 
+    get excludeFirstMsgInGame() {
+        return (
+            this.autoSpinEnabled ||
+            this.freeSpinEnabled ||
+            this.fsbPromotionUIStore.isFSBPromotionInProgress ||
+            this.slotBoardStore.slotState === SlotState.SPINNING
+        );
+    }
+
     setStake(stake: number) {
         this.stake = stake;
     }

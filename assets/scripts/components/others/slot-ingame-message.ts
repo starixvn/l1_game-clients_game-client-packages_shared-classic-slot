@@ -1,11 +1,11 @@
 import gc from "@sg/game-client-base";
-import { _decorator, Color, Font, Label, Node, RichText, sys, tween, v3 } from "cc";
+import { _decorator, Color, Font, Label, Node, RichText, sys, tween, UITransform, v3 } from "cc";
 import { AutoScrollingContent } from "db://shared-components/shared/common-components/auto-scrolling/auto-scrolling-content";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
-import { SlotBoardStore } from "../../handlers";
+import { BetControlStore, SlotBoardStore } from "../../handlers";
 import { getSymbolJackpotName, resourceCaches } from "../../utils/classic-slot-utils";
 const { ccclass, property } = _decorator;
 const { observer, render, handle } = Observer;
@@ -16,6 +16,12 @@ export class SlotIngameMessage extends ObserverComponent {
 
     @property(Node)
     nodeTotalWin: Node = null;
+
+    @property(Node)
+    nodeMask: Node = null;
+
+    @property
+    paddingMask = 0;
 
     @property
     symbolSize = 75;
@@ -28,16 +34,17 @@ export class SlotIngameMessage extends ObserverComponent {
     protected lblTotalWin: Label = null;
 
     private isWin = false;
+    private nodeAutoScrollingContent: Node = null;
 
     onLoad() {
         const { noticeTextColor } = resourceCaches.colorJson;
         this.msgRichText.fontColor = new Color().fromHEX(noticeTextColor);
-
-        const ignoreKey = !sys.isMobile ? "phone" : "desktop";
-        this.filterKeys = this.keys.filter(key => !key.includes(ignoreKey));
-
+        this.updateFilterKeys();
         this.lblTotalWin = this.nodeTotalWin.getChildByName("value").getComponent(Label);
         this.loadFontTotalWin();
+        this.nodeAutoScrollingContent = this.nodeMask.children[0];
+        this.nodeMask.getComponent(UITransform).width =
+            this.paddingMask * 2 + this.nodeAutoScrollingContent.getComponent(UITransform).width;
         super.onLoad();
     }
 
@@ -50,13 +57,13 @@ export class SlotIngameMessage extends ObserverComponent {
     generateImageKeys() {
         const jackpotEnabled = resourceCaches.jackpotEnabled;
         const spriteMap = {
-            "bonus_symbol": "symbol-8",
-            "free_spin_symbol": "symbol-7",
-            "symbol_10": jackpotEnabled ? getSymbolJackpotName() : "symbol-10",
-            "wild_symbol": "symbol-9"
+            bonus_symbol: "symbol-8",
+            free_spin_symbol: "symbol-7",
+            symbol_10: jackpotEnabled ? getSymbolJackpotName() : "symbol-10",
+            wild_symbol: "symbol-9",
         };
-        const keys = {}
-        Object.keys(spriteMap).forEach(key => {
+        const keys = {};
+        Object.keys(spriteMap).forEach((key) => {
             keys[key] = `<img src='${spriteMap[key]}' height=${this.symbolSize} align=center />`;
         });
         return keys;
@@ -78,8 +85,8 @@ export class SlotIngameMessage extends ObserverComponent {
 
     getMinOdds(odds: any) {
         return Object.keys(odds)
-            .filter(key => odds[key] > 0)
-            .map(key => +key)
+            .filter((key) => odds[key] > 0)
+            .map((key) => +key)
             .sort((a, b) => a - b)[0];
     }
 
@@ -100,15 +107,30 @@ export class SlotIngameMessage extends ObserverComponent {
         return Math.max(scrollDuration, 5);
     }
 
+    private updateFilterKeys(excludeFirstMsgInGame = false) {
+        const ignoreKey = !sys.isMobile ? "phone" : "desktop";
+
+        if (excludeFirstMsgInGame) {
+            this.filterKeys = this.keys.filter((key) => !key.includes(ignoreKey)).slice(1);
+        } else {
+            this.filterKeys = this.keys.filter((key) => !key.includes(ignoreKey));
+        }
+    }
+
+    @render(BetControlStore, (store) => store.excludeFirstMsgInGame)
+    renderExcludeFirstMsgInGame(excludeFirstMsgInGame: boolean) {
+        this.updateFilterKeys(excludeFirstMsgInGame);
+    }
+
     private updateScrolling() {
-        return this.node.getComponent(AutoScrollingContent).updateScrolling();
+        return this.nodeAutoScrollingContent.getComponent(AutoScrollingContent).updateScrolling();
     }
 
     async loadFontTotalWin() {
         try {
             const fontBitmap = await bundleManager.loadResourcesAsset("fonts/font-win-money", Font);
             this.lblTotalWin.font = fontBitmap;
-        } catch (e) { }
+        } catch (e) {}
     }
 
     async showTotalWin(value: number) {
