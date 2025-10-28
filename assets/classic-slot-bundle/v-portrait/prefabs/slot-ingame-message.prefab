@@ -1032,10 +1032,6 @@
     "nodeTotalWin": {
       "__id__": 24
     },
-    "nodeMask": {
-      "__id__": 2
-    },
-    "paddingMask": 0,
     "symbolSize": 75,
     "_id": ""
   },

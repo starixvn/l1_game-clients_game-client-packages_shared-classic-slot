@@ -1,5 +1,5 @@
 import gc from "@sg/game-client-base";
-import { _decorator, Color, Font, Label, Node, RichText, sys, tween, UITransform, v3 } from "cc";
+import { _decorator, Color, Font, Label, Node, RichText, sys, tween, v3 } from "cc";
 import { AutoScrollingContent } from "db://shared-components/shared/common-components/auto-scrolling/auto-scrolling-content";
 import { bundleManager } from "db://shared-components/shared/common-components/bundle-manager/bundle-manager";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
@@ -16,12 +16,6 @@ export class SlotIngameMessage extends ObserverComponent {
 
     @property(Node)
     nodeTotalWin: Node = null;
-
-    @property(Node)
-    nodeMask: Node = null;
-
-    @property
-    paddingMask = 0;
 
     @property
     symbolSize = 75;
@@ -42,9 +36,6 @@ export class SlotIngameMessage extends ObserverComponent {
         this.updateFilterKeys();
         this.lblTotalWin = this.nodeTotalWin.getChildByName("value").getComponent(Label);
         this.loadFontTotalWin();
-        this.nodeAutoScrollingContent = this.nodeMask.children[0];
-        this.nodeMask.getComponent(UITransform).width =
-            this.paddingMask * 2 + this.nodeAutoScrollingContent.getComponent(UITransform).width;
         super.onLoad();
     }
 
@@ -109,12 +100,8 @@ export class SlotIngameMessage extends ObserverComponent {
 
     private updateFilterKeys(excludeFirstMsgInGame = false) {
         const ignoreKey = !sys.isMobile ? "phone" : "desktop";
-
-        if (excludeFirstMsgInGame) {
-            this.filterKeys = this.keys.filter((key) => !key.includes(ignoreKey)).slice(1);
-        } else {
-            this.filterKeys = this.keys.filter((key) => !key.includes(ignoreKey));
-        }
+        const keys = this.keys.filter((key) => !key.includes(ignoreKey));
+        this.filterKeys = excludeFirstMsgInGame ? keys.slice(1) : keys;
     }
 
     @render(BetControlStore, (store) => store.excludeFirstMsgInGame)
@@ -123,7 +110,7 @@ export class SlotIngameMessage extends ObserverComponent {
     }
 
     private updateScrolling() {
-        return this.nodeAutoScrollingContent.getComponent(AutoScrollingContent).updateScrolling();
+        return this.node.getComponentsInChildren(AutoScrollingContent)[0].updateScrolling();
     }
 
     async loadFontTotalWin() {
