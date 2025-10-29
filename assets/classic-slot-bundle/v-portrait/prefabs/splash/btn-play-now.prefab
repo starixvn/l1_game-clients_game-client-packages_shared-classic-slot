@@ -660,8 +660,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 233.6399383544922,
-      "height": 50.4
+      "width": 175.2299346923828,
+      "height": 37.8
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -699,10 +699,10 @@
     "_string": "PLAY NOW!",
     "_horizontalAlign": 1,
     "_verticalAlign": 1,
-    "_actualFontSize": 40,
-    "_fontSize": 40,
+    "_actualFontSize": 30,
+    "_fontSize": 30,
     "_fontFamily": "Arial",
-    "_lineHeight": 40,
+    "_lineHeight": 30,
     "_overflow": 0,
     "_enableWrapText": false,
     "_font": {
@@ -812,7 +812,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 293.6399383544922,
+      "width": 235.2299346923828,
       "height": 100
     },
     "_anchorPoint": {
