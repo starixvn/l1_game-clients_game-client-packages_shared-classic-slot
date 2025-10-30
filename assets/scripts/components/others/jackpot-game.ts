@@ -50,7 +50,6 @@ export default class JackpotGame extends ObserverComponent {
     renderIsConnected(isConnected: boolean) {
         if (!isConnected) {
             this.onFinishJackpotGame();
-            return;
         }
     }
 

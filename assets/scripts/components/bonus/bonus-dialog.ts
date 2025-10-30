@@ -52,7 +52,6 @@ export default class BonusDialog extends ObserverComponent {
     renderIsConnected(isConnected: boolean) {
         if (!isConnected) {
             this.onFinishBonusDialog();
-            return;
         }
     }
 
