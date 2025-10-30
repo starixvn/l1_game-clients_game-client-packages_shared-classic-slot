@@ -1,6 +1,7 @@
 import gc from "@sg/game-client-base";
 import { FSBPromotionStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-store";
 import { FSBPromotionUIStore } from "db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store";
+import { FunctionUtils } from "db://shared-components/shared/utils";
 import inversify from "inversify";
 import { SLOT_BET_CHOICES } from "../../definitions";
 import { DialogName } from "../../utils/classic-slot-utils";
@@ -26,13 +27,18 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         this.callBet();
     }
 
-    callBet() {
+    async callBet() {
         if (this.betStore.isProcessingBet) {
             this.showWarningProcessingBet();
             return;
         }
 
         if (!this.betControlStore.isReadyBet) {
+            return;
+        }
+
+        await FunctionUtils.waitUntil(() => this.connectionStore.isConnected, 100, 20 * 60000).catch(() => { });
+        if (!this.connectionStore.isConnected) {
             return;
         }
 

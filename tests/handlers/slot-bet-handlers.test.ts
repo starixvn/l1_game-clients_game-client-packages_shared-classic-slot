@@ -101,6 +101,11 @@ jest.mock("@sg/game-client-base", () => {
     const actualGc = jest.requireActual("@sg/game-client-base");
     return {
         ...actualGc,
+        Connection: {
+            ConnectionStore: class MockConnectionStore {
+                isConnected = true;
+            },
+        },
         Bet: {
             ...actualGc.Bet,
             BetHandler: jest.fn().mockImplementation(function (this: any) {
@@ -143,6 +148,15 @@ jest.mock("../../assets/scripts/handlers/handlers/slot-ui-handler", () => ({
     }),
 }));
 
+jest.mock(
+    "db://shared-components/shared/utils",
+    () => ({
+        FunctionUtils: {
+            waitUntil: jest.fn().mockResolvedValue(true),
+        },
+    })
+);
+
 describe("SlotBetHandler", () => {
     let container: Container;
     let slotBetHandler: SlotBetHandler;
@@ -151,6 +165,7 @@ describe("SlotBetHandler", () => {
     let betStore: jest.Mocked<gc.Bet.BetStore>;
     let fsbPromotionUIStore: jest.Mocked<FSBPromotionUIStore>;
     let fsbPromotionStore: jest.Mocked<FSBPromotionStore>;
+    let connectionStore: jest.Mocked<gc.Connection.ConnectionStore>;
 
     beforeEach(() => {
         jest.useFakeTimers();
@@ -196,10 +211,11 @@ describe("SlotBetHandler", () => {
         betStore = container.get(gc.Bet.BetStore) as jest.Mocked<gc.Bet.BetStore>;
         fsbPromotionUIStore = container.get(FSBPromotionUIStore) as jest.Mocked<FSBPromotionUIStore>;
         fsbPromotionStore = container.get(FSBPromotionStore) as jest.Mocked<FSBPromotionStore>;
-
+        connectionStore = container.get(gc.Connection.ConnectionStore) as jest.Mocked<gc.Connection.ConnectionStore>;
         // Assign betStore to slotBetHandler for proper inheritance from BetHandler
         Object.assign(slotBetHandler, {
             betStore: betStore,
+            connectionStore
         });
     });
 
@@ -229,7 +245,7 @@ describe("SlotBetHandler", () => {
             expect(slotBoardStore.slotState).not.toBe(SlotState.BET);
         });
 
-        it("should execute full bet flow when board is ready", () => {
+        it("should execute full bet flow when board is ready", async () => {
             (betControlStore as any)._isReadyBet = true;
             betControlStore.stake = 50;
             const resetOnNewSpinSpy = jest.spyOn(slotBetHandler, "resetOnNewSpin");
@@ -238,9 +254,8 @@ describe("SlotBetHandler", () => {
 
             const mockBetData = { baseAmount: 100 };
             createBetDataSpy.mockReturnValue(mockBetData);
-
-            slotBetHandler.callBet();
-
+            connectionStore.isConnected = true;
+            await slotBetHandler.callBet();
             expect(resetOnNewSpinSpy).toHaveBeenCalledTimes(1);
             expect(slotBoardStore.resetOnNewSpin).toHaveBeenCalledTimes(1);
             expect(createBetDataSpy).toHaveBeenCalledWith({});
@@ -252,7 +267,7 @@ describe("SlotBetHandler", () => {
             });
         });
 
-        it("should use FSB promotion bet level when FSB promotion is in progress", () => {
+        it("should use FSB promotion bet level when FSB promotion is in progress", async () => {
             (betControlStore as any)._isReadyBet = true;
             (fsbPromotionUIStore as any)._isFSBPromotionInProgress = true;
             betControlStore.stake = 50;
@@ -263,7 +278,7 @@ describe("SlotBetHandler", () => {
             const mockBetData = { baseAmount: 100 };
             createBetDataSpy.mockReturnValue(mockBetData);
 
-            slotBetHandler.callBet();
+            await slotBetHandler.callBet();
 
             expect(handleBetDataSpy).toHaveBeenCalledWith({
                 ...mockBetData,
@@ -273,11 +288,11 @@ describe("SlotBetHandler", () => {
             });
         });
 
-        it("should set didSpin and isFreeSpinEffectCompleted correctly", () => {
+        it("should set didSpin and isFreeSpinEffectCompleted correctly", async () => {
             (betControlStore as any)._isReadyBet = true;
             betControlStore.stake = 50;
 
-            slotBetHandler.callBet();
+            await slotBetHandler.callBet();
 
             expect(betControlStore.didSpin).toBe(true);
             expect(betControlStore.isFreeSpinEffectCompleted).toBe(false);
@@ -582,7 +597,7 @@ describe("SlotBetHandler", () => {
             expect(betControlStore.cancelAutoSpin).toHaveBeenCalledTimes(1);
         });
 
-        it("should handle freeSpinEnabled with FSB promotion correctly", () => {
+        it("should handle freeSpinEnabled with FSB promotion correctly", async () => {
             (betControlStore as any)._isReadyBet = true;
             (betControlStore as any)._freeSpinEnabled = true;
             (fsbPromotionUIStore as any)._isFSBPromotionInProgress = true;
@@ -594,7 +609,7 @@ describe("SlotBetHandler", () => {
             const mockBetData = { baseAmount: 100 };
             createBetDataSpy.mockReturnValue(mockBetData);
 
-            slotBetHandler.callBet();
+            await slotBetHandler.callBet();
 
             expect(handleBetDataSpy).toHaveBeenCalledWith({
                 ...mockBetData,
