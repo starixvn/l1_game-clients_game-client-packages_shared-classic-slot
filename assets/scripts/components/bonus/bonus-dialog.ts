@@ -152,6 +152,7 @@ export default class BonusDialog extends ObserverComponent {
 
     private onFinishBonusDialog() {
         this.onBonusFinished();
+        this.hideTimer();
         this.node.destroy();
     }
 

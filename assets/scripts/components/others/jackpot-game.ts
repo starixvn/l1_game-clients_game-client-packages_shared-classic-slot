@@ -169,6 +169,7 @@ export default class JackpotGame extends ObserverComponent {
 
     private onFinishJackpotGame() {
         this.onJackpotGameFinished();
+        this.hideTimer();
         this.node.destroy();
     }
 
