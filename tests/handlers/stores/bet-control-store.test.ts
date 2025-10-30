@@ -52,6 +52,11 @@ jest.mock("@sg/game-client-base", () => {
             ...actualGc.Translator,
             gameTranslate: jest.fn().mockImplementation((key) => key),
         },
+        Connection: {
+            ConnectionStore: class MockConnectionStore {
+                isConnected = true;
+            },
+        },
     };
 });
 jest.mock("db://shared-common-slot/fsb-promotion/scripts/stores/fsb-promotion-ui-store", () => {

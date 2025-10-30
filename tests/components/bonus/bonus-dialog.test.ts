@@ -1,14 +1,24 @@
 import { Button, Label, Node, Prefab } from "cc";
-import { resourceCaches } from "../../../assets/scripts/utils/classic-slot-utils";
 import { Container } from "inversify";
 import "reflect-metadata";
 import BonusDialog from "../../../assets/scripts/components/bonus/bonus-dialog";
 import { SlotGameBaseConfigs } from "../../../assets/scripts/config/slot-game-base-configs";
+import { resourceCaches } from "../../../assets/scripts/utils/classic-slot-utils";
 
 // Mock game client base
 jest.mock("@sg/game-client-base", () => ({
     FormatUtils: {
         numberWithCommas: jest.fn((num: number, decimals: number) => num.toLocaleString()),
+    },
+    Connection: {
+        ConnectionStore: class MockConnectionStore {
+            isConnected = true;
+        },
+    },
+    Notification: {
+        NotificationStore: class MockNotificationStore {
+            isConnected = true;
+        },
     },
 }));
 
@@ -37,10 +47,10 @@ jest.mock("db://shared-components/game/game-timer/scripts/raw-timer", () => ({
 // Mock ObserverComponent
 jest.mock("db://shared-components/shared/common-components/observer-component/scripts/observer-component", () => ({
     ObserverComponent: class MockObserverComponent {
-        onLoad() {}
-        onDestroy() {}
-        start() {}
-        update() {}
+        onLoad() { }
+        onDestroy() { }
+        start() { }
+        update() { }
         node = new Node();
     },
 }));
@@ -56,11 +66,11 @@ jest.mock("db://shared-components/shared/utils", () => ({
 jest.mock("observer", () => ({
     __esModule: true,
     default: {
-        handle: jest.fn(() => () => {}),
-        render: jest.fn(() => () => {}),
+        handle: jest.fn(() => () => { }),
+        render: jest.fn(() => () => { }),
     },
-    handle: jest.fn(() => () => {}),
-    render: jest.fn(() => () => {}),
+    handle: jest.fn(() => () => { }),
+    render: jest.fn(() => () => { }),
 }));
 
 // Mock handlers and stores
@@ -220,7 +230,7 @@ describe("BonusDialog", () => {
                 configurable: true,
                 enumerable: true,
             });
-            jest.spyOn(bonusDialog, "createBonusItems").mockImplementation(() => {});
+            jest.spyOn(bonusDialog, "createBonusItems").mockImplementation(() => { });
 
             bonusDialog.initBonusItems();
 
@@ -247,7 +257,7 @@ describe("BonusDialog", () => {
                 configurable: true,
                 enumerable: true,
             });
-            jest.spyOn(bonusDialog, "createBonusItems").mockImplementation(() => {});
+            jest.spyOn(bonusDialog, "createBonusItems").mockImplementation(() => { });
 
             // Use type assertion to access protected method
             const onItemClickedSpy = jest.spyOn(bonusDialog as any, "onItemClicked").mockReturnValue(0);
@@ -303,8 +313,8 @@ describe("BonusDialog", () => {
             (bonusDialog as any).openedBonus = 0;
             (bonusDialog as any).totalValue = 0;
 
-            jest.spyOn(bonusDialog, "updateBonusCount").mockImplementation(() => {});
-            jest.spyOn(bonusDialog, "checkFinishBonus").mockImplementation(() => {});
+            jest.spyOn(bonusDialog, "updateBonusCount").mockImplementation(() => { });
+            jest.spyOn(bonusDialog, "checkFinishBonus").mockImplementation(() => { });
         });
 
         it("should open bonus item and update counters", () => {
@@ -342,7 +352,7 @@ describe("BonusDialog", () => {
             const gc = require("@sg/game-client-base");
 
             (bonusDialog as any).totalValue = 1500;
-            jest.spyOn(bonusDialog, "hideTimer").mockImplementation(() => {});
+            jest.spyOn(bonusDialog, "hideTimer").mockImplementation(() => { });
 
             AudioUtils.playSFX.mockClear();
             gc.FormatUtils.numberWithCommas.mockReturnValue("1,500.00");
@@ -367,7 +377,7 @@ describe("BonusDialog", () => {
             (bonusDialog as any).totalBonus = 3;
             (bonusDialog as any).openedBonus = 3;
 
-            jest.spyOn(bonusDialog, "showTotalAmount").mockImplementation(() => {});
+            jest.spyOn(bonusDialog, "showTotalAmount").mockImplementation(() => { });
             jest.spyOn(bonusDialog, "showTotalBonusWinTime").mockReturnValue(2000);
 
             tween.mockReturnValue(mockTween);
@@ -407,8 +417,8 @@ describe("BonusDialog", () => {
 
     describe("setBonusCount", () => {
         it("should set total bonus and update display", () => {
-            jest.spyOn(bonusDialog, "updateBonusCount").mockImplementation(() => {});
-            jest.spyOn(bonusDialog, "updateBonusCountItemTextColor").mockImplementation(() => {});
+            jest.spyOn(bonusDialog, "updateBonusCount").mockImplementation(() => { });
+            jest.spyOn(bonusDialog, "updateBonusCountItemTextColor").mockImplementation(() => { });
 
             bonusDialog.setBonusCount(5);
 
