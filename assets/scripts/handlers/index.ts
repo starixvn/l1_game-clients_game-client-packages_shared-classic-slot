@@ -1,3 +1,4 @@
+export * from "./handlers/interruption-handlers";
 export * from "./handlers/slot-bet-handlers";
 export * from "./handlers/slot-bet-response-handlers";
 export * from "./handlers/slot-configs-handlers";

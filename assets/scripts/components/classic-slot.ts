@@ -18,7 +18,7 @@ import Observer from "observer";
 import { SlotGameBaseConfigs } from "../config/slot-game-base-configs";
 import { StandardSlotGameConfigs } from "../config/standard-slot-game-configs";
 import { LineData } from "../definitions";
-import { SlotBetHandler, SlotSettlementHandler } from "../handlers";
+import { InterruptionHandlers, SlotBetHandler, SlotSettlementHandler } from "../handlers";
 import { SlotUIHandler } from "../handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../handlers/stores/bet-control-store";
 import { JackpotPoolStore } from "../handlers/stores/jackpot-pool-store";
@@ -69,6 +69,20 @@ export default class ClassicSlot extends GameComponent {
         super.onLoad();
         this.addComponent(FSBPromotionUIManager);
     }
+
+    override onHideGame() {
+        this.handleGameHide();
+    }
+
+    override onShowGame() {
+        this.handleGameShow();
+    }
+
+    @handle(InterruptionHandlers, (handler) => handler.onGameHide())
+    handleGameHide() { }
+
+    @handle(InterruptionHandlers, (handler) => handler.onGameShow())
+    handleGameShow() { }
 
     @render(JackpotPoolStore, (store) => store.jackpotEnabled, { fireImmediately: false })
     renderJackpotEnabled(jackpotEnabled: { enabled: boolean }) {

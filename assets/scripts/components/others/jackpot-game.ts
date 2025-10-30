@@ -1,3 +1,4 @@
+import gc from "@sg/game-client-base";
 import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -14,7 +15,6 @@ import { initTimer } from "../../utils/classic-slot-utils";
 import JackpotGameItem from "./jackpot-game-item";
 import JackpotWinningAmount from "./jackpot-winning-amount";
 const { handle, render } = Observer;
-
 const { ccclass, property } = _decorator;
 
 interface IWinningJackpot {
@@ -45,6 +45,14 @@ export default class JackpotGame extends ObserverComponent {
     private configDuration: CustomDuration;
     private timerTween: Tween;
     private spinTime = 0;
+
+    @render(gc.Connection.ConnectionStore, (store) => store.isConnected)
+    renderIsConnected(isConnected: boolean) {
+        if (!isConnected) {
+            this.onFinishJackpotGame();
+            return;
+        }
+    }
 
     @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
     onItemClicked(index: number) {
@@ -154,11 +162,15 @@ export default class JackpotGame extends ObserverComponent {
         try {
             this.showJackpotWin();
             await AnimationUtils.delayTime(this.slotGameConfigs.showJackpotWinningAmountDuration);
-            this.onJackpotGameFinished();
-            this.node.destroy();
+            this.onFinishJackpotGame();
         } catch (error) {
             console.log(error);
         }
+    }
+
+    private onFinishJackpotGame() {
+        this.onJackpotGameFinished();
+        this.node.destroy();
     }
 
     start() {

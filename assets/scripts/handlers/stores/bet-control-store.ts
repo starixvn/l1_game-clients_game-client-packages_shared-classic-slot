@@ -21,6 +21,7 @@ export class BetControlStore {
     @inject(gc.Notices.NoticeStore) protected readonly noticeStore: gc.Notices.NoticeStore;
     @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
     @inject(FSBPromotionUIStore) protected readonly fsbPromotionUIStore: FSBPromotionUIStore;
+    @inject(gc.Connection.ConnectionStore) protected readonly connectionStore: gc.Connection.ConnectionStore;
 
     constructor() {
         mobx.makeAutoObservable(this);
@@ -106,9 +107,10 @@ export class BetControlStore {
     }
 
     get isReadyBet() {
-        return this.slotBoardStore.slotState === SlotState.READY
+        return (this.slotBoardStore.slotState === SlotState.READY
             || this.slotBoardStore.slotState === SlotState.SETTLED
-            || this.slotBoardStore.slotState === SlotState.AUTO_SPIN;
+            || this.slotBoardStore.slotState === SlotState.AUTO_SPIN)
+            && this.connectionStore.isConnected;
     }
 
     get preventOpenAutoSpin() {

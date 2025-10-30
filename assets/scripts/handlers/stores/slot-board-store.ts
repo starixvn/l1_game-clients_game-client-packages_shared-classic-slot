@@ -21,11 +21,12 @@ export class SlotBoardStore {
         mobx.makeAutoObservable(this);
     }
 
+    gameHidden = false;
     spinResult: { result: number[]; duration: number; turbo: boolean; onComplete: () => void } = {
         result: [],
         duration: 0,
         turbo: false,
-        onComplete: () => {},
+        onComplete: () => { },
     };
 
     receivedBonus = null;

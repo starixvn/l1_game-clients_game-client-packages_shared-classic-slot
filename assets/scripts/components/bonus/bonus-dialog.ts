@@ -37,7 +37,7 @@ export default class BonusDialog extends ObserverComponent {
 
     items: BonusItem[] = [];
 
-    public onBonusFinished = () => {};
+    public onBonusFinished = () => { };
     public slotGameConfigs: SlotGameBaseConfigs;
     private configDuration: CustomDuration;
     private receivedJackpot = false;
@@ -47,6 +47,14 @@ export default class BonusDialog extends ObserverComponent {
     private timerTween: Tween;
     private readonly bonusNumber = 10;
     private spinTime = 0;
+
+    @render(gc.Connection.ConnectionStore, (store) => store.isConnected)
+    renderIsConnected(isConnected: boolean) {
+        if (!isConnected) {
+            this.onFinishBonusDialog();
+            return;
+        }
+    }
 
     initBonusItems() {
         this.createBonusItems();
@@ -137,11 +145,15 @@ export default class BonusDialog extends ObserverComponent {
                 .call(() => this.showTotalAmount())
                 .delay(this.showTotalBonusWinTime(delayTime))
                 .call(() => {
-                    this.onBonusFinished();
-                    this.node.destroy();
+                    this.onFinishBonusDialog();
                 })
                 .start();
         }
+    }
+
+    private onFinishBonusDialog() {
+        this.onBonusFinished();
+        this.node.destroy();
     }
 
     showTotalBonusWinTime(delayTime: number): number {
