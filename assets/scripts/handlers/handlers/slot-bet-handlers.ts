@@ -27,6 +27,10 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
         this.callBet();
     }
 
+    isConnectionReady() {
+        return this.connectionStore.isConnected && this.connectionStore.signedIn;
+    }
+
     async callBet() {
         if (this.betStore.isProcessingBet) {
             this.showWarningProcessingBet();
@@ -37,8 +41,8 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
             return;
         }
 
-        await FunctionUtils.waitUntil(() => this.connectionStore.isConnected, 100, 20 * 60000).catch(() => { });
-        if (!this.connectionStore.isConnected) {
+        await FunctionUtils.waitUntil(() => this.isConnectionReady(), 100, 20 * 60000).catch(() => { });
+        if (!this.isConnectionReady()) {
             return;
         }
 

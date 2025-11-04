@@ -255,6 +255,7 @@ describe("SlotBetHandler", () => {
             const mockBetData = { baseAmount: 100 };
             createBetDataSpy.mockReturnValue(mockBetData);
             connectionStore.isConnected = true;
+            connectionStore.signedIn = true;
             await slotBetHandler.callBet();
             expect(resetOnNewSpinSpy).toHaveBeenCalledTimes(1);
             expect(slotBoardStore.resetOnNewSpin).toHaveBeenCalledTimes(1);
@@ -278,6 +279,9 @@ describe("SlotBetHandler", () => {
             const mockBetData = { baseAmount: 100 };
             createBetDataSpy.mockReturnValue(mockBetData);
 
+            connectionStore.signedIn = true;
+            connectionStore.isConnected = true;
+
             await slotBetHandler.callBet();
 
             expect(handleBetDataSpy).toHaveBeenCalledWith({
@@ -291,6 +295,8 @@ describe("SlotBetHandler", () => {
         it("should set didSpin and isFreeSpinEffectCompleted correctly", async () => {
             (betControlStore as any)._isReadyBet = true;
             betControlStore.stake = 50;
+            connectionStore.signedIn = true;
+            connectionStore.isConnected = true;
 
             await slotBetHandler.callBet();
 
@@ -608,7 +614,8 @@ describe("SlotBetHandler", () => {
 
             const mockBetData = { baseAmount: 100 };
             createBetDataSpy.mockReturnValue(mockBetData);
-
+            connectionStore.signedIn = true;
+            connectionStore.isConnected = true;
             await slotBetHandler.callBet();
 
             expect(handleBetDataSpy).toHaveBeenCalledWith({
