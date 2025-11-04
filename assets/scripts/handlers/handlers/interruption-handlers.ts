@@ -15,13 +15,14 @@ export class InterruptionHandlers {
     @inject(gc.Notification.NotificationStore) protected readonly notificationStore: gc.Notification.NotificationStore;
     @inject(GameVisibilityStore) protected readonly gameVisibilityStore: GameVisibilityStore;
     @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
-
+    @inject(gc.Auth.AuthHandlers.TriggerRecheckIn) protected readonly triggerRecheckIn: gc.Auth.AuthHandlers.TriggerRecheckIn;
     onGameHide() {
         this.slotBoardStore.gameHidden = true;
     }
 
     onGameShow() {
         this.slotBoardStore.gameHidden = false;
+        this.triggerRecheckIn.handle();
         if (!this.connectionStore.isConnected) {
             this.connectionStore.reconnect();
         }
