@@ -227,6 +227,7 @@ export class SlotSettlementHandler {
         this.settleTween = tween(this)
             .sequence(...sequenceTweens)
             .call(() => {
+                this.betControlStore.syncFreeSpinCount();
                 this.finishSettlement();
                 this.fsbPromotionUIHandler.updateTotalWin({ win: betWin, totalFreeSpins: this.betControlStore.freeSpinCount });
                 this.slotBoardStore.resetToReady();
