@@ -53,6 +53,13 @@ export default class JackpotGame extends ObserverComponent {
         }
     }
 
+    @render(SlotBoardStore, (store) => store.hasInterruption)
+    renderHasInterruption(hasInterruption: boolean) {
+        if (hasInterruption) {
+            this.onFinishJackpotGame();
+        }
+    }
+
     @handle(SlotSettlementHandler, (handler, index: number) => handler.requestOpenJackpot(index))
     onItemClicked(index: number) {
         return index;

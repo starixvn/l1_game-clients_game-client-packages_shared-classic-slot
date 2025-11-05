@@ -55,6 +55,13 @@ export default class BonusDialog extends ObserverComponent {
         }
     }
 
+    @render(SlotBoardStore, (store) => store.hasInterruption)
+    renderHasInterruption(hasInterruption: boolean) {
+        if (hasInterruption) {
+            this.onFinishBonusDialog();
+        }
+    }
+
     initBonusItems() {
         this.createBonusItems();
         this.content.children.forEach((child, index) => {
