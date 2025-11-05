@@ -2,6 +2,7 @@ import gc from "@sg/game-client-base";
 import { GameVisibilityStore } from "db://shared-components/shared/common-components/game-visibility/game-visibility-store";
 import inversify from "inversify";
 import { SlotBoardStore } from "../stores/slot-board-store";
+import { SlotBetHandler } from "./slot-bet-handlers";
 const { injectable, inject } = inversify;
 
 enum TopWinnerEvent {
@@ -15,6 +16,7 @@ export class InterruptionHandlers {
     @inject(gc.Notification.NotificationStore) protected readonly notificationStore: gc.Notification.NotificationStore;
     @inject(GameVisibilityStore) protected readonly gameVisibilityStore: GameVisibilityStore;
     @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
+    @inject(SlotBetHandler) protected readonly slotBetHandler: SlotBetHandler;
     @inject(gc.Auth.AuthHandlers.TriggerRecheckIn) protected readonly triggerRecheckIn: gc.Auth.AuthHandlers.TriggerRecheckIn;
     onGameHide() {
         this.slotBoardStore.gameHidden = true;
@@ -25,6 +27,7 @@ export class InterruptionHandlers {
         this.triggerRecheckIn.handle();
         if (!this.connectionStore.isConnected) {
             this.connectionStore.reconnect();
+            this.slotBetHandler.handleInterruption();
         }
         if (!this.notificationStore.isConnected) {
             this.notificationStore.reconnect();
