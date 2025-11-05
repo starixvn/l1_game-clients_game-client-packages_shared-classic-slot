@@ -29,6 +29,9 @@ export class FreespinMessage extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.freeSpinCountDisplay)
     renderFreeSpinCount(freeSpinCountDisplay: number) {
+        if (freeSpinCountDisplay < 0) {
+            return;
+        }
         this.lblFreeSpinCount.string = freeSpinCountDisplay.toString();
 
         const isLast = freeSpinCountDisplay === 0;
