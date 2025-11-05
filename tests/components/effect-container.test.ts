@@ -23,7 +23,7 @@ jest.mock("@sg/game-client-base", () => ({
         numberWithCommas: jest.fn((num: number) => num.toLocaleString()),
     },
     Audios: {
-        AudioHandler: class MockAudioHandler {},
+        AudioHandler: class MockAudioHandler { },
     },
     Translator: {
         getLanguageId: jest.fn().mockReturnValue("en"),
@@ -36,27 +36,27 @@ jest.mock("@sg/game-client-base", () => ({
         },
     },
     Rounds: {
-        RoundTimeStore: class MockRoundTimeStore {},
-        RoundStore: class MockRoundStore {},
+        RoundTimeStore: class MockRoundTimeStore { },
+        RoundStore: class MockRoundStore { },
     },
     GameConfigs: {
-        GameConfigStore: class MockGameConfigStore {},
+        GameConfigStore: class MockGameConfigStore { },
     },
     Player: {
-        MainPlayerStore: class MockMainPlayerStore {},
+        MainPlayerStore: class MockMainPlayerStore { },
     },
     GameUserSettings: {
-        GameUserSettingHandler: class MockGameUserSettingHandler {},
+        GameUserSettingHandler: class MockGameUserSettingHandler { },
     },
 }));
 
 // Mock ObserverComponent with ALL lifecycle methods
 jest.mock("db://shared-components/shared/common-components/observer-component/scripts/observer-component", () => ({
     ObserverComponent: class MockObserverComponent {
-        onLoad() {}
-        onDestroy() {}
-        start() {}
-        update() {}
+        onLoad() { }
+        onDestroy() { }
+        start() { }
+        update() { }
         node = require("cc").Node ? new (require("cc").Node)() : { on: jest.fn(), off: jest.fn() };
     },
 }));
@@ -93,6 +93,7 @@ jest.mock("../../assets/scripts/components/bonus/bonus-dialog", () => ({
         initBonusItems = jest.fn();
         setBonusCount = jest.fn();
         onBonusFinished = null;
+        show = jest.fn();
     },
 }));
 
@@ -116,6 +117,7 @@ jest.mock("../../assets/scripts/components/others/jackpot-game", () => ({
         prizes = 0;
         initJackpotItems = jest.fn();
         onJackpotGameFinished = null;
+        show = jest.fn();
     },
 }));
 
@@ -176,7 +178,7 @@ describe("EffectContainer", () => {
         effectContainer.getComponent = jest.fn();
 
         // Mock node methods
-        jest.spyOn(mockNode, "addChild").mockImplementation(() => {});
+        jest.spyOn(mockNode, "addChild").mockImplementation(() => { });
 
         // Clear all mocks
         jest.clearAllMocks();
@@ -576,7 +578,7 @@ describe("EffectContainer", () => {
             jest.spyOn(effectContainer, "showEffect").mockResolvedValue();
             jest.spyOn(effectContainer, "loadEffectBonus").mockResolvedValue();
             jest.spyOn(effectContainer, "loadBonusDialog").mockResolvedValue();
-            jest.spyOn(effectContainer, "showBonusDialog").mockImplementation(() => {});
+            jest.spyOn(effectContainer, "showBonusDialog").mockImplementation(() => { });
 
             const mockInstantiate = jest.requireMock("cc").instantiate;
             mockInstantiate.mockReturnValue(mockEffectNode);

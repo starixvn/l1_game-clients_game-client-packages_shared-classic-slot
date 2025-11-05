@@ -48,17 +48,16 @@ export default class BonusDialog extends ObserverComponent {
     private readonly bonusNumber = 10;
     private spinTime = 0;
 
-    @render(gc.Connection.ConnectionStore, (store) => store.isConnected)
-    renderIsConnected(isConnected: boolean) {
-        if (!isConnected) {
-            this.onFinishBonusDialog();
-        }
-    }
+    private showing = false;
+    private hasInterruption = false;
 
     @render(SlotBoardStore, (store) => store.hasInterruption)
     renderHasInterruption(hasInterruption: boolean) {
+        this.hasInterruption = hasInterruption;
         if (hasInterruption) {
-            this.onFinishBonusDialog();
+            if (this.showing) {
+                this.onFinishBonusDialog();
+            }
         }
     }
 
@@ -181,7 +180,7 @@ export default class BonusDialog extends ObserverComponent {
         this.bonusCount.string = `${this.totalBonus - this.openedBonus}`;
     }
 
-    start() {
+    show() {
         const oldSpinDuration = 5;
         const spinAndBonusDuration = this.receivedJackpot
             ? this.configDuration.bonusDuration
@@ -189,5 +188,9 @@ export default class BonusDialog extends ObserverComponent {
         const calculateDuration = this.slotGameConfigs.bonusTimeOut + oldSpinDuration - spinAndBonusDuration;
         const duration = Math.min(calculateDuration, this.slotGameConfigs.bonusTimeOut);
         this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
+        this.showing = true;
+        if (this.hasInterruption) {
+            this.onFinishBonusDialog();
+        }
     }
 }

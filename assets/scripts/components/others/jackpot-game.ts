@@ -1,4 +1,3 @@
-import gc from "@sg/game-client-base";
 import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -46,17 +45,16 @@ export default class JackpotGame extends ObserverComponent {
     private timerTween: Tween;
     private spinTime = 0;
 
-    @render(gc.Connection.ConnectionStore, (store) => store.isConnected)
-    renderIsConnected(isConnected: boolean) {
-        if (!isConnected) {
-            this.onFinishJackpotGame();
-        }
-    }
+    private showing = false;
+    private hasInterruption = false;
 
     @render(SlotBoardStore, (store) => store.hasInterruption)
     renderHasInterruption(hasInterruption: boolean) {
+        this.hasInterruption = hasInterruption;
         if (hasInterruption) {
-            this.onFinishJackpotGame();
+            if (this.showing) {
+                this.onFinishJackpotGame();
+            }
         }
     }
 
@@ -180,11 +178,15 @@ export default class JackpotGame extends ObserverComponent {
         this.node.destroy();
     }
 
-    start() {
+    show() {
         const oldSpinDuration = 5;
         const spinTime = this.spinTime + this.configDuration.jackpotDuration;
         const calculateDuration = this.slotGameConfigs.jackpotTimeOut + oldSpinDuration - spinTime;
         const duration = Math.min(calculateDuration, this.slotGameConfigs.jackpotTimeOut);
         this.timerTween = initTimer(this.timer, duration, this.hideTimer.bind(this));
+        this.showing = true;
+        if (this.hasInterruption) {
+            this.onFinishJackpotGame();
+        }
     }
 }

@@ -129,6 +129,7 @@ export default class EffectContainer extends ObserverComponent {
             dialog.prizes = prizes;
             dialog.initJackpotItems();
             dialog.onJackpotGameFinished = resolve;
+            dialog.show();
         });
     }
 
@@ -177,6 +178,7 @@ export default class EffectContainer extends ObserverComponent {
         dialog.initBonusItems();
         dialog.setBonusCount(bonus);
         dialog.onBonusFinished = onBonusFinished;
+        dialog.show();
     }
 
     async loadEffectTransition() {
