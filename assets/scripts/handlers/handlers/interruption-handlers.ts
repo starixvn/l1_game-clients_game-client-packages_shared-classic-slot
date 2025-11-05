@@ -1,14 +1,11 @@
 import gc from "@sg/game-client-base";
+import { FSBPromotionHandlers } from "db://shared-common-slot/fsb-promotion/scripts/handlers/fsb-promotion-handlers";
 import { GameVisibilityStore } from "db://shared-components/shared/common-components/game-visibility/game-visibility-store";
 import inversify from "inversify";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotBetHandler } from "./slot-bet-handlers";
 const { injectable, inject } = inversify;
 
-enum TopWinnerEvent {
-    BigWinningWinners = "getBigWinningWinners",
-    JackpotWinners = "getJackpotWinners",
-}
 
 @injectable()
 export class InterruptionHandlers {
@@ -18,6 +15,8 @@ export class InterruptionHandlers {
     @inject(SlotBoardStore) protected readonly slotBoardStore: SlotBoardStore;
     @inject(SlotBetHandler) protected readonly slotBetHandler: SlotBetHandler;
     @inject(gc.Auth.AuthHandlers.TriggerRecheckIn) protected readonly triggerRecheckIn: gc.Auth.AuthHandlers.TriggerRecheckIn;
+
+    @inject(FSBPromotionHandlers) protected readonly fsbPromotionHandlers: FSBPromotionHandlers;
     onGameHide() {
         this.slotBoardStore.gameHidden = true;
         this.slotBoardStore.hasInterruption = true;
@@ -31,7 +30,9 @@ export class InterruptionHandlers {
             this.slotBetHandler.handleInterruption();
         }
         if (!this.notificationStore.isConnected) {
+            this.fsbPromotionHandlers.removeNotificationListeners();
             this.notificationStore.reconnect();
+            this.fsbPromotionHandlers.initNotificationListeners();
         }
     }
 }
