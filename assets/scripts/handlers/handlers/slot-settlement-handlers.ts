@@ -255,6 +255,9 @@ export class SlotSettlementHandler {
 
     protected onFinishSettlement(betWin: number) {
         this.betControlStore.syncFreeSpinCount();
+        if (this.betControlStore.freeSpinEnabled) {
+            this.betControlStore.setFreeSpinStake(this.betControlStore.stake);
+        }
         this.finishSettlement();
         this.fsbPromotionUIHandler.updateTotalWin({ win: betWin, totalFreeSpins: this.betControlStore.freeSpinCount });
         this.slotBoardStore.resetToReady();
