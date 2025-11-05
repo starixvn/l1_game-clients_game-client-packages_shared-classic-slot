@@ -81,6 +81,17 @@ export class SlotSettlementHandler {
                     }
                 }
             );
+
+            mobx.reaction(
+                () => this.slotBoardStore.hasInterruption,
+                (hasInterruption) => {
+                    if (hasInterruption) {
+                        if (this.slotBoardStore.receivedBonus || this.slotBoardStore.receivedJackpot) {
+                            this.onFinishSettlement(0);
+                        }
+                    }
+                }
+            );
         }, 0);
     }
 
@@ -114,6 +125,10 @@ export class SlotSettlementHandler {
     async handleJackpot(jackpot: any) {
         console.log("handleJackpot  -------");
         await this.spinResultSpecialCase(jackpot);
+        if (this.slotBoardStore.hasInterruption) {
+            this.onFinishSettlement(0);
+            return;
+        }
         this.slotBoardStore.winningItemsOnLines = [
             { payline: jackpot.winningLine, positions: paylines[jackpot.winningLine], symbol: jackpot.symbol },
         ];
@@ -130,7 +145,10 @@ export class SlotSettlementHandler {
         } else {
             await this.spinResultSpecialCase(bonuses);
         }
-
+        if (this.slotBoardStore.hasInterruption) {
+            this.onFinishSettlement(0);
+            return;
+        }
         if (bonuses.bonus) {
             this.slotBoardStore.receivedBonus = { bonus: bonuses.bonus, duration: this.slotDurationStore.bonusDuration };
         }
@@ -187,8 +205,11 @@ export class SlotSettlementHandler {
         if (betWin === 0) {
             this.updateWinningBet(betWin);
         }
-
-        this.handleSettleTween(bigWin, newFreeSpinCount, betWin, jackpot, winningLines, freeSpins);
+        if (this.slotBoardStore.hasInterruption) {
+            this.onFinishSettlement(betWin);
+        } else {
+            this.handleSettleTween(bigWin, newFreeSpinCount, betWin, jackpot, winningLines, freeSpins);
+        }
     }
 
     protected updateWinningBet(betWin: number) {
@@ -196,7 +217,7 @@ export class SlotSettlementHandler {
         this.getBalanceHandler.handle();
     }
 
-    protected handleSettleTween(bigWin: any, newFreeSpinCount: any, betWin: any, jackpot: any, winningLines: any, freeSpins: any) {
+    protected handleSettleTween(bigWin: any, newFreeSpinCount: any, betWin: number, jackpot: any, winningLines: any, freeSpins: any) {
         const gotFreeSpin = newFreeSpinCount > 0;
         const bigWinOrGotFreeSpin = bigWin || gotFreeSpin;
         if (!bigWinOrGotFreeSpin) {
@@ -227,17 +248,21 @@ export class SlotSettlementHandler {
         this.settleTween = tween(this)
             .sequence(...sequenceTweens)
             .call(() => {
-                this.betControlStore.syncFreeSpinCount();
-                this.finishSettlement();
-                this.fsbPromotionUIHandler.updateTotalWin({ win: betWin, totalFreeSpins: this.betControlStore.freeSpinCount });
-                this.slotBoardStore.resetToReady();
-                const isEndGameError = this.slotErrorHandler.handleEndGameApiError();
-
-                if (!isEndGameError) {
-                    this.checkSpinNextRound();
-                }
+                this.onFinishSettlement(betWin);
             })
             .start();
+    }
+
+    protected onFinishSettlement(betWin: number) {
+        this.betControlStore.syncFreeSpinCount();
+        this.finishSettlement();
+        this.fsbPromotionUIHandler.updateTotalWin({ win: betWin, totalFreeSpins: this.betControlStore.freeSpinCount });
+        this.slotBoardStore.resetToReady();
+        const isEndGameError = this.slotErrorHandler.handleEndGameApiError();
+
+        if (!isEndGameError) {
+            this.checkSpinNextRound();
+        }
     }
 
     private handleWinningSpecialSymbols(bonus: any, newFreeSpinCount: any) {

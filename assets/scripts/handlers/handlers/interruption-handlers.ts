@@ -20,6 +20,7 @@ export class InterruptionHandlers {
     @inject(gc.Auth.AuthHandlers.TriggerRecheckIn) protected readonly triggerRecheckIn: gc.Auth.AuthHandlers.TriggerRecheckIn;
     onGameHide() {
         this.slotBoardStore.gameHidden = true;
+        this.slotBoardStore.hasInterruption = true;
     }
 
     onGameShow() {

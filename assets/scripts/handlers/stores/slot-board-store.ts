@@ -46,6 +46,7 @@ export class SlotBoardStore {
     spinTime = 0;
 
     bottomMessageState = SlotNotification.READY;
+    hasInterruption = false;
 
     clearSettlement() {
         this.receivedBonus = null;
@@ -73,6 +74,7 @@ export class SlotBoardStore {
 
         this.slotState = SlotState.BET;
         this.bottomMessageState = SlotNotification.SPINNING;
+        this.hasInterruption = false;
     }
 
     updateSpinTime(time: number) {
