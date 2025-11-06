@@ -1,6 +1,6 @@
 
 
-import { _decorator, Label, Node, Tween } from "cc";
+import { _decorator, BlockInputEvents, Label, Node, Tween } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import { AnimationUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
@@ -24,6 +24,7 @@ export class FreespinMessage extends ObserverComponent {
         this.lastNode = this.container.getChildByName("last");
         this.container.active = false;
         ComponentUtils.setOpacityNode(this.container, 1);
+        this.addComponent(BlockInputEvents);
         super.onLoad();
     }
 
