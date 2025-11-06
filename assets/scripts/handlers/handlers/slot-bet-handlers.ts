@@ -161,6 +161,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
 
     resetBetProcessing() {
         this.slotBetResponseHandler.stopProcessingBetAndClearInterval();
+        this.slotBoardStore.resetToReady();
         this.clearTriggerAction();
         this.slotBoardStore.clearSettlement();
     }
