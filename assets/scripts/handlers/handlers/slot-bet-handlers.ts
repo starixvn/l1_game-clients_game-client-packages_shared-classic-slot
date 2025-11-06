@@ -33,9 +33,9 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
 
     handleInterruption() {
         if (this.betStore.isProcessingBet) {
-            this.handlePlaceBetFailed();
+            this.resetBetProcessing();
 
-            if (this.betControlStore.freeSpinEnabled) {
+            if (this.betControlStore.autoSpinEnabled || this.betControlStore.freeSpinEnabled) {
                 this.callBet();
             }
         }
@@ -157,6 +157,12 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
 
     showLineSelection() {
         this.betControlStore.showLineSelection = {};
+    }
+
+    resetBetProcessing() {
+        this.slotBetResponseHandler.stopProcessingBetAndClearInterval();
+        this.clearTriggerAction();
+        this.slotBoardStore.clearSettlement();
     }
 
     handlePlaceBetFailed(clearFreeSpins = false) {
