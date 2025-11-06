@@ -417,6 +417,7 @@ describe("EffectContainer", () => {
             const jackpotData = {
                 jackpot: { prizes: 50000 },
                 duration: 4000,
+                onComplete: jest.fn(),
             };
             const mockBundleManager = jest.requireMock(
                 "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
@@ -446,9 +447,6 @@ describe("EffectContainer", () => {
             expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(4000);
             expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffectNode);
             expect(mockEffectNode.destroy).toHaveBeenCalled();
-            expect(effectContainer.loadJackpotGame).toHaveBeenCalled();
-            //@ts-ignore
-            expect(effectContainer.showJackpotGame).toHaveBeenCalledWith(50000);
         });
 
         it("should return early when no jackpot data is provided", async () => {

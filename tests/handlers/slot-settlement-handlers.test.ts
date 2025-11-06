@@ -453,15 +453,16 @@ describe("SlotSettlementHandler", () => {
                 roundId: 1,
                 result: [1, 2, 3],
             } as any;
+            slotBoardStore.hasInterruption = false;
 
+            jest.spyOn(settlementHandler as any, "showEffectJackpot").mockResolvedValue(undefined);
+            jest.spyOn(settlementHandler as any, "showJackpotGame").mockResolvedValue(undefined);
             await settlementHandler.handleJackpot(jackpot);
 
             expect(slotBoardStore.winningItemsOnLines).toHaveLength(1);
             expect(slotBoardStore.winningLines).toHaveLength(1);
-            expect(slotBoardStore.receivedJackpot).toEqual({
-                jackpot,
-                duration: slotDurationStore.jackpotDuration,
-            });
+            expect(settlementHandler.showEffectJackpot).toHaveBeenCalledWith(jackpot);
+            expect(settlementHandler.showJackpotGame).toHaveBeenCalledWith(jackpot);
 
             spinSpy.mockRestore();
         });
