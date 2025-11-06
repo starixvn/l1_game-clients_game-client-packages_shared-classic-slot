@@ -33,7 +33,11 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
 
     handleInterruption() {
         if (this.betStore.isProcessingBet) {
-            this.handlePlaceBetFailed(this.betControlStore.freeSpinEnabled);
+            this.handlePlaceBetFailed();
+
+            if (this.betControlStore.freeSpinEnabled) {
+                this.callBet();
+            }
         }
     }
 
