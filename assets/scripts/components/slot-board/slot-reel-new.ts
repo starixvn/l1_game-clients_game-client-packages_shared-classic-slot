@@ -62,7 +62,7 @@ export default class SlotReelNew extends SlotReel {
     private spinDuration = 0;
     private cachedData: number[] = [];
     private lowestIndex = 0;
-    private onSpinFinishCallback = () => {};
+    private onSpinFinishCallback = () => { };
 
     protected override init() {
         super.init();
@@ -114,7 +114,8 @@ export default class SlotReelNew extends SlotReel {
     }
 
     // Main update loop
-    protected update(dt: number): void {
+    protected update(deltaTime: number): void {
+        const dt = Math.min(deltaTime, 1 / 30);
         switch (this.state) {
             case State.BounceStart:
                 this.updateBounceStart(dt);
