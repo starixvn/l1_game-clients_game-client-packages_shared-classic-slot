@@ -29,7 +29,9 @@ export class SlotBoardStore {
         onComplete: () => { },
     };
 
+    receivedFinish = null;
     receivedBonus = null;
+    showBonusDialog = null;
     receivedJackpot = null;
     receivedFreeSpins = null;
     receivedBigWin = null;
@@ -49,6 +51,7 @@ export class SlotBoardStore {
     hasInterruption = false;
 
     clearSettlement() {
+        this.receivedFinish = null;
         this.receivedBonus = null;
         this.receivedJackpot = null;
         this.receivedFreeSpins = null;

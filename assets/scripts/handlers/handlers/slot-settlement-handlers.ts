@@ -81,17 +81,6 @@ export class SlotSettlementHandler {
                     }
                 }
             );
-
-            mobx.reaction(
-                () => this.slotBoardStore.hasInterruption,
-                (hasInterruption) => {
-                    if (hasInterruption) {
-                        if (this.slotBoardStore.receivedBonus || this.slotBoardStore.receivedJackpot) {
-                            this.onFinishSettlement(0);
-                        }
-                    }
-                }
-            );
         }, 0);
     }
 
@@ -145,13 +134,26 @@ export class SlotSettlementHandler {
         } else {
             await this.spinResultSpecialCase(bonuses);
         }
+        if (bonuses.bonus) {
+            !this.slotBoardStore.hasInterruption && await this.showEffectBonus(bonuses.bonus);
+            !this.slotBoardStore.hasInterruption && await this.showBonusDialog(bonuses.bonus);
+        }
         if (this.slotBoardStore.hasInterruption) {
             this.onFinishSettlement(0);
             return;
         }
-        if (bonuses.bonus) {
-            this.slotBoardStore.receivedBonus = { bonus: bonuses.bonus, duration: this.slotDurationStore.bonusDuration };
-        }
+    }
+
+    showBonusDialog(bonus: any) {
+        return new Promise<void>((resolve) => {
+            this.slotBoardStore.showBonusDialog = { bonus, duration: this.slotDurationStore.bonusDuration, onComplete: resolve };
+        });
+    }
+
+    showEffectBonus(bonus: any) {
+        return new Promise<void>((resolve) => {
+            this.slotBoardStore.receivedBonus = { bonus, duration: this.slotDurationStore.bonusDuration, onComplete: resolve };
+        });
     }
 
     async spinResultSpecialCase(data: { roundId: number; result: number[] }) {
@@ -186,6 +188,7 @@ export class SlotSettlementHandler {
 
     async handleFinish(finish: any) {
         console.log("handleFinish  -------");
+        this.slotBoardStore.receivedFinish = finish;
         const { result, settlementResult, betWin, bigWin, roundId, totalOfFreeSpins, betByFreeSpin } = finish;
         const { winningLines, jackpot, bonus, freeSpins } = settlementResult;
         const newFreeSpinCount = freeSpins.count ?? 0;

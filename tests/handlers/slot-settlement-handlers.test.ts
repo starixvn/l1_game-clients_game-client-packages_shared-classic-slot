@@ -471,16 +471,16 @@ describe("SlotSettlementHandler", () => {
         it("should handle bonuses with jackpot delay when jackpot exists", async () => {
             const bonuses = { bonus: { count: 1 }, roundId: 1, result: [1, 2, 3] };
             slotBoardStore.receivedJackpot = { jackpot: {}, duration: 1000 };
-
+            jest.spyOn(settlementHandler as any, "showEffectBonus").mockResolvedValue(undefined);
+            jest.spyOn(settlementHandler as any, "showBonusDialog").mockResolvedValue(undefined);
             await settlementHandler.handleBonuses(bonuses);
 
             expect(jest.requireMock("db://shared-components/shared/utils").AnimationUtils.delayTime).toHaveBeenCalledWith(
                 slotDurationStore.showJackpotWinningAmountDuration
             );
-            expect(slotBoardStore.receivedBonus).toEqual({
-                bonus: bonuses.bonus,
-                duration: slotDurationStore.bonusDuration,
-            });
+            expect(settlementHandler.showEffectBonus).toHaveBeenCalledWith(bonuses.bonus);
+            expect(settlementHandler.showBonusDialog).toHaveBeenCalledWith(bonuses.bonus);
+
         });
 
         it("should handle bonuses without jackpot delay when no jackpot", async () => {
@@ -489,16 +489,16 @@ describe("SlotSettlementHandler", () => {
 
             const bonuses = { bonus: { count: 1 }, roundId: 1, result: [1, 2, 3] };
             slotBoardStore.receivedJackpot = null;
-
+            slotBoardStore.hasInterruption = false;
+            jest.spyOn(settlementHandler as any, "showEffectBonus").mockResolvedValue(undefined);
+            jest.spyOn(settlementHandler as any, "showBonusDialog").mockResolvedValue(undefined);
             await settlementHandler.handleBonuses(bonuses);
 
             expect(jest.requireMock("db://shared-components/shared/utils").AnimationUtils.delayTime).not.toHaveBeenCalledWith(
                 slotDurationStore.showJackpotWinningAmountDuration
             );
-            expect(slotBoardStore.receivedBonus).toEqual({
-                bonus: bonuses.bonus,
-                duration: slotDurationStore.bonusDuration,
-            });
+            expect(settlementHandler.showEffectBonus).toHaveBeenCalledWith(bonuses.bonus);
+            expect(settlementHandler.showBonusDialog).toHaveBeenCalledWith(bonuses.bonus);
 
             spinSpy.mockRestore();
         });

@@ -566,7 +566,7 @@ describe("EffectContainer", () => {
     describe("receivedBonus", () => {
         it("should handle bonus effect when data is provided", async () => {
             // Arrange
-            const bonusData = { bonus: {}, duration: 3000 };
+            const bonusData = { bonus: {}, duration: 3000, onComplete: jest.fn() };
             const mockBundleManager = jest.requireMock(
                 "db://shared-components/shared/common-components/bundle-manager/bundle-manager"
             ).bundleManager;
@@ -592,9 +592,6 @@ describe("EffectContainer", () => {
             expect(effectContainer.loadEffectBonus).toHaveBeenCalled();
             expect(mockCallbackAnimation.setDuration).toHaveBeenCalledWith(3000);
             expect(effectContainer.showEffect).toHaveBeenCalledWith(mockEffectNode);
-            expect(mockAudioUtils.playSFX).toHaveBeenCalledWith(AudioIds.BONUS_POPUP);
-            expect(effectContainer.loadBonusDialog).toHaveBeenCalled();
-            expect(effectContainer.showBonusDialog).toHaveBeenCalledWith({}, expect.any(Function));
         });
 
         it("should return Promise.resolve when no bonus data is provided", async () => {

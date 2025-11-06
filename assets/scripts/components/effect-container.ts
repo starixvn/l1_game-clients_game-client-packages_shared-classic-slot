@@ -149,13 +149,18 @@ export default class EffectContainer extends ObserverComponent {
         this.bonusDialogPrefab = await this.loadPrefab(path);
     }
 
+    @render(SlotBoardStore, (store) => store.hasInterruption)
+    hasInterruption(hasInterruption: boolean) {
+
+    }
+
     @render(SlotBoardStore, (store) => store.receivedBonus, { fireImmediately: false })
-    async receivedBonus(receivedBonus: { bonus: any; duration: number }) {
+    async receivedBonus(receivedBonus: { bonus: any; duration: number, onComplete: () => void }) {
         if (!receivedBonus) {
             return;
         }
+        const { bonus, duration, onComplete } = receivedBonus;
         try {
-            const { bonus, duration } = receivedBonus;
             const transtition = await this.playEffectTransition();
             AudioUtils.playSFX(AudioIds.BONUS);
             await this.loadEffectBonus();
@@ -163,12 +168,28 @@ export default class EffectContainer extends ObserverComponent {
             const animation = effect.getComponent(CallbackAnimation);
             animation.setDuration(duration);
             await this.showEffect(effect);
+            onComplete();
+            transtition?.destroy();
+        } catch (e) {
+            onComplete();
+        }
+    }
+
+    @render(SlotBoardStore, (store) => store.showBonusDialog, { fireImmediately: false })
+    async triggerShowBonus(showBonusDialog: { bonus: any; duration: number; onComplete: () => void }) {
+        if (!showBonusDialog) {
+            return;
+        }
+        const { bonus, duration, onComplete } = showBonusDialog;
+        try {
             AudioUtils.playSFX(AudioIds.BONUS_POPUP);
             await this.loadBonusDialog();
             this.showBonusDialog(bonus, () => {
-                transtition?.destroy();
+                onComplete();
             });
-        } catch (e) { }
+        } catch (e) {
+            onComplete();
+        }
     }
 
     showBonusDialog(bonus: any, onBonusFinished: () => void) {
