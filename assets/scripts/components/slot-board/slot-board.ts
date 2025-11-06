@@ -248,7 +248,6 @@ export default class SlotBoard extends Component {
         const nextReelIndex = current + 1;
         const currentColumns = current < SLOT_COLUMN_MAX_INDEX ? columns.slice(0, nextReelIndex) : columns;
         const peekEffects = this.checkPeekEffect(this.data, currentColumns);
-        console.log('peekEffects at ending ', nextReelIndex);
         this.handleSymbolsPeekEffect(peekEffects, nextReelIndex);
 
         if (current < SLOT_COLUMN_MAX_INDEX) {

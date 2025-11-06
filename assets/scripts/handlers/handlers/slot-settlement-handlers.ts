@@ -98,12 +98,10 @@ export class SlotSettlementHandler {
     }
 
     handleBonusChest(bonusChest: any) {
-        console.log("handleBonusChest  -------");
         this.slotBoardStore.bonusChest = bonusChest;
     }
 
     handleWinningJackpot(winningJackpot: any) {
-        console.log("handleWinningJackpot  -------");
         this.slotBoardStore.winningJackpot = {
             winnerName: winningJackpot.winnerName,
             pool: winningJackpot.pool,
@@ -112,7 +110,6 @@ export class SlotSettlementHandler {
     }
 
     async handleJackpot(jackpot: any) {
-        console.log("handleJackpot  -------");
         await this.spinResultSpecialCase(jackpot);
         if (this.slotBoardStore.hasInterruption) {
             this.onFinishSettlement(0);
@@ -147,7 +144,6 @@ export class SlotSettlementHandler {
     }
 
     async handleBonuses(bonuses: any) {
-        console.log("handleBonuses  -------");
         if (this.slotBoardStore.receivedJackpot) {
             await AnimationUtils.delayTime(this.slotDurationStore.showJackpotWinningAmountDuration);
         } else {
@@ -205,8 +201,6 @@ export class SlotSettlementHandler {
     }
 
     async handleFinish(finish: any) {
-        console.log("handleFinish  -------");
-        this.slotBoardStore.receivedFinish = finish;
         const { result, settlementResult, betWin, bigWin, roundId, totalOfFreeSpins, betByFreeSpin } = finish;
         const { winningLines, jackpot, bonus, freeSpins } = settlementResult;
         const newFreeSpinCount = freeSpins.count ?? 0;
