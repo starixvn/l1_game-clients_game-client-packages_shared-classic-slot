@@ -124,7 +124,26 @@ export class SlotSettlementHandler {
         this.slotBoardStore.winningLines = [
             { payline: jackpot.winningLine, positions: paylines[jackpot.winningLine], symbol: jackpot.symbol },
         ];
-        this.slotBoardStore.receivedJackpot = { jackpot, duration: this.slotDurationStore.jackpotDuration };
+
+        !this.slotBoardStore.hasInterruption && await this.showEffectJackpot(jackpot);
+        !this.slotBoardStore.hasInterruption && await this.showJackpotGame(jackpot);
+        if (this.slotBoardStore.hasInterruption) {
+            this.onFinishSettlement(0);
+        }
+    }
+
+    showJackpotGame(jackpot: any) {
+        return new Promise<void>((resolve) => {
+            this.slotBoardStore.showJackpotGame =
+                { jackpot, duration: this.slotDurationStore.jackpotDuration, onComplete: resolve };
+        });
+    }
+
+    showEffectJackpot(jackpot: any) {
+        return new Promise<void>((resolve) => {
+            this.slotBoardStore.receivedJackpot =
+                { jackpot, duration: this.slotDurationStore.jackpotDuration, onComplete: resolve };
+        });
     }
 
     async handleBonuses(bonuses: any) {

@@ -102,12 +102,12 @@ export default class EffectContainer extends ObserverComponent {
     }
 
     @render(SlotBoardStore, (store) => store.receivedJackpot, { fireImmediately: false })
-    async receivedJackpot(receivedJackpot: { jackpot: any; duration: number }) {
+    async receivedJackpot(receivedJackpot: { jackpot: any; duration: number, onComplete: () => void }) {
         if (!receivedJackpot) {
             return;
         }
+        const { duration, onComplete } = receivedJackpot;
         try {
-            const { jackpot, duration } = receivedJackpot;
             const transtition = await this.playEffectTransition();
             AudioUtils.playSFX(AudioIds.JACKPOT_HIT);
             await this.loadEffectJackpot();
@@ -115,10 +115,24 @@ export default class EffectContainer extends ObserverComponent {
             const animation = effect.getComponent(CallbackAnimation);
             animation.setDuration(duration);
             await this.showEffect(effect);
+            onComplete();
             transtition?.destroy();
+        } catch (e) {
+            onComplete();
+        }
+    }
+
+    @render(SlotBoardStore, (store) => store.showJackpotGame, { fireImmediately: false })
+    async triggerShowJackpotGame(showJackpotGame: { jackpot: any; duration: number, onComplete: () => void }) {
+        if (!showJackpotGame) {
+            return;
+        }
+        const { jackpot, onComplete } = showJackpotGame;
+        try {
             await this.loadJackpotGame();
             await this.showJackpotGame(jackpot.prizes);
-        } catch (e) { }
+            onComplete()
+        } catch (e) { onComplete() }
     }
 
     protected showJackpotGame(prizes: number) {
@@ -147,11 +161,6 @@ export default class EffectContainer extends ObserverComponent {
         }
         const path = `prefabs/dialogs/dialog-bonus`;
         this.bonusDialogPrefab = await this.loadPrefab(path);
-    }
-
-    @render(SlotBoardStore, (store) => store.hasInterruption)
-    hasInterruption(hasInterruption: boolean) {
-
     }
 
     @render(SlotBoardStore, (store) => store.receivedBonus, { fireImmediately: false })

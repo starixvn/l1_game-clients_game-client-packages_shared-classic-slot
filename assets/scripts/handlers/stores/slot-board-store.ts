@@ -33,6 +33,7 @@ export class SlotBoardStore {
     receivedBonus = null;
     showBonusDialog = null;
     receivedJackpot = null;
+    showJackpotGame = null;
     receivedFreeSpins = null;
     receivedBigWin = null;
     winningJackpot = null;
@@ -53,7 +54,9 @@ export class SlotBoardStore {
     clearSettlement() {
         this.receivedFinish = null;
         this.receivedBonus = null;
+        this.showBonusDialog = null;
         this.receivedJackpot = null;
+        this.showJackpotGame = null;
         this.receivedFreeSpins = null;
         this.receivedBigWin = null;
 
