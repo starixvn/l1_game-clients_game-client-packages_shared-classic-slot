@@ -159,7 +159,7 @@ export default class EffectContainer extends ObserverComponent {
         if (!receivedBonus) {
             return;
         }
-        const { bonus, duration, onComplete } = receivedBonus;
+        const { duration, onComplete } = receivedBonus;
         try {
             const transtition = await this.playEffectTransition();
             AudioUtils.playSFX(AudioIds.BONUS);
@@ -180,7 +180,7 @@ export default class EffectContainer extends ObserverComponent {
         if (!showBonusDialog) {
             return;
         }
-        const { bonus, duration, onComplete } = showBonusDialog;
+        const { bonus, onComplete } = showBonusDialog;
         try {
             AudioUtils.playSFX(AudioIds.BONUS_POPUP);
             await this.loadBonusDialog();
