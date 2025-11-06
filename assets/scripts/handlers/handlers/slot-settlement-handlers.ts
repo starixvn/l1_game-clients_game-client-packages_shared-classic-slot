@@ -140,7 +140,6 @@ export class SlotSettlementHandler {
         }
         if (this.slotBoardStore.hasInterruption) {
             this.onFinishSettlement(0);
-            return;
         }
     }
 
