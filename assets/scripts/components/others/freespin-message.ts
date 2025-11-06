@@ -24,7 +24,7 @@ export class FreespinMessage extends ObserverComponent {
         this.lastNode = this.container.getChildByName("last");
         this.container.active = false;
         ComponentUtils.setOpacityNode(this.container, 1);
-        this.addComponent(BlockInputEvents);
+        this.container.addComponent(BlockInputEvents);
         super.onLoad();
     }
 
