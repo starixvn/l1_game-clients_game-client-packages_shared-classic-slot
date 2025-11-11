@@ -57,9 +57,6 @@ export class BetControlStore {
     roundId = -1;
 
     get totalBet() {
-        if (this.freeSpinStake !== -1 || this.fsbPromotionUIStore.isFSBPromotionInProgress) {
-            return 0;
-        }
         return this.displayStake * SLOT_LINES;
     }
 
