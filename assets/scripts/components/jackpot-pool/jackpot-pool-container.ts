@@ -1,3 +1,5 @@
+import gc from "@sg/game-client-base";
+const { MainPlayerStore } = gc.Player;
 import { _decorator } from "cc";
 import { ObserverComponent } from "db://shared-components/shared/common-components/observer-component/scripts/observer-component";
 import Observer from "observer";
@@ -9,6 +11,12 @@ const { render } = Observer;
 @ccclass
 export default class JackpotPoolContainer extends ObserverComponent {
     items: JackpotPoolItem[] = [];
+
+    private xMode = 1;
+    @render(MainPlayerStore, (store) => store.xMode)
+    setXMode(value: number) {
+        this.xMode = value;
+    }
 
     onLoad() {
         this.items = this.getComponentsInChildren(JackpotPoolItem);
@@ -38,6 +46,6 @@ export default class JackpotPoolContainer extends ObserverComponent {
         if (!pool) {
             return;
         }
-        this.getJackpotPoolItem(pool.pool)?.setValue(pool.amount);
+        this.getJackpotPoolItem(pool.pool)?.setValue(pool.amount * this.xMode);
     }
 }

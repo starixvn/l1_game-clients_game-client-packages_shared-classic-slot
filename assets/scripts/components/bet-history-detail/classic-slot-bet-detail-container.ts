@@ -1,4 +1,5 @@
 import gc from "@sg/game-client-base";
+const { MainPlayerStore } = gc.Player;
 import { _decorator, Node } from "cc";
 import { NodeContainer } from "db://shared-components/shared/common-components/node-container/node-container";
 import Observer from "observer";
@@ -10,6 +11,12 @@ const { handle, render } = Observer;
 export class ClassicSlotBetDetailContainer extends NodeContainer {
     protected detailNode: Node = null;
 
+    private xMode = 1;
+    @render(MainPlayerStore, (store) => store.xMode)
+    setXMode(value: number) {
+        this.xMode = value;
+    }
+
     @render(gc.BetHistory.BetDetailHistoryStore, (store) => store.model, { fireImmediately: false })
     showBetDetailPopup(model: gc.BetHistory.BetDetailModel) {
         if (!model) {
@@ -19,6 +26,6 @@ export class ClassicSlotBetDetailContainer extends NodeContainer {
         if (!this.detailNode || !this.detailNode.isValid) {
             this.detailNode = this.createNode();
         }
-        this.detailNode.getComponent(ClassicSlotBetDetail).showBetDetail(model);
+        this.detailNode.getComponent(ClassicSlotBetDetail).showBetDetail({...model, xMode: this.xMode});
     }
 }

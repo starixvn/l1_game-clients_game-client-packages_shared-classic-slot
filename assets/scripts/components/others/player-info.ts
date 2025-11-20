@@ -1,4 +1,5 @@
 import gc from "@sg/game-client-base";
+const { MainPlayerStore } = gc.Player;
 import { _decorator, Label, Tween } from 'cc';
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { BetControlStore } from "db://shared-classic-slot/scripts/handlers/stores/bet-control-store";
@@ -21,10 +22,17 @@ export class PlayerInfo extends ObserverComponent {
     lblTotalWin: Label = null;
 
     private tweenFloatNumber: Tween = null;
+    private xMode = 1;
+
+    @render(MainPlayerStore, (store) => store.xMode)
+    setXMode(value: number) {
+        this.xMode = value;
+    }
 
     @render(gc.Player.MainPlayerStore, (store) => store.balance)
     setBalance(value: number) {
-        this.lblBalance && (this.lblBalance.string = gc.FormatUtils.truncateFixedDecimals(value, 2).toString());
+        const balance =  Math.round(value * this.xMode * 100) / 100;
+        this.lblBalance && (this.lblBalance.string = gc.FormatUtils.truncateFixedDecimals(balance, 2).toString());
     }
 
     @render(BetControlStore, (store) => store.totalBet)

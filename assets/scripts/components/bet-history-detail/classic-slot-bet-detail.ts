@@ -58,29 +58,30 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         super.onLoad();
     }
 
-    showBetDetail(model: gc.BetHistory.BetDetailModel) {
+    showBetDetail(model: gc.BetHistory.BetDetailModel & { xMode: number }) {
+        const { xMode } = model;
         const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult } = model.betHistoryLog as any;
         this.enableJackpot = enableJackpot;
         this.lblRound.string = freeSpin ? `${id.toString()} (Free Spin)` : id.toString();
         this.initResultBoard(result , settlementResult, paylines);
-        this.createBetLogs(model.betHistoryLog);
+        this.createBetLogs(model.betHistoryLog, xMode);
         this.showNoWinningPaylinesText(model.betHistoryLog);
 
         if (this.lblBet) {
-            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2 , true);
+            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet * xMode, 2 , true);
         }
         if (this.lblPaylines) {
             this.lblPaylines.string = paylines.length.toString();
         }
         if (this.lblTotalAmount) {
-            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount, 2, true);
+            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount * xMode, 2, true);
         }
         if (this.lblBetWin) {
             let win = betWin;
             if (settlementResult.jackpot) {
                 win += settlementResult.jackpot.winningAmount;
             }
-            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(win, 2, true);
+            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(win * xMode, 2, true);
         }
         if (this.lblTime) {
             this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
@@ -98,7 +99,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         }
     }
 
-    private createBetLogs(data) {
+    private createBetLogs(data, xMode: number) {
         this.content.destroyAllChildren();
 
         const { paylines, settlementResult, bet } = data;
@@ -112,7 +113,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         });
 
         if (settlementResult.jackpot) {
-            this.addJackpotLog(settlementResult.jackpot, bet, order);
+            this.addJackpotLog(settlementResult.jackpot, bet, xMode, order);
             order++;
         }
 
@@ -124,7 +125,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
                 amount: line.count,
                 payout: line.odds,
                 bet,
-                win: `${bet * line.odds}`,
+                win: `${bet * line.odds * xMode}`,
             };
             this.creatLogItem(itemData);
             order++;
@@ -141,7 +142,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         }
     }
 
-    protected addJackpotLog(jackpot: any, bet, order: number) {
+    protected addJackpotLog(jackpot: any, bet, xMode: number, order: number) {
         let jackpotName = gc.Translator.gameTranslate("jackpot");
         const { pool } = jackpot;
 
@@ -157,7 +158,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
             amount: "5",
             payout: jackpotName,
             bet,
-            win: `${jackpot.winningAmount}`,
+            win: `${jackpot.winningAmount * xMode}`,
         });
     }
 

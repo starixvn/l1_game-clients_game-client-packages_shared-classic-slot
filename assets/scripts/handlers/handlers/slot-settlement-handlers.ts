@@ -98,6 +98,7 @@ export class SlotSettlementHandler {
     }
 
     handleBonusChest(bonusChest: any) {
+        bonusChest.amount = Math.round(bonusChest.amount * this.mainPlayerStore.xMode * 100) / 100;
         this.slotBoardStore.bonusChest = bonusChest;
     }
 
@@ -202,6 +203,7 @@ export class SlotSettlementHandler {
 
     async handleFinish(finish: any) {
         const { result, settlementResult, betWin, bigWin, roundId, totalOfFreeSpins, betByFreeSpin } = finish;
+        const currentBetWin = Math.round(betWin * this.mainPlayerStore.xMode * 100) / 100;
         const { winningLines, jackpot, bonus, freeSpins } = settlementResult;
         const newFreeSpinCount = freeSpins.count ?? 0;
 
@@ -217,13 +219,13 @@ export class SlotSettlementHandler {
         if (!isSpecialCases) {
             this.settleDone();
         }
-        if (betWin === 0) {
-            this.updateWinningBet(betWin);
+        if (currentBetWin === 0) {
+            this.updateWinningBet(currentBetWin);
         }
         if (this.slotBoardStore.hasInterruption) {
-            this.onFinishSettlement(betWin);
+            this.onFinishSettlement(currentBetWin);
         } else {
-            this.handleSettleTween(bigWin, newFreeSpinCount, betWin, jackpot, winningLines, freeSpins);
+            this.handleSettleTween(bigWin, newFreeSpinCount, currentBetWin, jackpot, winningLines, freeSpins);
         }
     }
 

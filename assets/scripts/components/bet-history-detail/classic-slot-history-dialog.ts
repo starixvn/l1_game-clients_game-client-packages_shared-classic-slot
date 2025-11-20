@@ -33,17 +33,17 @@ export class ClassicSlotHistoryDialog extends BetHistoryTable {
     }
 
     override showBetHistory(model: BetHistoryTableType) {
-        super.showBetHistory(model);
+        super.showBetHistory({...model,});
         if (this.isAnimatingSwipe) {
             this.animationSwipe(this.isAnimatingSwipe.direction, () => {
-                super.showBetHistory(model);
+                super.showBetHistory({...model});
             });
 
             this.isAnimatingSwipe = null;
             return;
         }
 
-        super.showBetHistory(model);
+        super.showBetHistory({...model,});
     }
 
     animationSwipe(direction: 'left' | 'right', updateDetailCallback: () => void) {

@@ -47,6 +47,7 @@ export interface Winner {
     baseWinningAmount?: number;
     rate?: number;
     pool?: string;
+    xMode?: number;
 }
 
 export interface WinnersData {

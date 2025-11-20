@@ -48,7 +48,7 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
     betHistoryLog: gc.BetHistory.BetHistoryLog = null;
 
     override setData(data: any) {
-        const { betHistoryLog, index } = data;
+        const { betHistoryLog, index, xMode } = data;
         this.betHistoryLog = betHistoryLog;
 
         const { betWin, settlementResult, time, id, bet, totalAmount } = betHistoryLog;
@@ -61,14 +61,14 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
         this.lblRound.string = id.toString();
-        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : gc.FormatUtils.numberWithCommas(totalAmount, 2);
-        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(win, 2, true);
+        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : gc.FormatUtils.numberWithCommas(totalAmount * xMode, 2);
+        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(win * xMode, 2, true);
 
         const color = win > 0 ? this.textHighlightColor : this.textNormalColor;
         ComponentUtils.setNodeColor(this.lblTime.node, color);
 
         if (this.lblBet) {
-            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet, 2, true);
+            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet * xMode, 2, true);
             ComponentUtils.setNodeColor(this.lblBet.node, color);
         }
 
