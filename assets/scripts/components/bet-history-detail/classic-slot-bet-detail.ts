@@ -132,7 +132,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         });
 
         if (settlementResult.bonus.odds > 0) {
-            this.addBonusLog(settlementResult.bonus, order);
+            this.addBonusLog(settlementResult.bonus, xMode, order);
             order++;
         }
 
@@ -162,7 +162,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         });
     }
 
-    private addBonusLog(bonus: any, order: number) {
+    private addBonusLog(bonus: any, xMode: number, order: number) {
         this.creatLogItem({
             order,
             paylineSprite: null,
@@ -170,7 +170,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
             amount: bonus.count,
             payout: `${bonus.odds} Bonus`,
             bet: "",
-            win: bonus.winningAmount,
+            win: `${bonus.winningAmount * xMode}`,
         });
     }
 

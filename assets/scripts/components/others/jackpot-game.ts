@@ -1,3 +1,5 @@
+import gc from "@sg/game-client-base";
+const { MainPlayerStore } = gc.Player;
 import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -47,6 +49,12 @@ export default class JackpotGame extends ObserverComponent {
 
     private showing = false;
     private hasInterruption = false;
+    private xMode = 1;
+
+    @render(MainPlayerStore, (store) => store.xMode)
+    setXMode(value: number) {
+        this.xMode = value;
+    }
 
     @render(SlotBoardStore, (store) => store.hasInterruption)
     renderHasInterruption(hasInterruption: boolean) {
@@ -145,7 +153,7 @@ export default class JackpotGame extends ObserverComponent {
         const jackpotWinningAmount = winningAmount.getComponent(JackpotWinningAmount);
 
         jackpotWinningAmount.setAmount({
-            amount: amount,
+            amount: amount * this.xMode,
             duration: this.slotGameConfigs.showJackpotWinningAmountDuration - delayTime,
         });
         jackpotWinningAmount.loadPoolSprite(pool);
