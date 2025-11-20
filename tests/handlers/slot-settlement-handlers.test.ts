@@ -205,6 +205,7 @@ jest.mock("@sg/game-client-base", () => {
             ...actualGc.Player,
             MainPlayerStore: jest.fn().mockImplementation(() => ({
                 rate: 1,
+                xMode: 1,
             })),
         },
         NumberUtils: {
@@ -381,6 +382,7 @@ describe("SlotSettlementHandler", () => {
         betStore.lastReceivedBet = null;
         errorStore.apiError = null;
         mainPlayerStore.rate = 1;
+        mainPlayerStore.xMode = 1;
         fsbPromotionUIStore.isSpinningFSB = false;
         fsbPromotionUIStore.isShowFreeSpinMessage = false;
         fsbPromotionUIStore.isFSBInfoReady = false;
