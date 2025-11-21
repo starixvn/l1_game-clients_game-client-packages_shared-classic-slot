@@ -40,9 +40,9 @@ export class ClassicSlotBaseBetDetailLogItem extends Component {
         this.amount.string = amount;
         this.payout.string = payout;
         if (this.bet) {
-            this.bet.string = bet !== "" ? gc.FormatUtils.numberWithCommas(bet, 2) : "";
+            this.bet.string = bet !== "" ? gc.FormatUtils.numberWithCommas(bet, 6) : "";
         }
-        this.win.string = win !== "" ? gc.FormatUtils.numberWithCommas(win, 2) : "";
+        this.win.string = win !== "" ? gc.FormatUtils.numberWithCommas(win, 6) : "";
         this.bg.active = order % 2 > 0;
     }
 }
