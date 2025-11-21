@@ -61,14 +61,14 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
         this.lblRound.string = id.toString();
-        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : gc.FormatUtils.numberWithCommas(totalAmount * xMode, 2);
-        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(win * xMode, 2, true);
+        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : gc.FormatUtils.numberWithCommas(totalAmount * xMode, 6);
+        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(win * xMode, 6);
 
         const color = win > 0 ? this.textHighlightColor : this.textNormalColor;
         ComponentUtils.setNodeColor(this.lblTime.node, color);
 
         if (this.lblBet) {
-            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet * xMode, 2, true);
+            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet * xMode, 6);
             ComponentUtils.setNodeColor(this.lblBet.node, color);
         }
 

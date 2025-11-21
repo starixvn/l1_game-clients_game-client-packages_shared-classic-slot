@@ -31,7 +31,7 @@ export class PlayerInfo extends ObserverComponent {
 
     @render(gc.Player.MainPlayerStore, (store) => store.balance)
     setBalance(value: number) {
-        const balance =  Math.round(value * this.xMode * 100) / 100;
+        const balance =  gc.FormatUtils.formatXMode(value, this.xMode);
         this.lblBalance && (this.lblBalance.string = gc.FormatUtils.truncateFixedDecimals(balance, 2).toString());
     }
 
