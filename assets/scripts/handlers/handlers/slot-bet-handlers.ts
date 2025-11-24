@@ -18,6 +18,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     @inject(SlotBetResponseHandler) protected slotBetResponseHandler: SlotBetResponseHandler;
     @inject(FSBPromotionUIStore) protected fsbPromotionUIStore: FSBPromotionUIStore;
     @inject(FSBPromotionStore) protected fsbPromotionStore: FSBPromotionStore;
+    @inject(gc.Player.MainPlayerStore) protected mainPlayerStore: gc.Player.MainPlayerStore;
 
     protected timeoutHolding: NodeJS.Timeout;
     protected readonly HOLDING_THRESHOLD = 1000;
@@ -111,7 +112,8 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     isEnoughBalance() {
-        if (this.betControlStore.totalBet > this.betStore.availableBalance) {
+        const availableBalance = gc.FormatUtils.formatXMode(this.betStore.availableBalance, this.mainPlayerStore.xMode);
+        if (this.betControlStore.totalBet > availableBalance) {
             this.showNoticePlaceBetFailure();
             return false;
         }
