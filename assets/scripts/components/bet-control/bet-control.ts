@@ -77,7 +77,7 @@ export default class BetControl extends ObserverComponent {
         if (!this.lblTotalBet) {
             return;
         }
-        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 2, true);
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 6, true);
     }
 
     @render(BetControlStore, (store) => store.displayStake)

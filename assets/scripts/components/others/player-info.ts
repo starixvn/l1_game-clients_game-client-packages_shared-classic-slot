@@ -37,7 +37,7 @@ export class PlayerInfo extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.totalBet)
     renderTotalBet(totalBet: number) {
-        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 2, true);
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 6, true);
     }
 
     @render(SlotBoardStore, (store) => store.winningBet)

@@ -60,7 +60,7 @@ export default class BetLevelsContainer extends ObserverComponent {
         if (!this.lblTotalBet) {
             return
         }
-        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 2);
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 6);
     }
 
     @render(BetControlStore, (store) => store.betLevels)
