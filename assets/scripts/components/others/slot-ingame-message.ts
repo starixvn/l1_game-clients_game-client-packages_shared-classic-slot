@@ -120,7 +120,7 @@ export class SlotIngameMessage extends ObserverComponent {
     }
 
     async showTotalWin(value: number) {
-        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2);
+        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 6);
         this.updateScrolling();
 
         this.nodeTotalWin.scale = v3(1, 1, 1).multiplyScalar(0.3);

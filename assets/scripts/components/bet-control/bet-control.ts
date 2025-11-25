@@ -104,7 +104,7 @@ export default class BetControl extends ObserverComponent {
             to: totalWin,
             duration: 0.6,
             progress: (value) => {
-                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 2, true);
+                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 6, true);
             },
         });
     }
