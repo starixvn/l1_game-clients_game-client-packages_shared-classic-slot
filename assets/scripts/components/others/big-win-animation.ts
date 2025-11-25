@@ -1,6 +1,10 @@
+import gc from "@sg/game-client-base";
+const { MainPlayerStore } = gc.Player;
 import { _decorator, Component, Label, tween } from "cc";
 import { AnimationUtils } from "db://shared-components/shared/utils";
 const { ccclass, property } = _decorator;
+import Observer from "observer";
+const { render } = Observer;
 
 interface BigWinType {
     amount: number;
@@ -14,6 +18,12 @@ export default class BigWinAnimation extends Component {
     @property(Label)
     amountLabel: Label = null;
 
+    private xMode = 1;
+    @render(MainPlayerStore, (store) => store.xMode)
+    setXMode(value: number) {
+        this.xMode = value;
+    }
+
     setAmount(data: BigWinType) {
         const { amount } = data;
         const duration = data.duration ?? 0;
@@ -22,7 +32,7 @@ export default class BigWinAnimation extends Component {
 
         tween(this.amountLabel.node)
             .delay(delayTime)
-            .call(() => AnimationUtils.floatToNumber({ label: this.amountLabel, amount, duration, noZeroSuffix: noZeroSuffix }))
+            .call(() => AnimationUtils.floatToNumber({ label: this.amountLabel, amount, duration, noZeroSuffix: noZeroSuffix, xMode: this.xMode }))
             .start();
     }
 
