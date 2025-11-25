@@ -273,7 +273,7 @@ export class SlotSettlementHandler {
     protected onFinishSettlement(betWin: number) {
         this.betControlStore.syncFreeSpinCount();
         if (this.betControlStore.freeSpinEnabled) {
-            this.betControlStore.setFreeSpinStake(this.betControlStore.stake);
+            this.betControlStore.setFreeSpinStake(this.betControlStore.freeSpinStake);
         }
         this.finishSettlement();
         this.fsbPromotionUIHandler.updateTotalWin({ win: betWin, totalFreeSpins: this.betControlStore.freeSpinCount });
@@ -426,10 +426,11 @@ export class SlotSettlementHandler {
         }
     }
 
-    handleFreeSpins(freeSpins: { total: number; bet: number; promotionId?: string }) {
+    handleFreeSpins(freeSpins: { total: number; bet: number; promotionId?: string, xMode: number }) {
         const total = freeSpins.total;
         if (total > 0) {
             this.betControlStore.setFreeSpinStake(freeSpins.bet);
+            this.betControlStore.setXModeFreeSpin(freeSpins.xMode);
             this.betControlStore.setTotalFreeSpins(total);
             this.betControlStore.syncFreeSpinCount();
             if (freeSpins.promotionId) {

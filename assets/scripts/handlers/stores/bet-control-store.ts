@@ -42,13 +42,14 @@ export class BetControlStore {
     betLevels: number[] = [];
     stake = 0;
     freeSpinStake = -1;
+    xModeFreeSpin = 1;
     defaultStake = 0;
 
     totalBetChanged: { value: number } = null;
 
     get displayStake() {
         if (this.freeSpinEnabled && this.freeSpinStake !== -1) {
-            return this.freeSpinStake;
+            return this.freeSpinStakeXmode();
         }
 
         return this.stake;
@@ -158,6 +159,10 @@ export class BetControlStore {
         this.freeSpinStake = stake;
     }
 
+    setXModeFreeSpin(xModeFreeSpin: number) {
+        this.xModeFreeSpin = xModeFreeSpin;
+    }
+
     quickChangeStake(increase: boolean) {
         const index = this.stakeIndex;
         if (index === -1) {
@@ -242,5 +247,9 @@ export class BetControlStore {
         this.freeSpinCount = -1;
         this.freeSpinCountDisplay = -1;
         this.freeSpinStake = -1;
+    }
+
+    freeSpinStakeXmode() {
+        return this.mainPlayerStore.xMode > 1 && this.xModeFreeSpin === 1 ? this.freeSpinStake * this.mainPlayerStore.xMode : this.freeSpinStake;
     }
 }
