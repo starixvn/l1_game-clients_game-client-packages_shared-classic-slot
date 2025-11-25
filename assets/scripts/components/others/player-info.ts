@@ -32,7 +32,7 @@ export class PlayerInfo extends ObserverComponent {
     @render(gc.Player.MainPlayerStore, (store) => store.balance)
     setBalance(value: number) {
         const balance =  gc.FormatUtils.formatXMode(value, this.xMode);
-        this.lblBalance && (this.lblBalance.string = gc.FormatUtils.truncateFixedDecimals(balance, 2).toString());
+        this.lblBalance && (this.lblBalance.string = gc.FormatUtils.truncateFixedDecimals(balance, 6).toString());
     }
 
     @render(BetControlStore, (store) => store.totalBet)
