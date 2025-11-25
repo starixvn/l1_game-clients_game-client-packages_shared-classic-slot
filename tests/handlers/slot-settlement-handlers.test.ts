@@ -72,6 +72,7 @@ jest.mock("../../assets/scripts/handlers/stores/bet-control-store", () => ({
         this.setFreeSpinStake = jest.fn((stake: number) => {
             this.freeSpinStake = stake;
         });
+        this.setXModeFreeSpin = jest.fn();
 
         // Add getter for turboEnabledOnSpin
         Object.defineProperty(this, "turboEnabledOnSpin", {
@@ -359,6 +360,7 @@ describe("SlotSettlementHandler", () => {
         betControlStore.clearFreeSpins.mockClear();
         betControlStore.syncFreeSpinCount.mockClear();
         betControlStore.setFreeSpinStake.mockClear();
+        betControlStore.setXModeFreeSpin.mockClear();
         getBalanceHandler.handle.mockClear();
         (gc.NumberUtils.getValueByCurrency as jest.Mock).mockClear();
         fsbPromotionUIHandler.updateTotalWin.mockClear();
@@ -951,21 +953,23 @@ describe("SlotSettlementHandler", () => {
 
     describe("handleFreeSpins", () => {
         it("should set free spin stake and count when total > 0", () => {
-            const freeSpins = { total: 5, bet: 50 };
+            const freeSpins = { total: 5, bet: 50, xMode: 1 };
 
             settlementHandler.handleFreeSpins(freeSpins);
 
             expect(betControlStore.setFreeSpinStake).toHaveBeenCalledWith(50);
+            expect(betControlStore.setXModeFreeSpin).toHaveBeenCalledWith(1);
             expect(betControlStore.setTotalFreeSpins).toHaveBeenCalledWith(5);
             expect(betControlStore.syncFreeSpinCount).toHaveBeenCalled();
         });
 
         it("should not set anything when total is 0", () => {
-            const freeSpins = { total: 0, bet: 50 };
+            const freeSpins = { total: 0, bet: 50, xMode: 1 };
 
             settlementHandler.handleFreeSpins(freeSpins);
 
             expect(betControlStore.setFreeSpinStake).not.toHaveBeenCalled();
+            expect(betControlStore.setXModeFreeSpin).not.toHaveBeenCalled();
             expect(betControlStore.setTotalFreeSpins).not.toHaveBeenCalled();
             expect(betControlStore.syncFreeSpinCount).not.toHaveBeenCalled();
         });
