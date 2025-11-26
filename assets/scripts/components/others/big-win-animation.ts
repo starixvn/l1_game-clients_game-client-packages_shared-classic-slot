@@ -28,11 +28,10 @@ export default class BigWinAnimation extends Component {
         const { amount } = data;
         const duration = data.duration ?? 0;
         const delayTime = data.delayTime ?? 0;
-        const noZeroSuffix = data.noZeroSuffix ?? false;
 
         tween(this.amountLabel.node)
             .delay(delayTime)
-            .call(() => AnimationUtils.floatToNumber({ label: this.amountLabel, amount, duration, noZeroSuffix: noZeroSuffix, xMode: this.xMode }))
+            .call(() => AnimationUtils.floatToNumber({ label: this.amountLabel, amount, duration, noZeroSuffix: true, xMode: this.xMode }))
             .start();
     }
 
