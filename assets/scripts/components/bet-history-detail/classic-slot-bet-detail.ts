@@ -60,33 +60,29 @@ export class ClassicSlotBetDetail extends ObserverComponent {
     }
 
     showBetDetail(model: gc.BetHistory.BetDetailModel) {
-        const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult, xMode } = model.betHistoryLog as any;
-        const isShowActualValue = getXMode() === 1;
-        const xModeBetLog = isShowActualValue ? 1 : xMode;
+        const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult } = model.betHistoryLog as any;
+        const xMode = getXMode();
         this.enableJackpot = enableJackpot;
         this.lblRound.string = freeSpin ? `${id.toString()} (Free Spin)` : id.toString();
         this.initResultBoard(result , settlementResult, paylines);
-        this.createBetLogs(model.betHistoryLog, xModeBetLog);
+        this.createBetLogs(model.betHistoryLog, xMode);
         this.showNoWinningPaylinesText(model.betHistoryLog);
 
         if (this.lblBet) {
-            const betLog = isShowActualValue ? bet : bet * xMode;
-            this.lblBet.string = formatStringXMode(betLog);
+            this.lblBet.string = formatStringXMode(bet * xMode);
         }
         if (this.lblPaylines) {
             this.lblPaylines.string = paylines.length.toString();
         }
         if (this.lblTotalAmount) {
-            const totalAmountLog = isShowActualValue ? totalAmount : totalAmount * xMode;
-            this.lblTotalAmount.string = formatStringXMode(totalAmountLog);
+            this.lblTotalAmount.string = formatStringXMode(totalAmount * xMode);
         }
         if (this.lblBetWin) {
             let win = betWin;
             if (settlementResult.jackpot) {
                 win += settlementResult.jackpot.winningAmount;
             }
-            const winLog = isShowActualValue ? win : win * xMode;
-            this.lblBetWin.string = formatStringXMode(winLog);
+            this.lblBetWin.string = formatStringXMode(win * xMode);
         }
         if (this.lblTime) {
             this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);

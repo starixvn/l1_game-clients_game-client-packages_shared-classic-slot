@@ -52,8 +52,8 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         const { betHistoryLog, index } = data;
         this.betHistoryLog = betHistoryLog;
 
-        const { betWin, settlementResult, time, id, bet, totalAmount, xMode } = betHistoryLog;
-        const isShowActualValue = getXMode() === 1;
+        const { betWin, settlementResult, time, id, bet, totalAmount } = betHistoryLog;
+        const xMode = getXMode();
         let win = betWin;
         if (settlementResult.jackpot) {
             win += settlementResult.jackpot.winningAmount;
@@ -63,17 +63,14 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
         this.lblRound.string = id.toString();
-        const totalAmountLog = isShowActualValue ? totalAmount : totalAmount * xMode;
-        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : formatStringXMode(totalAmountLog);
-        const winLog = isShowActualValue ? win : win * xMode;
-        this.lblTotalWin.string = formatStringXMode(winLog);
+        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : formatStringXMode(totalAmount * xMode);
+        this.lblTotalWin.string = formatStringXMode(win * xMode);
 
         const color = win > 0 ? this.textHighlightColor : this.textNormalColor;
         ComponentUtils.setNodeColor(this.lblTime.node, color);
 
         if (this.lblBet) {
-            const betLog = isShowActualValue ? bet : bet * xMode;
-            this.lblBet.string = formatStringXMode(betLog);
+            this.lblBet.string = formatStringXMode(bet * xMode);
             ComponentUtils.setNodeColor(this.lblBet.node, color);
         }
 
