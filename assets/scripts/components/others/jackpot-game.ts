@@ -1,5 +1,3 @@
-import gc from "@sg/game-client-base";
-const { MainPlayerStore } = gc.Player;
 import { _decorator, Button, instantiate, Node, Prefab, Tween } from "cc";
 import { AudioIds } from "db://assets/game/audios/AudioIds";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
@@ -15,6 +13,7 @@ import { SlotDurationStore } from "../../handlers/stores/slot-duration-store";
 import { initTimer } from "../../utils/classic-slot-utils";
 import JackpotGameItem from "./jackpot-game-item";
 import JackpotWinningAmount from "./jackpot-winning-amount";
+import { getXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { handle, render } = Observer;
 const { ccclass, property } = _decorator;
 
@@ -49,12 +48,6 @@ export default class JackpotGame extends ObserverComponent {
 
     private showing = false;
     private hasInterruption = false;
-    private xMode = 1;
-
-    @render(MainPlayerStore, (store) => store.xMode)
-    setXMode(value: number) {
-        this.xMode = value;
-    }
 
     @render(SlotBoardStore, (store) => store.hasInterruption)
     renderHasInterruption(hasInterruption: boolean) {
@@ -153,7 +146,7 @@ export default class JackpotGame extends ObserverComponent {
         const jackpotWinningAmount = winningAmount.getComponent(JackpotWinningAmount);
 
         jackpotWinningAmount.setAmount({
-            amount: amount * this.xMode,
+            amount: amount * getXMode(),
             duration: this.slotGameConfigs.showJackpotWinningAmountDuration - delayTime,
         });
         jackpotWinningAmount.loadPoolSprite(pool);

@@ -7,6 +7,8 @@ import { SlotBoardStore } from "db://shared-classic-slot/scripts/handlers/stores
 import { floatToNumber } from "db://shared-classic-slot/scripts/utils/classic-slot-utils";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ObserverComponent } from 'db://shared-components/shared/common-components/observer-component/scripts/observer-component';
+import { setXMode, getXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
+
 import Observer from "observer";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
@@ -22,16 +24,15 @@ export class PlayerInfo extends ObserverComponent {
     lblTotalWin: Label = null;
 
     private tweenFloatNumber: Tween = null;
-    private xMode = 1;
 
     @render(MainPlayerStore, (store) => store.xMode)
     setXMode(value: number) {
-        this.xMode = value;
+        setXMode(value);
     }
 
     @render(gc.Player.MainPlayerStore, (store) => store.balance)
     setBalance(value: number) {
-        const balance =  gc.FormatUtils.formatXMode(value, this.xMode);
+        const balance =  gc.FormatUtils.formatXMode(value, getXMode());
         this.lblBalance && (this.lblBalance.string = gc.FormatUtils.truncateFixedDecimals(balance, 6).toString());
     }
 

@@ -4,6 +4,7 @@ import BetHistoryBodyItem from "db://shared-components/game/bet-history/scripts/
 import { AppUtils, ComponentUtils } from "db://shared-components/shared/utils";
 import Observer from "observer";
 import { resourceCaches } from "../../utils/classic-slot-utils";
+import { formatStringXMode, getXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
 const { handle } = Observer;
 
@@ -48,10 +49,11 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
     betHistoryLog: gc.BetHistory.BetHistoryLog = null;
 
     override setData(data: any) {
-        const { betHistoryLog, index, xMode } = data;
+        const { betHistoryLog, index } = data;
         this.betHistoryLog = betHistoryLog;
 
-        const { betWin, settlementResult, time, id, bet, totalAmount } = betHistoryLog;
+        const { betWin, settlementResult, time, id, bet, totalAmount, xMode } = betHistoryLog;
+        const isShowActualValue = getXMode() === 1;
         let win = betWin;
         if (settlementResult.jackpot) {
             win += settlementResult.jackpot.winningAmount;
@@ -61,14 +63,17 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
         this.lblRound.string = id.toString();
-        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : gc.FormatUtils.numberWithCommas(totalAmount * xMode, 6);
-        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(win * xMode, 6);
+        const totalAmountLog = isShowActualValue ? totalAmount : totalAmount * xMode;
+        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : formatStringXMode(totalAmountLog);
+        const winLog = isShowActualValue ? win : win * xMode;
+        this.lblTotalWin.string = formatStringXMode(winLog);
 
         const color = win > 0 ? this.textHighlightColor : this.textNormalColor;
         ComponentUtils.setNodeColor(this.lblTime.node, color);
 
         if (this.lblBet) {
-            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet * xMode, 6);
+            const betLog = isShowActualValue ? bet : bet * xMode;
+            this.lblBet.string = formatStringXMode(betLog);
             ComponentUtils.setNodeColor(this.lblBet.node, color);
         }
 

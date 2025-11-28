@@ -6,6 +6,7 @@ import { ComponentUtils } from "db://shared-components/shared/utils";
 import { paylines, SpecialSymbol } from "../../definitions";
 import { formatNamePool, getSpriteLine, getSymbolName, resourceCaches } from "../../utils/classic-slot-utils";
 import { ClassicSlotBaseBetDetailLogItem } from "./classic-slot-bet-detail-log-item";
+import { formatStringXMode, getXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
 
 @ccclass("ClassicSlotBetDetail")
@@ -58,30 +59,34 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         super.onLoad();
     }
 
-    showBetDetail(model: gc.BetHistory.BetDetailModel & { xMode: number }) {
-        const { xMode } = model;
-        const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult } = model.betHistoryLog as any;
+    showBetDetail(model: gc.BetHistory.BetDetailModel) {
+        const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult, xMode } = model.betHistoryLog as any;
+        const isShowActualValue = getXMode() === 1;
+        const xModeBetLog = isShowActualValue ? 1 : xMode;
         this.enableJackpot = enableJackpot;
         this.lblRound.string = freeSpin ? `${id.toString()} (Free Spin)` : id.toString();
         this.initResultBoard(result , settlementResult, paylines);
-        this.createBetLogs(model.betHistoryLog, xMode);
+        this.createBetLogs(model.betHistoryLog, xModeBetLog);
         this.showNoWinningPaylinesText(model.betHistoryLog);
 
         if (this.lblBet) {
-            this.lblBet.string = gc.FormatUtils.numberWithCommas(bet * xMode, 6 , true);
+            const betLog = isShowActualValue ? bet : bet * xMode;
+            this.lblBet.string = formatStringXMode(betLog);
         }
         if (this.lblPaylines) {
             this.lblPaylines.string = paylines.length.toString();
         }
         if (this.lblTotalAmount) {
-            this.lblTotalAmount.string = gc.FormatUtils.numberWithCommas(totalAmount * xMode, 6, true);
+            const totalAmountLog = isShowActualValue ? totalAmount : totalAmount * xMode;
+            this.lblTotalAmount.string = formatStringXMode(totalAmountLog);
         }
         if (this.lblBetWin) {
             let win = betWin;
             if (settlementResult.jackpot) {
                 win += settlementResult.jackpot.winningAmount;
             }
-            this.lblBetWin.string = gc.FormatUtils.numberWithCommas(win * xMode, 6, true);
+            const winLog = isShowActualValue ? win : win * xMode;
+            this.lblBetWin.string = formatStringXMode(winLog);
         }
         if (this.lblTime) {
             this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
