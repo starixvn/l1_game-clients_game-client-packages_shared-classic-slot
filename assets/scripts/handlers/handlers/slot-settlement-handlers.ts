@@ -316,7 +316,7 @@ export class SlotSettlementHandler {
             })
             .delay(this.slotDurationStore.freespinDuration + this.slotDurationStore.transitionDuration)
             .call(() => {
-                this.betControlStore.setFreeSpinStake(this.betControlStore.stake);
+                this.betControlStore.setFreeSpinStake(this.betControlStore.freeSpinEnabled ? this.betControlStore.freeSpinStake : this.betControlStore.stake);
                 this.betControlStore.syncFreeSpinCount();
             });
     }
