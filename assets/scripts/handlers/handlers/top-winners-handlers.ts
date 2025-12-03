@@ -98,7 +98,7 @@ export class TopWinnersHandler {
                 const { baseTotalAmount, totalAmount } = winner;
                 winner.amountString = gc.FormatUtils.numberWithCommas(
                     this.getValueByExchangeRateCode(baseTotalAmount ?? totalAmount * rate, exchangeRateCode),
-                    2
+                    6
                 );
             }
         }
