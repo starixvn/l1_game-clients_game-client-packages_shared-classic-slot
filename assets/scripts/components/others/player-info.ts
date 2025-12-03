@@ -7,7 +7,7 @@ import { SlotBoardStore } from "db://shared-classic-slot/scripts/handlers/stores
 import { floatToNumber } from "db://shared-classic-slot/scripts/utils/classic-slot-utils";
 import { AudioUtils } from "db://shared-components/game/audios/utils";
 import { ObserverComponent } from 'db://shared-components/shared/common-components/observer-component/scripts/observer-component';
-import { setXMode, formatNumberXMode, formatStringXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
+import { setXMode, formatNumberXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 
 import Observer from "observer";
 const { ccclass, property } = _decorator;
@@ -37,7 +37,7 @@ export class PlayerInfo extends ObserverComponent {
 
     @render(BetControlStore, (store) => store.totalBet)
     renderTotalBet(totalBet: number) {
-        this.lblTotalBet.string = formatStringXMode(totalBet);
+        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 6);
     }
 
     @render(SlotBoardStore, (store) => store.winningBet)
@@ -54,7 +54,7 @@ export class PlayerInfo extends ObserverComponent {
             to: totalWin,
             duration: 0.6,
             progress: (value) => {
-                this.lblTotalWin.string = formatStringXMode(value);
+                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 6);
             },
         });
     }

@@ -11,6 +11,7 @@ import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotDurationStore } from "../stores/slot-duration-store";
 import { SlotBetHandler } from "./slot-bet-handlers";
 import { SlotErrorHandler } from "./slot-error-handler";
+import { formatNumberXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotSettlementHandler {
@@ -98,7 +99,7 @@ export class SlotSettlementHandler {
     }
 
     handleBonusChest(bonusChest: any) {
-        bonusChest.amount = gc.FormatUtils.formatXMode(bonusChest.amount, this.mainPlayerStore.xMode);
+        bonusChest.amount = formatNumberXMode(bonusChest.amount);
         this.slotBoardStore.bonusChest = bonusChest;
     }
 
@@ -203,7 +204,7 @@ export class SlotSettlementHandler {
 
     async handleFinish(finish: any) {
         const { result, settlementResult, betWin, bigWin, roundId, totalOfFreeSpins, betByFreeSpin } = finish;
-        const currentBetWin = gc.FormatUtils.formatXMode(betWin, this.mainPlayerStore.xMode);
+        const currentBetWin = formatNumberXMode(betWin);
         const { winningLines, jackpot, bonus, freeSpins } = settlementResult;
         const newFreeSpinCount = freeSpins.count ?? 0;
 

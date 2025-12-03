@@ -9,6 +9,7 @@ import { BetControlStore } from "../stores/bet-control-store";
 import { SlotBoardStore } from "../stores/slot-board-store";
 import { SlotBetResponseHandler } from "./slot-bet-response-handlers";
 import { SlotUIHandler } from "./slot-ui-handler";
+import { formatNumberXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { injectable, inject } = inversify;
 @injectable()
 export class SlotBetHandler extends gc.Bet.BetHandler {
@@ -112,7 +113,7 @@ export class SlotBetHandler extends gc.Bet.BetHandler {
     }
 
     isEnoughBalance() {
-        const availableBalance = gc.FormatUtils.formatXMode(this.betStore.availableBalance, this.mainPlayerStore.xMode);
+        const availableBalance = formatNumberXMode(this.betStore.availableBalance);
         if (this.betControlStore.totalBet > availableBalance) {
             this.showNoticePlaceBetFailure();
             return false;
