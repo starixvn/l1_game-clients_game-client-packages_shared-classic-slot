@@ -10,6 +10,7 @@ import { BetControlStore, SlotBetHandler, SlotUIHandler } from "../../handlers";
 import { SlotBoardStore } from "../../handlers/stores/slot-board-store";
 import { SlotUIStore } from "../../handlers/stores/slot-ui-store";
 import { DialogName, floatToNumber, resourceCaches } from "../../utils/classic-slot-utils";
+import { formatStringXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
 const { handle, render } = Observer;
 
@@ -77,7 +78,7 @@ export default class BetControl extends ObserverComponent {
         if (!this.lblTotalBet) {
             return;
         }
-        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 6, true);
+        this.lblTotalBet.string = formatStringXMode(totalBet);
     }
 
     @render(BetControlStore, (store) => store.displayStake)
@@ -104,7 +105,7 @@ export default class BetControl extends ObserverComponent {
             to: totalWin,
             duration: 0.6,
             progress: (value) => {
-                this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 6, true);
+                this.lblTotalWin.string = formatStringXMode(value);
             },
         });
     }

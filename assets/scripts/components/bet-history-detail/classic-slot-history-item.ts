@@ -2,11 +2,9 @@ import gc from "@sg/game-client-base";
 import { _decorator, Button, Color, Label, Node, Sprite } from "cc";
 import BetHistoryBodyItem from "db://shared-components/game/bet-history/scripts/components/bet-history-body-item";
 import { AppUtils, ComponentUtils } from "db://shared-components/shared/utils";
-import Observer from "observer";
 import { resourceCaches } from "../../utils/classic-slot-utils";
-import { formatStringXMode, getXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
+import { formatStringXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
-const { handle } = Observer;
 
 @ccclass("ClassicSlotHistoryItem")
 export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
@@ -53,7 +51,6 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.betHistoryLog = betHistoryLog;
 
         const { betWin, settlementResult, time, id, bet, totalAmount } = betHistoryLog;
-        const xMode = getXMode();
         let win = betWin;
         if (settlementResult.jackpot) {
             win += settlementResult.jackpot.winningAmount;
@@ -63,14 +60,14 @@ export class ClassicSlotHistoryItem extends BetHistoryBodyItem {
         this.nodeBackground.active = index % 2 > 0;
         this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
         this.lblRound.string = id.toString();
-        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : formatStringXMode(totalAmount * xMode);
-        this.lblTotalWin.string = formatStringXMode(win * xMode);
+        this.lblTotalStake.string = betHistoryLog.freeSpin ? "0" : formatStringXMode(totalAmount);
+        this.lblTotalWin.string = formatStringXMode(win);
 
         const color = win > 0 ? this.textHighlightColor : this.textNormalColor;
         ComponentUtils.setNodeColor(this.lblTime.node, color);
 
         if (this.lblBet) {
-            this.lblBet.string = formatStringXMode(bet * xMode);
+            this.lblBet.string = formatStringXMode(bet);
             ComponentUtils.setNodeColor(this.lblBet.node, color);
         }
 

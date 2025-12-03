@@ -7,6 +7,7 @@ import { SlotUIHandler } from "../../handlers/handlers/slot-ui-handler";
 import { BetControlStore } from "../../handlers/stores/bet-control-store";
 import { DialogName } from "../../utils/classic-slot-utils";
 import BetLevelItem from "./bet-level-item";
+import { formatStringXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
@@ -60,7 +61,7 @@ export default class BetLevelsContainer extends ObserverComponent {
         if (!this.lblTotalBet) {
             return
         }
-        this.lblTotalBet.string = gc.FormatUtils.numberWithCommas(totalBet, 6);
+        this.lblTotalBet.string = formatStringXMode(totalBet);
     }
 
     @render(BetControlStore, (store) => store.betLevels)

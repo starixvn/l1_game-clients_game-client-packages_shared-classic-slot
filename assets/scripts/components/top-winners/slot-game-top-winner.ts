@@ -7,7 +7,6 @@ import Observer from "observer";
 import { TopWinnersHandler } from "../../handlers/handlers/top-winners-handlers";
 import { TopWinnersStore, TopWinnerType, WinnersData } from "../../handlers/stores/top-winners-store";
 import SlotGameTopWinnerItem from "./slot-game-top-winner-item";
-import { getXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
 const { render, handle } = Observer;
 @ccclass
@@ -70,7 +69,7 @@ export default class SlotGameTopWinner extends ObserverComponent {
             const node = instantiate(this.itemPrefab);
 
             this.content.addChild(node);
-            node.getComponent(SlotGameTopWinnerItem).setData({...winner, xMode: getXMode()}, index);
+            node.getComponent(SlotGameTopWinnerItem).setData(winner, index);
         });
     }
 

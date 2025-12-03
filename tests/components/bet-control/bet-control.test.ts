@@ -194,7 +194,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6, true);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6);
             expect(betControl.lblTotalBet.string).toBe("1,000");
         });
 
@@ -203,7 +203,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6, true);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6);
             expect(betControl.lblTotalBet.string).toBe("0");
         });
 
@@ -212,7 +212,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6, true);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6);
             expect(betControl.lblTotalBet.string).toBe("1,000,000");
         });
 
@@ -221,7 +221,7 @@ describe("BetControl", () => {
 
             betControl.renderTotalBet(totalBet);
 
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6, true);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(totalBet, 6);
         });
     });
 

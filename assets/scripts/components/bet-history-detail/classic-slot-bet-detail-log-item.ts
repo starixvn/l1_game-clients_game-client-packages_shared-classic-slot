@@ -1,8 +1,6 @@
-import gc from "@sg/game-client-base";
 import { _decorator, Component, Label, Node, Sprite } from "cc";
-import Observer from "observer";
+import { formatStringXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
-const { handle } = Observer;
 
 @ccclass("ClassicSlotBaseBetDetailLogItem")
 export class ClassicSlotBaseBetDetailLogItem extends Component {
@@ -40,9 +38,9 @@ export class ClassicSlotBaseBetDetailLogItem extends Component {
         this.amount.string = amount;
         this.payout.string = payout;
         if (this.bet) {
-            this.bet.string = bet !== "" ? gc.FormatUtils.numberWithCommas(bet, 6) : "";
+            this.bet.string = bet !== "" ? formatStringXMode(bet) : "";
         }
-        this.win.string = win !== "" ? gc.FormatUtils.numberWithCommas(win, 6) : "";
+        this.win.string = win !== "" ? formatStringXMode(win) : "";
         this.bg.active = order % 2 > 0;
     }
 }

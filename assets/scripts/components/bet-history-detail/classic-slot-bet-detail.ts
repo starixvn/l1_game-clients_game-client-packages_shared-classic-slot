@@ -6,7 +6,7 @@ import { ComponentUtils } from "db://shared-components/shared/utils";
 import { paylines, SpecialSymbol } from "../../definitions";
 import { formatNamePool, getSpriteLine, getSymbolName, resourceCaches } from "../../utils/classic-slot-utils";
 import { ClassicSlotBaseBetDetailLogItem } from "./classic-slot-bet-detail-log-item";
-import { formatStringXMode, getXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
+import { formatStringXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
 
 @ccclass("ClassicSlotBetDetail")
@@ -61,28 +61,27 @@ export class ClassicSlotBetDetail extends ObserverComponent {
 
     showBetDetail(model: gc.BetHistory.BetDetailModel) {
         const { result, id, freeSpin, enableJackpot, bet, paylines, totalAmount, betWin, time, settlementResult } = model.betHistoryLog as any;
-        const xMode = getXMode();
         this.enableJackpot = enableJackpot;
         this.lblRound.string = freeSpin ? `${id.toString()} (Free Spin)` : id.toString();
         this.initResultBoard(result , settlementResult, paylines);
-        this.createBetLogs(model.betHistoryLog, xMode);
+        this.createBetLogs(model.betHistoryLog, );
         this.showNoWinningPaylinesText(model.betHistoryLog);
 
         if (this.lblBet) {
-            this.lblBet.string = formatStringXMode(bet * xMode);
+            this.lblBet.string = formatStringXMode(bet);
         }
         if (this.lblPaylines) {
             this.lblPaylines.string = paylines.length.toString();
         }
         if (this.lblTotalAmount) {
-            this.lblTotalAmount.string = formatStringXMode(totalAmount * xMode);
+            this.lblTotalAmount.string = formatStringXMode(totalAmount);
         }
         if (this.lblBetWin) {
             let win = betWin;
             if (settlementResult.jackpot) {
                 win += settlementResult.jackpot.winningAmount;
             }
-            this.lblBetWin.string = formatStringXMode(win * xMode);
+            this.lblBetWin.string = formatStringXMode(win);
         }
         if (this.lblTime) {
             this.lblTime.string = gc.DateTimeUtils.getStringDateByTime(time);
@@ -100,7 +99,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         }
     }
 
-    private createBetLogs(data, xMode: number) {
+    private createBetLogs(data) {
         this.content.destroyAllChildren();
 
         const { paylines, settlementResult, bet } = data;
@@ -114,7 +113,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         });
 
         if (settlementResult.jackpot) {
-            this.addJackpotLog(settlementResult.jackpot, bet, xMode, order);
+            this.addJackpotLog(settlementResult.jackpot, bet, order);
             order++;
         }
 
@@ -126,14 +125,14 @@ export class ClassicSlotBetDetail extends ObserverComponent {
                 amount: line.count,
                 payout: line.odds,
                 bet,
-                win: `${bet * line.odds * xMode}`,
+                win: `${bet * line.odds}`,
             };
             this.creatLogItem(itemData);
             order++;
         });
 
         if (settlementResult.bonus.odds > 0) {
-            this.addBonusLog(settlementResult.bonus, xMode, order);
+            this.addBonusLog(settlementResult.bonus, order);
             order++;
         }
 
@@ -143,7 +142,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
         }
     }
 
-    protected addJackpotLog(jackpot: any, bet, xMode: number, order: number) {
+    protected addJackpotLog(jackpot: any, bet, order: number) {
         let jackpotName = gc.Translator.gameTranslate("jackpot");
         const { pool } = jackpot;
 
@@ -159,11 +158,11 @@ export class ClassicSlotBetDetail extends ObserverComponent {
             amount: "5",
             payout: jackpotName,
             bet,
-            win: `${jackpot.winningAmount * xMode}`,
+            win: `${jackpot.winningAmount}`,
         });
     }
 
-    private addBonusLog(bonus: any, xMode: number, order: number) {
+    private addBonusLog(bonus: any, order: number) {
         this.creatLogItem({
             order,
             paylineSprite: null,
@@ -171,7 +170,7 @@ export class ClassicSlotBetDetail extends ObserverComponent {
             amount: bonus.count,
             payout: `${bonus.odds} Bonus`,
             bet: "",
-            win: `${bonus.winningAmount * xMode}`,
+            win: `${bonus.winningAmount}`,
         });
     }
 

@@ -26,12 +26,12 @@ export default class SlotGameTopWinnerItem extends Component {
 
     setData(player: Winner, index: number) {
         const amountValue = Number(player.amountString.replace(/,/g, ""));
-        const amountXMode = formatStringXMode(amountValue * player.xMode);
+        const amountXMode = formatStringXMode(amountValue);
         this.bg.active = index % 2 > 0;
         this.time.string = player.time;
         this.player.string = player.name;        
         this.amount.string = amountValue > 0 ? amountXMode : player.amountString;
-        this.win.string = formatStringXMode(player.winningAmount * player.xMode);
+        this.win.string = formatStringXMode(player.winningAmount);
         if (player.highlight) {
             this.setTextColor(this.highlightColor ? this.highlightColor : Color.YELLOW);
         }

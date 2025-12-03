@@ -7,6 +7,7 @@ import Observer from "observer";
 import { SpecialSymbol } from "../../definitions";
 import { BetControlStore, SlotBoardStore } from "../../handlers";
 import { getSymbolJackpotName, resourceCaches } from "../../utils/classic-slot-utils";
+import { formatStringXMode } from "db://shared-common-slot/x-mode/scripts/utils/xMode-utils";
 const { ccclass, property } = _decorator;
 const { observer, render, handle } = Observer;
 @ccclass
@@ -120,7 +121,7 @@ export class SlotIngameMessage extends ObserverComponent {
     }
 
     async showTotalWin(value: number) {
-        this.lblTotalWin.string = gc.FormatUtils.numberWithCommas(value, 6);
+        this.lblTotalWin.string = formatStringXMode(value);
         this.updateScrolling();
 
         this.nodeTotalWin.scale = v3(1, 1, 1).multiplyScalar(0.3);
