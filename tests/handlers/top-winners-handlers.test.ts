@@ -332,7 +332,7 @@ describe("TopWinnersHandler", () => {
             expect(winnerToConvert.amountString).toBe("1000");
             expect(winnerToConvert.winningAmount).toBe(1000);
             expect(gc.DateTimeUtils.getStringDateByTime).toHaveBeenCalledWith(now);
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1000, 2);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1000, 6);
         });
 
         it("should highlight and not shorten name for current player", () => {
@@ -393,7 +393,7 @@ describe("TopWinnersHandler", () => {
             // @ts-ignore - testing protected method
             topWinnersHandler.convertWinner(winnerToConvert);
             expect(winnerToConvert.amountString).toBe("1200");
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1200, 2);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1200, 6);
         });
 
         it("should use totalAmount * rate for amountString if baseTotalAmount is undefined and no pool/freespin", () => {
@@ -408,7 +408,7 @@ describe("TopWinnersHandler", () => {
             // @ts-ignore - testing protected method
             topWinnersHandler.convertWinner(winnerToConvert);
             expect(winnerToConvert.amountString).toBe("1500"); // 1000 * 1.5
-            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1500, 2);
+            expect(gc.FormatUtils.numberWithCommas).toHaveBeenCalledWith(1500, 6);
         });
 
         it("should calculate winningAmount based on pool or baseWinningAmount/winningAmount*rate", () => {
